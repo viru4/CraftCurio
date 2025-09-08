@@ -1,41 +1,46 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import CraftCurioLogo from "../assets/CraftCuriologo.jpg";
+import logo from "@/assets/CraftCuriologo.jpg";
 
 const Navbar = () => {
-  const [search, setSearch] = useState("");
-
   return (
-    <nav className="flex items-center justify-between px-6 py-3 bg-white shadow-md" style={{ minHeight: "64px" }}>
-      {/* Logo: left */}
-      <Link to="/">
-        <img src={CraftCurioLogo} alt="CraftCurio Logo" height={32} width={32}  className="h-10 w-auto" style={{ objectFit: "contain" }} />
-      </Link>
+    <nav
+      className="bg-white border-b-2 border-black"
+      style={{ height: "64px", display: "flex", alignItems: "center", padding: "0 24px" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
+        <Link to="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
+          <img src={logo} alt="CraftCurio logo" height={32} width={32} style={{ display: "block", objectFit: "cover" }} />
+          <span style={{ fontSize: "20px", fontWeight: 600, color: "#000" }}>CraftCurio</span>
+        </Link>
 
-      {/* Search bar: center */}
-      <div className="flex-1 flex justify-center px-4">
-        <Input
-          type="text"
-          placeholder="Search unique crafts..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-lg px-3 py-2"
-        />
-      </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <ul style={{ display: "flex", alignItems: "center", gap: "24px", listStyle: "none", margin: 0, padding: 0 }}>
+            <li><Link to="/" style={{ textDecoration: "none", color: "#000" }}>Home</Link></li>
+            <li><Link to="/about" style={{ textDecoration: "none", color: "#000" }}>About</Link></li>
+            <li><Link to="/contact" style={{ textDecoration: "none", color: "#000" }}>Contact</Link></li>
+          </ul>
 
-      {/* Login/User button: right */}
-      <div className="flex items-center gap-4">
-        <SignedOut>
-          <SignInButton>
-            <Button variant="outline">Login</Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+          <SignedOut>
+            <Link to="/sign-in">
+              <Button size="sm">Login</Button>
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+        </div>
       </div>
     </nav>
   );
