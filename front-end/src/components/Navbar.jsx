@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/CraftCuriologo.jpg";
 
 const Navbar = () => {
   return (
@@ -21,7 +20,7 @@ const Navbar = () => {
         }}
       >
         <Link to="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <img src={logo} alt="CraftCurio logo" height={32} width={32} style={{ display: "block", objectFit: "cover" }} />
+          <img src={"cc_favicon.png"} alt="CraftCurio logo" height={32} width={32} style={{ display: "block", objectFit: "cover" }} />
           <span style={{ fontSize: "20px", fontWeight: 600, color: "#000" }}>CraftCurio</span>
         </Link>
 
