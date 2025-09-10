@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 
+
 const Navbar = () => {
   return (
     <nav
-      className="bg-white border-b-2 border-black"
-      style={{ height: "64px", display: "flex", alignItems: "center", padding: "0 24px" }}
+      className="bg-white border-b-2 border-black dark:bg-black"
+      style={{ height: "64px", display: "flex", alignItems: "center", padding: "0 24px", backgroundColor:"golden"}}
     >
       <div
         style={{
