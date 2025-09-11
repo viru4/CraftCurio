@@ -48,19 +48,18 @@ export default function SignInPage() {
   return (
     <div
       style={{
-        height: '100vh',
-        minHeight: '80vh',
+        minHeight: '100vh',
         width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px',
+        padding: '16px 12px',
         backgroundColor: '#CE9458'
       }}
     >
-      <div style={{ width: '100%', maxWidth: 420, background: 'white', borderRadius: 12, padding: 24, boxShadow: '0 10px 20px rgba(0,0,0,0.15)' }}>
-        <h1 style={{ margin: 0, marginBottom: 8, fontSize: 28, fontWeight: 700, color: '#1f2937' }}>Welcome back</h1>
-        <p style={{ marginTop: 0, marginBottom: 20, color: '#4b5563' }}>Sign in to continue to CraftCurio</p>
+      <div style={{ width: '100%', maxWidth: 480, background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 10px 20px rgba(0,0,0,0.15)' }}>
+        <h1 style={{ margin: 0, marginBottom: 8, fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 700, color: '#1f2937' }}>Welcome back</h1>
+        <p style={{ marginTop: 0, marginBottom: 20, color: '#4b5563', fontSize: 'clamp(14px, 2.8vw, 16px)' }}>Sign in to continue to CraftCurio</p>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <label htmlFor="fullName" style={{ fontWeight: 600, color: '#374151' }}>Full name</label>
@@ -83,11 +82,11 @@ export default function SignInPage() {
                 {error}
               </div>
             ) : null}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Button type="submit" disabled={!isLoaded || isSubmitting || formIsSubmitting}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Button type="submit" disabled={!isLoaded || isSubmitting || formIsSubmitting} style={{ flex: '1 1 140px' }}>
                 {isSubmitting ? 'Signing in…' : 'Sign in'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => { reset(); setError('') }} disabled={isSubmitting || formIsSubmitting}>
+              <Button type="button" variant="outline" onClick={() => { reset(); setError('') }} disabled={isSubmitting || formIsSubmitting} style={{ flex: '1 1 120px' }}>
                 Reset
               </Button>
             </div>
