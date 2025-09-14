@@ -4,7 +4,11 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import landingBg from '@/assets/LandingPagebackground.png'
-import sampleImg from '@/assets/CraftCuriologo.jpg'
+import ceramicDishes from '@/assets/corousel images/ceramicDishes.jpg'
+import handcraftedGoods from '@/assets/corousel images/handcraftedGoods.jpg'
+import pottery from '@/assets/corousel images/pottery.jpg'
+import traditionalBowls from '@/assets/corousel images/traditionalBowls.jpg'
+import woodworking from '@/assets/corousel images/woodworking.jpg'
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from '@/components/ui/carousel'
 
 export default function Landing() {
@@ -100,11 +104,11 @@ function ProductCarousel() {
   const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarouselControls(api)
 
   const products = [
-    { id: 1, image: sampleImg },
-    { id: 2, image: sampleImg },
-    { id: 3, image: sampleImg },
-    { id: 4, image: sampleImg },
-    { id: 5, image: sampleImg }
+    { id: 1, image: ceramicDishes, title: "Ceramic Dishes" },
+    { id: 2, image: handcraftedGoods, title: "Handcrafted Goods" },
+    { id: 3, image: pottery, title: "Artisan Pottery" },
+    { id: 4, image: traditionalBowls, title: "Traditional Bowls" },
+    { id: 5, image: woodworking, title: "Woodworking Crafts" }
   ]
 
   React.useEffect(() => {
