@@ -38,26 +38,51 @@ export default function Landing() {
           }}
         />
         <div
-          className="w-full max-w-xl"
-          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", position: "relative", zIndex: 1 }}
+          className="w-full max-w-6xl"
+          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", position: "relative", zIndex: 1 }}
         >
-          <h1 className="text-2xl md:text-3xl font-serif" style={{ color: "#2a1f1f" }}>Find your next handcrafted treasure</h1>
+          <h1 className="text-2xl md:text-3xl font-serif" style={{ color: "biege" }}>Find your next handcrafted treasure</h1>
 
-          <form onSubmit={onSearch} style={{ width: "100%", display: "flex", gap: "8px" }}>
-            <Input
-              placeholder="Search handcrafted curios..."
-              className="font-serif bg-amber-50/80 text-amber-950 placeholder:text-amber-950/60 border-amber-900/20 focus-visible:border-amber-700 focus-visible:ring-amber-700/30"
-            />
-            <Button
-              type="submit"
-              className="font-serif bg-amber-200 text-amber-950 border border-amber-900/20 hover:bg-amber-300"
-            >
-              <Search className="mr-2" />
-              Search
-            </Button>
-          </form>
+          {/* Main content area with text and search */}
+          <div className="w-full flex flex-col lg:flex-row gap-8 items-start lg:items-start">
+            {/* Left side - Text area about website */}
+            <div className="flex-1 lg:max-w-lg">
+              <div className="backdrop-blur-md rounded-lg p-6" style={{ backgroundColor: 'rgba(0, 0, 0, 0.1)' }}>
+                <h2 className="text-xl font-serif font-semibold text-white mb-4 drop-shadow-lg">About CraftCurio</h2>
+                <p className="text-white/90 font-serif leading-relaxed mb-4 drop-shadow-md">
+                  Discover the beauty of handcrafted treasures from skilled artisans around the world. 
+                  Each piece tells a unique story of tradition, creativity, and passion.
+                </p>
+                <p className="text-white/90 font-serif leading-relaxed mb-4 drop-shadow-md">
+                  From intricate pottery and woven textiles to hand-carved woodwork and delicate jewelry, 
+                  our curated collection celebrates the artistry and craftsmanship that makes each item truly special.
+                </p>
+                <p className="text-white/90 font-serif leading-relaxed drop-shadow-md">
+                  Join our community of art lovers and collectors who appreciate the value of authentic, 
+                  handmade creations that bring warmth and character to your home.
+                </p>
+              </div>
+            </div>
 
-          <div style={{ width: "100%", marginTop: "24px" }}>
+            {/* Right side - Search bar */}
+            <div className="flex-1 lg:max-w-sm lg:ml-8">
+              <form onSubmit={onSearch} style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Input
+                  placeholder="Search handcrafted curios..."
+                  className="font-serif bg-white/90 text-amber-950 placeholder:text-amber-950/60 border-amber-900/20 focus-visible:border-amber-700 focus-visible:ring-amber-700/30"
+                />
+                <Button
+                  type="submit"
+                  className="font-serif bg-amber-200 text-amber-950 border border-amber-900/20 hover:bg-amber-300 w-24 h-8 text-sm px-3"
+                >
+                  <Search className="mr-1 h-3 w-3" />
+                  Search
+                </Button>
+              </form>
+            </div>
+          </div>
+
+          <div style={{ width: "50%", marginTop: "100px" }}>
             <ProductCarousel />
           </div>
 

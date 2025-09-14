@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signInSchema, signInDefaultValues } from '@/forms/SignInSchema'
+import landingBg from '@/assets/LandingPagebackground.png'
 
 export default function SignInPage() {
   const navigate = useNavigate()
@@ -54,10 +55,35 @@ export default function SignInPage() {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px 12px',
-        backgroundColor: '#CE9458'
+        position: 'relative'
       }}
     >
-      <div style={{ width: '100%', maxWidth: 480, background: 'white', borderRadius: 12, padding: 20, boxShadow: '0 10px 20px rgba(0,0,0,0.15)' }}>
+      {/* Background image with same styling as Landing page */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `url(${landingBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          transform: "scale(1.05)",
+          zIndex: 0,
+          pointerEvents: "none"
+        }}
+      />
+      <div style={{ 
+        width: '100%', 
+        maxWidth: 480, 
+        background: 'rgba(255, 255, 255, 0.95)', 
+        backdropFilter: 'blur(10px)',
+        borderRadius: 12, 
+        padding: 20, 
+        boxShadow: '0 10px 20px rgba(0,0,0,0.15)',
+        position: 'relative',
+        zIndex: 1
+      }}>
         <h1 style={{ margin: 0, marginBottom: 8, fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 700, color: '#1f2937' }}>Welcome back</h1>
         <p style={{ marginTop: 0, marginBottom: 20, color: '#4b5563', fontSize: 'clamp(14px, 2.8vw, 16px)' }}>Sign in to continue to CraftCurio</p>
         <form onSubmit={handleSubmit(onSubmit)}>
