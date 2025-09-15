@@ -28,7 +28,7 @@ const Navbar = () => {
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
         </div>
-        <div className="hidden lg:flex flex-1 items-center justify-end gap-4">
+        <div className="hidden md:flex flex-1 items-center justify-end gap-4">
           <label className="flex flex-col min-w-40 !h-10 max-w-64">
             <div className="flex w-full flex-1 items-stretch rounded-full h-full">
               <div className="text-[var(--text-secondary)] flex border-none bg-[var(--secondary-color)] items-center justify-center pl-4 rounded-l-full border-r-0">
