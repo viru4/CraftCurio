@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
+const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
 const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-b-[#f4f2f0]">
@@ -38,12 +40,18 @@ const Navbar = () => {
             </div>
           </label>
           <div className="flex gap-2">
-            <SignedOut>
+            {hasClerk ? (
+              <>
+                <SignedOut>
+                  <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
+              </>
+            ) : (
               <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-            </SignedOut>
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
+            )}
           </div>
         </div>
         <div className="md:hidden flex items-center gap-2">
@@ -60,14 +68,22 @@ const Navbar = () => {
                 <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />
-                <SignedOut>
+                {hasClerk ? (
+                  <>
+                    <SignedOut>
+                      <Link to="/sign-in">
+                        <Button size="sm" className="w-full">Sign In</Button>
+                      </Link>
+                    </SignedOut>
+                    <SignedIn>
+                      <UserButton afterSignOutUrl="/" />
+                    </SignedIn>
+                  </>
+                ) : (
                   <Link to="/sign-in">
                     <Button size="sm" className="w-full">Sign In</Button>
                   </Link>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton afterSignOutUrl="/" />
-                </SignedIn>
+                )}
               </div>
             </SheetContent>
           </Sheet>
