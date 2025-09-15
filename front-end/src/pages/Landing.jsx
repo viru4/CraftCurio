@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
 
@@ -135,7 +135,22 @@ export default function Landing() {
 
 function FeaturedProducts() {
   const [api, setApi] = useState(null)
-  const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarouselControls(api)
+  const { canScrollPrev, canScrollNext } = useCarouselControls(api)
+
+  const handleNext = useCallback(() => {
+    if (!api) return
+    if (api.canScrollNext()) api.scrollNext()
+    else api.scrollTo(0)
+  }, [api])
+
+  const handlePrev = useCallback(() => {
+    if (!api) return
+    if (api.canScrollPrev()) api.scrollPrev()
+    else {
+      const last = (api.scrollSnapList()?.length || 1) - 1
+      api.scrollTo(last)
+    }
+  }, [api])
 
   const products = [
     { id: 1, title: 'Ceramic Vase', subtitle: 'Handcrafted ceramic vase with unique glaze', imageClass: 'card-image-ceramic-vase-bg' },
@@ -146,19 +161,19 @@ function FeaturedProducts() {
 
   useEffect(() => {
     if (!api) return
-    const id = setInterval(() => api.scrollNext(), 3000)
+    const id = setInterval(() => handleNext(), 3000)
     return () => clearInterval(id)
-  }, [api])
+  }, [api, handleNext])
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Featured Products</h2>
         <div className="flex gap-2">
-          <button onClick={scrollPrev} disabled={!canScrollPrev} className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors disabled:opacity-50">
+          <button onClick={handlePrev} className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors">
             <span className="material-symbols-outlined">chevron_left</span>
           </button>
-          <button onClick={scrollNext} disabled={!canScrollNext} className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors disabled:opacity-50">
+          <button onClick={handleNext} className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors">
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
@@ -172,8 +187,8 @@ function FeaturedProducts() {
             </CarouselItem>
           ))}
         </Carousel>
-        <CarouselPrevious onClick={scrollPrev} disabled={!canScrollPrev} />
-        <CarouselNext onClick={scrollNext} disabled={!canScrollNext} />
+        <CarouselPrevious onClick={handlePrev} />
+        <CarouselNext onClick={handleNext} />
       </div>
     </div>
   )
