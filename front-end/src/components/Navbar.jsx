@@ -38,8 +38,9 @@ const Navbar = () => {
             </div>
           </label>
           <div className="flex gap-2">
-            <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign Up</Link>
-            <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--secondary-color)] text-[var(--text-primary)] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 transition-all">Log In</Link>
+            <SignedOut>
+              <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
+            </SignedOut>
             <SignedIn>
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
@@ -61,7 +62,7 @@ const Navbar = () => {
                 <div className="h-px bg-gray-200" />
                 <SignedOut>
                   <Link to="/sign-in">
-                    <Button size="sm" className="w-full">Login</Button>
+                    <Button size="sm" className="w-full">Sign In</Button>
                   </Link>
                 </SignedOut>
                 <SignedIn>
