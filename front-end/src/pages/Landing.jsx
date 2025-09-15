@@ -6,7 +6,7 @@ export default function Landing() {
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pt-16 md:pt-20">
         {/* Hero */}
         <section className="relative">
           <div className="hero-banner-bg flex min-h-[60vh] lg:min-h-[80vh] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center">
