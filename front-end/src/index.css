@@ -115,5 +115,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: Manrope, "Noto Sans", sans-serif;
   }
 }
+
+:root {
+  --primary-color: #ec6d13;
+  --secondary-color: #f4f2f0;
+  --text-primary: #181411;
+  --text-secondary: #897261;
+}
+
+/* Background image helpers to avoid inline styles */
+.hero-banner-bg {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCaJ4nEEYQ6MtgsLgnBRKR_eyY4ZPcJMH_JMjlGQNseLSeG73NOBXMx1cQwplyxonWzoLtdr0F4yv7gRllsP-wfwUsXlke-A4E0KAiK9pZzgBEvHDU0Wu5lCO_UbaOzkGdBRBVHQrp-nCTHs5ioc1GODlOj8LO-Y-T3kQM39O9InV7bQOMXaKQuA9vQhtuCkiJLb0CV32XlwONHr5QcsUIr0-Vxk1YPVj02SbopQj62wEhKTwjByV2sG2KeHz_slul7ludQJojTETOD");
+}
+
+.card-image-ceramic-vase-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDfdEDNGElA3Y8lRF4kxUpBDOfhILyAeJVhooin3V4IEA3avnrAGwuXelFB9vI7tW-unQqvNqyOsorZny0XV6GYY050mNhO_GcgJL8eg711DPWnQnkad9D7eRu2758Zp11gABLgi5XSRmRylmpWSQ9S3ZaS3M2hnOIV1eL2LaUqsD1L0JTTcvj_wI2gNFFVz2JOZpF1o59E8E-G3FGZ0rOQlPNgITbh_EDZb_cVzqjBKMHo2buxbJAxSRpEHbDkpAybJEOBDfD8K-D6"); }
+.card-image-pocket-watch-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBEtvpV7ok9UR7imToCEYzOcCsjUZlXYyfHmOG-LV2iQJo9Gd6fqlKR9taZgxW-dE17Z_O4BYUDnwc2u77mTD_JXkDctiuZr8ZYbPYodavF2qMxn79WSeIfVkgW7_PvEbUJxmglfFuvlyP_f-wVizJAbeZeoNVfEUWqmP3ov_YeW_SRli6YFsisEnYblqOYbn9vgoY_ZBHSRUa5JSK9rQuGZZKH86yIihO-zReRApBjglFVrAtluQV0deU7gWcuYNMm5kPbPKNX9o5r"); }
+.card-image-silk-scarf-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0sfvsYfssOw4hhUP_mhpAeJB-oOwNAXMIV_iDg51-098WTOJZzNzNs-rHYa2_Yty4F97GA12Bl2W66JG1DpR5j3JNFjb4OZ0EY7gobuKQjefGYxCqkSrwyumwWt2wYqfIysk45QpEJRNXnLcBbxPqH9ljgyy5hFEVW9TtZOo9zz_6t0AB2vZE8bTRnqP9aAfua6qgIrw2ULayDWSycSPX1nEo9I9po8hYh_wAUbIn6hQEGUoyBi350ypgqPjFqIZKNzf47_7boj3m"); }
+.card-image-bird-sculpture-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBuBY5q7Il6LKB7OJdhlsLqGpxCDMX-Ewy-UX9vK9qYHIE6vjvSaKmT1M9nWKAnc1NM41H2KB7M7IUR9Vd0de2hure2DPuF0nMu-oi8hhg963c0adlX8t2TTHFgjdUJUna4HFse1awsV4DAX_BfZYwu9yZ5fnpOmpeVWvOZCRkS5eI1ybDhoTAPuB3FNBTIXfX1po7GLrs8ytA-dG83CWN2a_hh8SB-QXb0g0wr-YO94KGbBeSdvdNuJtSSF_50i1Xmzq3SJKS7Dfy6"); }
+
+.category-image-vintage-stamps-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMqYndO0-xNLL1W8v9ptj-v0X9mhscyYI-2oAJVytvP8vOKpiqLHIgNjp416bCP0DsP_U4weMPCYg-aAlIg1pFvENXKZf29US-btAF07cAR5gDHshU5tmEY5DojdnnsLqeuLQO_z40kbXrHfkOiUjzdJqu1-pGYgAMMo3LFgcbpOQXvOxqacLtXMrSuZj2qoEAxBv7zt_hy-QWKol-lJsMBIu8KDYqni_-sArAXAl3GsIs9BoiDp4eTK3a9bEqLx9caS-6camz6FlU"); }
+.category-image-rare-coins-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC65xCxlTmAp2mA5KGLqsUQSG7dZbiu2x0fu1Qu7P656YRxt54mn4jTNb9NvYx8YCh5ahoUBnBs_Ia2giD3dMBiYrMd9Msc0t0sw5TOrchcWD-VwR3geypT0ByUaClNnigh-RHBzLOkFPezLvOkwJumX1baaZSzR8Rk9zjLhK1XBvHfminCvUMb3IuGoNq0ULl2IgmTipc-totleX9D37ngz9Y4WD-nxkbDX7cg902ySnG-h6XWhzEsgM8F5WQzAWgD0MyrwKc3Vpsd"); }
+.category-image-antique-books-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBldxQsgwqad_9gOiYDKI9x0sMi8NBU4TQPOmfnKRmMW9XYgvBVzp4dVm-2fS8rHkalxZNny8MDCWvuinwTHl8Eoe14Y6nzHWW0I6GWjPYmsfHNjrb7ixigXBLQePqbC-FA2DrFNU7w_SSuGyuc9Meq2dTrWK7MY2NUTobXbcyW77XlbruuZmnziyBOqyRcuBaFvZy3G8kdYnpvXM7cwXTtYKguL1-100JZd9J4rNRDPB2juMp06UFcUt3_EDOsEhaK9qSbj2JNricp"); }
+.category-image-classic-toys-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmFu8fUvD05XTw5Ht293Tcb1SEur1OZ_ljLywYyvUbhJFUgm4SH3fD0LDG1OErajHyilnsEpYA5jCry3BqnOiz785JAY6NjOYpGy3gQh-FNH6uvUmHyMSWGA2_1_jDav5FtsRvJlOeqB859YlmJdvU3vLIkhEuM5p0y1fLhUbyrQ7VdwmBHdiadWnsTbQDWAuYlpdSIoAF-Lt9h3u3sgYHJOyhiZb5h1vItJT3MIG9pSbzpYSk8a6awtITImNBQzZJEVZT-1bCSHbt"); }
