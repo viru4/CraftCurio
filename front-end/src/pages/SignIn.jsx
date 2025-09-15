@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signInSchema, signInDefaultValues } from '@/forms/SignInSchema'
-import landingBg from '@/assets/LandingPagebackground.png'
+import landingBg from '@/assets/StoneWork.avif'
 
 export default function SignInPage() {
   const navigate = useNavigate()
@@ -122,5 +122,3 @@ export default function SignInPage() {
     </div>
   )
 }
-
-
