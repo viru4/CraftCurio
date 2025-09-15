@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
 
 export default function Landing() {
   return (
@@ -23,26 +24,7 @@ export default function Landing() {
 
         {/* Featured Products */}
         <section className="py-16 px-4 md:px-10 lg:px-20">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Featured Products</h2>
-              <div className="flex gap-2">
-                <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors">
-                  <span className="material-symbols-outlined">chevron_left</span>
-                </button>
-                <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors">
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              <CardItem title="Ceramic Vase" subtitle="Handcrafted ceramic vase with unique glaze" imageClass="card-image-ceramic-vase-bg" />
-              <CardItem title="Vintage Pocket Watch" subtitle="Vintage pocket watch with intricate detailing" imageClass="card-image-pocket-watch-bg" />
-              <CardItem title="Silk Scarf" subtitle="Hand-painted silk scarf with floral design" imageClass="card-image-silk-scarf-bg" />
-              <CardItem title="Wooden Bird Sculpture" subtitle="Hand-carved wooden sculpture of a bird" imageClass="card-image-bird-sculpture-bg" />
-            </div>
-          </div>
+          <FeaturedProducts />
         </section>
 
         {/* Categories */}
@@ -149,6 +131,52 @@ export default function Landing() {
       </footer>
     </div>
   );
+}
+
+function FeaturedProducts() {
+  const [api, setApi] = useState(null)
+  const { scrollPrev, scrollNext, canScrollPrev, canScrollNext } = useCarouselControls(api)
+
+  const products = [
+    { id: 1, title: 'Ceramic Vase', subtitle: 'Handcrafted ceramic vase with unique glaze', imageClass: 'card-image-ceramic-vase-bg' },
+    { id: 2, title: 'Vintage Pocket Watch', subtitle: 'Vintage pocket watch with intricate detailing', imageClass: 'card-image-pocket-watch-bg' },
+    { id: 3, title: 'Silk Scarf', subtitle: 'Hand-painted silk scarf with floral design', imageClass: 'card-image-silk-scarf-bg' },
+    { id: 4, title: 'Wooden Bird Sculpture', subtitle: 'Hand-carved wooden sculpture of a bird', imageClass: 'card-image-bird-sculpture-bg' }
+  ]
+
+  useEffect(() => {
+    if (!api) return
+    const id = setInterval(() => api.scrollNext(), 3000)
+    return () => clearInterval(id)
+  }, [api])
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Featured Products</h2>
+        <div className="flex gap-2">
+          <button onClick={scrollPrev} disabled={!canScrollPrev} className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors disabled:opacity-50">
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button onClick={scrollNext} disabled={!canScrollNext} className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors disabled:opacity-50">
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="relative">
+        <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: true, slidesToScroll: 1 }}>
+          {products.map((p) => (
+            <CarouselItem key={p.id} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 px-2">
+              <CardItem title={p.title} subtitle={p.subtitle} imageClass={p.imageClass} />
+            </CarouselItem>
+          ))}
+        </Carousel>
+        <CarouselPrevious onClick={scrollPrev} disabled={!canScrollPrev} />
+        <CarouselNext onClick={scrollNext} disabled={!canScrollNext} />
+      </div>
+    </div>
+  )
 }
 
 function CardItem({ title, subtitle, imageClass, compact = false }) {
