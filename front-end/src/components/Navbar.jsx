@@ -39,17 +39,13 @@ const Navbar = () => {
               <>
                 <SignedOut>
                   <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-                  <Link to="/sign-up" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign Up</Link>
                 </SignedOut>
                 <SignedIn>
                   <UserButton afterSignOutUrl="/" />
                 </SignedIn>
               </>
             ) : (
-              <>
-                <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-                <Link to="/sign-up" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign Up</Link>
-              </>
+              <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
             )}
           </div>
         </div>
@@ -73,23 +69,15 @@ const Navbar = () => {
                       <Link to="/sign-in">
                         <Button size="sm" className="w-full">Sign In</Button>
                       </Link>
-                      <Link to="/sign-up">
-                        <Button size="sm" className="w-full">Sign Up</Button>
-                      </Link>
                     </SignedOut>
                     <SignedIn>
                       <UserButton afterSignOutUrl="/" />
                     </SignedIn>
                   </>
                 ) : (
-                  <>
-                    <Link to="/sign-in">
-                      <Button size="sm" className="w-full">Sign In</Button>
-                    </Link>
-                    <Link to="/sign-up">
-                      <Button size="sm" className="w-full">Sign Up</Button>
-                    </Link>
-                  </>
+                  <Link to="/sign-in">
+                    <Button size="sm" className="w-full">Sign In</Button>
+                  </Link>
                 )}
               </div>
             </SheetContent>
