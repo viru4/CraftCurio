@@ -3,7 +3,9 @@ import { Routes, Route } from 'react-router-dom'
 import Landing from '@/pages/Landing'
 import SignInPage from '@/pages/SignIn'
 
-const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import { isValidPublishableKey } from '@/lib/utils'
+
+const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 function AuthDisabled() {
   return (
