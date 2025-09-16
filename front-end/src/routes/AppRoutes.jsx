@@ -2,6 +2,7 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Landing from '@/pages/Landing'
 import SignInPage from '@/pages/SignIn'
+import SellerRegistration from '@/pages/SellerRegistration'
 
 import { isValidPublishableKey } from '@/lib/utils'
 
