@@ -1,5 +1,4 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useSignIn } from '@clerk/clerk-react'
 import { useForm } from 'react-hook-form'
@@ -79,7 +78,7 @@ export default function SignInPage() {
               <h2 className="text-3xl font-extrabold text-stone-900 tracking-tight">Welcome Back, Artisan!</h2>
               <p className="mt-2 text-base text-stone-600">Sign in to your CraftCurio account.</p>
             </div>
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="space-y-6" noValidate onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-4 rounded-md">
                 <div>
                   <label className="sr-only" htmlFor="email">Email or username</label>

@@ -48,7 +48,7 @@ export default function SellerRegistration() {
             <p className="text-[var(--text-secondary)] mb-8">Provide your details for verification. We require identity and address proof to keep our marketplace trustworthy.</p>
 
             {!submitted ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Field label="Full name" error={errors.fullName?.message}><Input id="fullName" {...register('fullName')} placeholder="Jane Doe" /></Field>
                   <Field label="Business / Shop name" error={errors.businessName?.message}><Input id="businessName" {...register('businessName')} placeholder="CraftCurio Studio" /></Field>
