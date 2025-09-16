@@ -79,6 +79,17 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Become a CraftCurio Artisan */}
+        <section className="bg-[var(--secondary-color)] py-20 px-4 md:px-10 lg:px-20">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">Become a CraftCurio Artisan</h2>
+            <p className="mt-4 text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">Share your passion with the world. Join our community of talented artisans and start selling your creations today.</p>
+            <Link to="/become-seller" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 mt-8 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all mx-auto">
+              <span className="truncate">Join as an Artisan</span>
+            </Link>
+          </div>
+        </section>
+
         {/* Testimonials */}
         <section className="bg-stone-50 py-16 px-4 md:px-10 lg:px-20">
           <div className="max-w-7xl mx-auto">
@@ -87,6 +98,39 @@ export default function Landing() {
               <Testimonial name="Sarah L." role="Buyer" avatar="https://lh3.googleusercontent.com/a-/AOh14GhJ1QdY23c_C5E9zY_8Q_Z0j_X_Z_0_0_0_0_0=s96-c" text="I'm so glad I found CraftCurio! I discovered a beautiful handmade necklace that I cherish. The direct communication with the artist was a wonderful touch." rating={5} />
               <Testimonial name="David M." role="Artisan" avatar="https://lh3.googleusercontent.com/a-/AOh14Gg_2QdY23c_C5E9zY_8Q_Z0j_X_Z_0_0_0_0_0=s96-c" text="Selling my pottery on CraftCurio has been a game-changer. The platform is incredibly easy to use, and I've connected with so many amazing customers who truly value my work." rating={4} />
               <Testimonial name="Jessica P." role="Buyer" avatar="https://lh3.googleusercontent.com/a-/AOh14Gg_2QdY23c_C5E9zY_8Q_Z0j_X_Z_0_0_0_0_1=s96-c" text="The quality of the items on this platform is outstanding. I bought a vintage map for my collection, and it exceeded all my expectations. The shipping was fast and secure." rating={4.5} />
+            </div>
+          </div>
+        </section>
+
+        {/* More to Explore */}
+        <section className="bg-stone-50 py-16 px-4 md:px-10 lg:px-20">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-12 text-center">More to Explore</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+              <a href="#" className="group">
+                <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <span className="material-symbols-outlined text-4xl text-[var(--primary-color)]">auto_stories</span>
+                  <h3 className="mt-4 text-xl font-bold text-[var(--text-primary)]">Read Artisan Stories</h3>
+                </div>
+              </a>
+              <a href="#" className="group">
+                <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <span className="material-symbols-outlined text-4xl text-[var(--primary-color)]">mail</span>
+                  <h3 className="mt-4 text-xl font-bold text-[var(--text-primary)]">Join Our Newsletter</h3>
+                </div>
+              </a>
+              <a href="#" className="group">
+                <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <span className="material-symbols-outlined text-4xl text-[var(--primary-color)]">inventory_2</span>
+                  <h3 className="mt-4 text-xl font-bold text-[var(--text-primary)]">Shop Limited Edition</h3>
+                </div>
+              </a>
+              <a href="#" className="group">
+                <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <span className="material-symbols-outlined text-4xl text-[var(--primary-color)]">support_agent</span>
+                  <h3 className="mt-4 text-xl font-bold text-[var(--text-primary)]">Custom Orders</h3>
+                </div>
+              </a>
             </div>
           </div>
         </section>

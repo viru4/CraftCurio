@@ -42,6 +42,12 @@ const Navbar = () => {
                   <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
                 </SignedOut>
                 <SignedIn>
+                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors mr-2">
+                    <span className="material-symbols-outlined">shopping_cart</span>
+                  </button>
+                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors mr-2">
+                    <span className="material-symbols-outlined">favorite</span>
+                  </button>
                   <UserButton afterSignOutUrl="/" />
                 </SignedIn>
               </>
