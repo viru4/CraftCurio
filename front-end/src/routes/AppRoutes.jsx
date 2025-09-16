@@ -2,8 +2,12 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Landing from '@/pages/Landing'
 import SignInPage from '@/pages/SignIn'
+import SignUpPage from '@/pages/SignUp'
+import SellerRegistration from '@/pages/SellerRegistration'
 
-const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import { isValidPublishableKey } from '@/lib/utils'
+
+const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 function AuthDisabled() {
   return (
@@ -21,6 +25,8 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/sign-in" element={hasClerk ? <SignInPage /> : <AuthDisabled />} />
+      <Route path="/sign-up" element={hasClerk ? <SignUpPage /> : <AuthDisabled />} />
+      <Route path="/become-seller" element={<SellerRegistration />} />
     </Routes>
   )
 }

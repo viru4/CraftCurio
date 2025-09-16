@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
-const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import { isValidPublishableKey } from '@/lib/utils'
+
+const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Navbar = () => {
   return (
@@ -13,7 +15,7 @@ const Navbar = () => {
       <div className="flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-10">
           <Link to="/" className="flex items-center gap-3 text-[var(--text-primary)] no-underline">
-            <img src="/cc_favicon.png" alt="CraftCurio Logo" className="h-8 w-8 object-contain" />
+            <img src="/cc_favicon.png" alt="CraftCurio logo" className="h-8 w-8 rounded" />
 
             <h2 className="text-2xl font-bold tracking-tight">CraftCurio</h2>
           </Link>

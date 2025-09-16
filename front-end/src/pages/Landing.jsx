@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
+import { Link } from 'react-router-dom'
 
 export default function Landing() {
   return (
@@ -16,9 +17,14 @@ export default function Landing() {
             <p className="text-white text-lg md:text-xl font-normal max-w-2xl">
               Explore a curated selection of handcrafted items and rare collectibles from local artisans.
             </p>
-            <a href="#" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 mt-4 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transform hover:scale-105 transition-all">
-              <span className="truncate">Shop Now</span>
-            </a>
+            <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+              <a href="#" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transform hover:scale-105 transition-all">
+                <span className="truncate">Shop Now</span>
+              </a>
+              <Link to="/become-seller" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transform hover:scale-105 transition-all">
+                <span className="truncate">Become a seller</span>
+              </Link>
+            </div>
           </div>
         </section>
 
