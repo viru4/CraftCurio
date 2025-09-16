@@ -25,6 +25,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/sign-in" element={hasClerk ? <SignInPage /> : <AuthDisabled />} />
+      <Route path="/sign-up" element={hasClerk ? <SignUpPage /> : <AuthDisabled />} />
       <Route path="/become-seller" element={<SellerRegistration />} />
     </Routes>
   )
