@@ -82,9 +82,14 @@ const Navbar = () => {
                     </SignedIn>
                   </>
                 ) : (
-                  <Link to="/sign-in">
-                    <Button size="sm" className="w-full">Sign In</Button>
-                  </Link>
+                  <>
+                    <Link to="/sign-in">
+                      <Button size="sm" className="w-full">Sign In</Button>
+                    </Link>
+                    <Link to="/sign-up">
+                      <Button size="sm" className="w-full">Sign Up</Button>
+                    </Link>
+                  </>
                 )}
               </div>
             </SheetContent>
