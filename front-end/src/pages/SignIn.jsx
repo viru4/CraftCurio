@@ -118,6 +118,10 @@ export default function SignInPage() {
             </div>
           </div>
         </form>
+        <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+          <span style={{ color: '#4b5563' }}>not signed in?</span>
+          <Link to="/sign-up" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign Up</Link>
+        </div>
       </div>
     </div>
   )
