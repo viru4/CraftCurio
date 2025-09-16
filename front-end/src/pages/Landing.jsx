@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
+import { Link } from 'react-router-dom'
 
 export default function Landing() {
   return (
