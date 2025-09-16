@@ -88,11 +88,6 @@ export default function SignInPage() {
         <p style={{ marginTop: 0, marginBottom: 20, color: '#4b5563', fontSize: 'clamp(14px, 2.8vw, 16px)' }}>Sign in to continue to CraftCurio</p>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <label htmlFor="fullName" style={{ fontWeight: 600, color: '#374151' }}>Full name</label>
-            <Input id="fullName" type="text" placeholder="Jane Doe" {...register('fullName')} />
-            {errors.fullName ? (
-              <span style={{ color: '#b91c1c' }}>{errors.fullName.message}</span>
-            ) : null}
             <label htmlFor="email" style={{ fontWeight: 600, color: '#374151' }}>Email</label>
             <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
             {errors.email ? (
