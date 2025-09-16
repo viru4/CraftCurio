@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
-const hasClerk = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import { isValidPublishableKey } from '@/lib/utils'
+
+const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Navbar = () => {
   return (
