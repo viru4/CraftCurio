@@ -24,5 +24,28 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Separate vendor chunks for better caching
+            vendor: ['react', 'react-dom'],
+            router: ['react-router-dom'],
+            ui: ['lucide-react'],
+            clerk: ['@clerk/clerk-react']
+          }
+        }
+      },
+      // Increase chunk size warning limit
+      chunkSizeWarningLimit: 1000,
+      // Optimize for production
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: mode === 'production',
+          drop_debugger: mode === 'production'
+        }
+      }
+    }
   };
 });

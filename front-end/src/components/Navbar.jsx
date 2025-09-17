@@ -21,7 +21,7 @@ const Navbar = () => {
           </Link>
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Home</Link>
-            <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</a>
+            <Link to="/collectibles" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</Link>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Products</a>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
@@ -66,7 +66,7 @@ const Navbar = () => {
             <SheetContent side="right">
               <div className="flex flex-col gap-4">
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
-                <a href="#" className="text-[var(--text-primary)]">Collectibles</a>
+                <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
                 <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />

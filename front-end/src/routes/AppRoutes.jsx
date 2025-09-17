@@ -4,6 +4,7 @@ import Landing from '@/pages/Landing'
 import SignInPage from '@/pages/SignIn'
 import SignUpPage from '@/pages/SignUp'
 import SellerRegistration from '@/pages/SellerRegistration'
+import Collectibles from '@/pages/Collectibles'
 
 import { isValidPublishableKey } from '@/lib/utils'
 
@@ -27,6 +28,7 @@ export default function AppRoutes() {
       <Route path="/sign-in" element={hasClerk ? <SignInPage /> : <AuthDisabled />} />
       <Route path="/sign-up" element={hasClerk ? <SignUpPage /> : <AuthDisabled />} />
       <Route path="/become-seller" element={<SellerRegistration />} />
+      <Route path="/collectibles" element={<Collectibles />} />
     </Routes>
   )
 }
