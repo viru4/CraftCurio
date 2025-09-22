@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
+import { Link } from "react-router-dom";
 
 export default function Landing() {
   return (
@@ -33,9 +34,9 @@ export default function Landing() {
             <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-8 text-center">Explore Our Categories</h2>
             <div className="border-b border-[#e6e0db] mb-8">
               <div className="flex justify-center gap-8">
-                <a href="#" className="flex flex-col items-center justify-center border-b-2 border-b-[var(--primary-color)] text-[var(--text-primary)] pb-3 pt-2">
+                <Link to="" className="flex flex-col items-center justify-center border-b-2 border-b-[var(--primary-color)] text-[var(--text-primary)] pb-3 pt-2">
                   <p className="text-base font-bold">Collectibles</p>
-                </a>
+                </Link>
                 <a href="#" className="flex flex-col items-center justify-center border-b-2 border-b-transparent text-[var(--text-secondary)] pb-3 pt-2 hover:border-b-[var(--primary-color)] hover:text-[var(--text-primary)] transition-colors">
                   <p className="text-base font-bold">Artisan Products</p>
                 </a>

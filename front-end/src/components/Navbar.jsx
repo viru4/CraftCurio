@@ -56,7 +56,7 @@ const Navbar = () => {
             <SheetContent side="right">
               <div className="flex flex-col gap-4">
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
-                <a href="#" className="text-[var(--text-primary)]">Collectibles</a>
+                <Link to="/collectibles-main" className="text-[var(--text-primary)]">Collectibles</Link>
                 <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />
