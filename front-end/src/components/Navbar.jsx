@@ -5,25 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
+import { isValidPublishableKey } from '@/lib/utils'
+
+const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+
 const Navbar = () => {
   return (
-    <header className="sticky top-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-b-[#f4f2f0]">
+    <header className="fixed top-0 left-0 right-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-b-[#f4f2f0]">
       <div className="flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-10">
           <Link to="/" className="flex items-center gap-3 text-[var(--text-primary)] no-underline">
-            <svg className="h-8 w-8 text-[var(--primary-color)]" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <g clipPath="url(#clip0_6_330)">
-                <path clipRule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fillRule="evenodd"></path>
-              </g>
-              <defs>
-                <clipPath id="clip0_6_330"><rect fill="white" height="48" width="48"></rect></clipPath>
-              </defs>
-            </svg>
+            <img src="/cc_favicon.png" alt="CraftCurio logo" className="h-8 w-8 rounded" />
+
             <h2 className="text-2xl font-bold tracking-tight">CraftCurio</h2>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Home</Link>
-            <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</a>
+            <Link to="/collectibles" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</Link>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Products</a>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
@@ -38,12 +36,24 @@ const Navbar = () => {
             </div>
           </label>
           <div className="flex gap-2">
-            <SignedOut>
+            {hasClerk ? (
+              <>
+                <SignedOut>
+                  <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
+                </SignedOut>
+                <SignedIn>
+                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors mr-2">
+                    <span className="material-symbols-outlined">shopping_cart</span>
+                  </button>
+                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors mr-2">
+                    <span className="material-symbols-outlined">favorite</span>
+                  </button>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
+              </>
+            ) : (
               <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-            </SignedOut>
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
+            )}
           </div>
         </div>
         <div className="md:hidden flex items-center gap-2">
@@ -56,18 +66,30 @@ const Navbar = () => {
             <SheetContent side="right">
               <div className="flex flex-col gap-4">
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
+<<<<<<< HEAD
                 <Link to="/collectibles-main" className="text-[var(--text-primary)]">Collectibles</Link>
+=======
+                <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
+>>>>>>> 28e0514cf39066b27d5c1cdf6a02772f92d2c0b1
                 <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />
-                <SignedOut>
+                {hasClerk ? (
+                  <>
+                    <SignedOut>
+                      <Link to="/sign-in">
+                        <Button size="sm" className="w-full">Sign In</Button>
+                      </Link>
+                    </SignedOut>
+                    <SignedIn>
+                      <UserButton afterSignOutUrl="/" />
+                    </SignedIn>
+                  </>
+                ) : (
                   <Link to="/sign-in">
                     <Button size="sm" className="w-full">Sign In</Button>
                   </Link>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton afterSignOutUrl="/" />
-                </SignedIn>
+                )}
               </div>
             </SheetContent>
           </Sheet>
