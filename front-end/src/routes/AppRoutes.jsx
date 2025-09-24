@@ -2,12 +2,10 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Landing from '@/pages/Landing'
 import SignInPage from '@/pages/SignIn'
-<<<<<<< HEAD
-import CollectiblesMain from '@/pages/CollectiblesMain'
-=======
 import SignUpPage from '@/pages/SignUp'
 import SellerRegistration from '@/pages/SellerRegistration'
 import Collectibles from '@/pages/Collectibles'
+import CollectiblesMain from '@/pages/CollectiblesMain'
 
 import { isValidPublishableKey } from '@/lib/utils'
 
@@ -23,21 +21,16 @@ function AuthDisabled() {
     </div>
   )
 }
->>>>>>> 28e0514cf39066b27d5c1cdf6a02772f92d2c0b1
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-<<<<<<< HEAD
-      <Route path="/sign-in" element={<SignInPage />} />
-      <Route path="/collectibles-main" element={<CollectiblesMain/>}/>
-=======
       <Route path="/sign-in" element={hasClerk ? <SignInPage /> : <AuthDisabled />} />
       <Route path="/sign-up" element={hasClerk ? <SignUpPage /> : <AuthDisabled />} />
       <Route path="/become-seller" element={<SellerRegistration />} />
       <Route path="/collectibles" element={<Collectibles />} />
->>>>>>> 28e0514cf39066b27d5c1cdf6a02772f92d2c0b1
+      <Route path="/collectibles-main" element={<CollectiblesMain/>}/>
     </Routes>
   )
 }

@@ -66,11 +66,8 @@ const Navbar = () => {
             <SheetContent side="right">
               <div className="flex flex-col gap-4">
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
-<<<<<<< HEAD
-                <Link to="/collectibles-main" className="text-[var(--text-primary)]">Collectibles</Link>
-=======
                 <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
->>>>>>> 28e0514cf39066b27d5c1cdf6a02772f92d2c0b1
+                <Link to="/collectibles-main" className="text-[var(--text-primary)]">Collectibles Main</Link>
                 <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />
