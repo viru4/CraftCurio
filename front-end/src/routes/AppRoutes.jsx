@@ -5,7 +5,6 @@ import SignInPage from '@/pages/SignIn'
 import SignUpPage from '@/pages/SignUp'
 import SellerRegistration from '@/pages/SellerRegistration'
 import Collectibles from '@/pages/Collectibles'
-import CollectiblesMain from '@/pages/CollectiblesMain'
 
 import { isValidPublishableKey } from '@/lib/utils'
 
@@ -30,7 +29,6 @@ export default function AppRoutes() {
       <Route path="/sign-up" element={hasClerk ? <SignUpPage /> : <AuthDisabled />} />
       <Route path="/become-seller" element={<SellerRegistration />} />
       <Route path="/collectibles" element={<Collectibles />} />
-      <Route path="/collectibles-main" element={<CollectiblesMain/>}/>
     </Routes>
   )
 }

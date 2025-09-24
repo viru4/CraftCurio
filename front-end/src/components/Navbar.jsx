@@ -1,15 +1,31 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import SearchBar from "@/components/SearchBar";
 
 import { isValidPublishableKey } from '@/lib/utils'
 
 const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Navbar = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (query) => {
+    if (query.trim()) {
+      // Navigate to collectibles page with search query
+      navigate(`/collectibles?search=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
+  const handlePopularTagClick = (tag) => {
+    setSearchQuery(tag);
+    handleSearch(tag);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-b-[#f4f2f0]">
       <div className="flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-4 max-w-7xl mx-auto">
@@ -27,14 +43,19 @@ const Navbar = () => {
           </nav>
         </div>
         <div className="hidden md:flex flex-1 items-center justify-end gap-4">
-          <label className="flex flex-col min-w-40 !h-10 max-w-64">
-            <div className="flex w-full flex-1 items-stretch rounded-full h-full">
-              <div className="text-[var(--text-secondary)] flex border-none bg-[var(--secondary-color)] items-center justify-center pl-4 rounded-l-full border-r-0">
-                <span className="material-symbols-outlined">search</span>
-              </div>
-              <input className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-[var(--text-primary)] focus:outline-0 focus:ring-0 border-none bg-[var(--secondary-color)] focus:border-none h-full placeholder:text-[var(--text-secondary)] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search for treasures" defaultValue="" />
-            </div>
-          </label>
+          <div className="min-w-40 max-w-64">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onSearch={handleSearch}
+              placeholder="Search for treasures..."
+              popularTags={['Vintage Coins', 'Comics', 'Antiques', 'Stamps']}
+              onPopularTagClick={handlePopularTagClick}
+              showPopularTags={false}
+              size="small"
+              className="!max-w-none !px-0"
+            />
+          </div>
           <div className="flex gap-2">
             {hasClerk ? (
               <>
@@ -65,9 +86,23 @@ const Navbar = () => {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4">
+                {/* Mobile Search */}
+                <div className="mb-4">
+                  <SearchBar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onSearch={handleSearch}
+                    placeholder="Search for treasures..."
+                    popularTags={['Vintage Coins', 'Comics', 'Antiques', 'Stamps']}
+                    onPopularTagClick={handlePopularTagClick}
+                    showPopularTags={false}
+                    size="small"
+                    className="!max-w-none !px-0"
+                  />
+                </div>
+                <div className="h-px bg-gray-200" />
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
                 <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
-                <Link to="/collectibles-main" className="text-[var(--text-primary)]">Collectibles Main</Link>
                 <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />

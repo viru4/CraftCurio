@@ -1,289 +1,462 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-
-// Memoized collectible item component for performance
-const CollectibleItem = memo(({ item }) => (
-  <div className="flex flex-col gap-2 group">
-    <div className="relative overflow-hidden rounded-lg">
-      <div 
-        className="w-full bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-        style={{ backgroundImage: `url("${item.image}")` }}
-        loading="lazy"
-      ></div>
-      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-        <button 
-          className="bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors"
-          aria-label={`Add ${item.title} to cart`}
-        >
-          <span className="material-symbols-outlined text-stone-800">shopping_cart</span>
-        </button>
-        <button 
-          className="bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors"
-          aria-label={`View details for ${item.title}`}
-        >
-          <span className="material-symbols-outlined text-stone-800">visibility</span>
-        </button>
-      </div>
-    </div>
-    <div className="px-1">
-      <p className="text-stone-800 text-sm font-semibold leading-normal truncate">{item.title}</p>
-      <p className="text-[var(--primary-color)] text-sm font-bold leading-normal">{item.price}</p>
-    </div>
-  </div>
-));
-
-CollectibleItem.displayName = 'CollectibleItem';
+import Footer from '@/components/Footer';
+import HeroCarousel from '@/components/HeroCarousel';
+import ProductCard from '@/components/ProductCard';
+import SearchBar from '@/components/SearchBar';
+import { carouselItems, categories, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems } from '@/data/Products';
 
 const Collectibles = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Default to open for better UX
+  const [searchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [showAllFeatured, setShowAllFeatured] = useState(false);
+  const [showAllPopular, setShowAllPopular] = useState(false);
+  const [showAllRecent, setShowAllRecent] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
-  // Memoized collectibles data for performance
-  const collectibles = useMemo(() => [
-    {
-      id: 1,
-      title: "Vintage Pocket Watch",
-      price: "$150.00",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBjbfMKuJG-aPLpKmcLGN83KvaA8NqyC4IuOmXet1x57aZvwz4ly1rXgIOKJFWca9w2gwKlEaLZAIlteb-JYbjJeJyE5p2jJmrZdafOf_bYHC9r1TJYYZ6dk_qo9o2EzAZF2rZQIBJneUFZzDtsWlZG-yjnWhRmOth8D3NC8hkD-6iEaKMYHa-xPT_qYckdXULqtiJPByWNDrYyYMUYed3pCXdzOUhsOQqR99zK0Bb11_vaWBmW0B_cCHcob5rd4hn6Q6_4jllrxYDw"
-    },
-    {
-      id: 2,
-      title: "Antique Map of Paris",
-      price: "$200.00",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD7ftPdZwxZWx1Qvni8ZPgvBi--Oqhqlj0IzjOl_Xx7UwpWWmYBIUz90lFI1eIGOOd0J6hd7-plV0-_22EkOY_euIzS6MLHyMPj_0-Gubhr_Zt1d6flgNNE_u1o2d3sEab0huzH3NcrnhgzW7Atq-TCTgi-lO1mKCi36jjo2xIFNGwFvreTzI07bH7DOwPJxm_IPggkDzPZIbFx5ol55fumAjUrVkMn1MX1P-5VvIaF7-gNirCMLTzUuRME3xejiw9hiVdVjvjHdrZF"
-    },
-    {
-      id: 3,
-      title: "Rare Coin Collection",
-      price: "$300.00",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBYG0OgQjsvDaGJoH3azOXn7rJdKTyVh0lnD8BFbsnieJiwdTxZhxpPxYrQSFLglHA8B83Liw0-Pm1ZwL2nx8ur63wFU0KeeM1iKQ6wP0Lj5a7J7jgv1fTKsiG7ks8Yv-u1SzVHsxdtdJCfwOCmHsZ7keZPk7OKaul6smVDyW6tvXFtT3Fk0ZFVapqbyBclSZKcIonrIShQE8DAE7P2JeSJ9fzFW_3J2kqqkomr926cwUtQ8wW54KPcth5AcgQQ4sDK-gnImKhNKHumv"
-    },
-    {
-      id: 4,
-      title: "Hand-Painted Porcelain Doll",
-      price: "$100.00",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVkns8on6pgVR8FeDGFv9WPONnILWYkNkQHynNWlafiOMgeqBnMsoKczk6z6hVtHVsuV5y8u-1BgBkDLfuB1DilaRm3533Fy4aAvlLgqW_NQzlHDzQ2M81gK8WVsh0kfGTkoFNIBkYpyuvA8WihzjMX5NKeoqJnMkO_87JfS0GMChJIHAc4T0RZn9eQT7Zr51JTTvYr8hDnVad0FpG3JaTWcm2BtPMnKF53oLtM0crFYfxFwzWpsyXufd6-hbAKfQM9Ei5HPzhMco_"
-    },
-    {
-      id: 5,
-      title: "Limited Edition Comic Book",
-      price: "$75.00",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAbjP30kR2tw7q4JxxpQ9s6DeGi6-w-m-eZeP7UpkOxhuijWsP0WtGJ4B8d4Yx0i_k18TABoH7EvFMd__oAkw_3-d6l_x_E3YlmtMvwzhHnaSMPimxr3TCjOBAKUwFKq-UJzClMVjfo9RgISAQVbR4dOVex2INl5FM5utO8ICK0TH2P1JNCh8p2Rpn-pB0JUQCcQoZac2pvJM0cb_a_1eBNuqXlyO8NSWaQSkDMs1y0hKR4x8ujOuxGDW9e7o6D3QZaE1qRMvLSLQXR"
-    },
-    {
-      id: 6,
-      title: "Signed First Edition Novel",
-      price: "$250.00",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuALz8qGjwn2HbMVVk1NzrBao_ODszNlR3mbPd9V_AddxsjMLdJhQSyRV0890B-TQRx0gFk9NhObT2ZkdrTN7k3JlR8faIwAw6qqXkjh4xWXxjz5UZB-eGk0Kntr909q_daKv7SvsWxgqY3WaMMEcBKsfuc0d1dnMGzEgP77Dz66UgrZ6KXswCFmmqlCSKZDJrKuVCNy1jB_u0AT00z_fDeIW0Xk03EMSbRva56LiWj7Uba1JN9lVMEAwj99C3-3hddjjZHoy4Hv2qqa"
-    }
-  ], []);
-
-  const categories = useMemo(() => [
-    "Fine Art",
-    "Rare Coins & Currency",
-    "Trading Cards",
-    "Vintage Watches & Jewelry",
-    "Comic Books",
-    "Stamps",
-    "Antiques",
-    "Pop Culture Memorabilia",
-    "Vintage Toys & Games",
-    "Limited-Edition Fashion",
-    "Posters & Prints",
-    "Digital Collectibles"
-  ], []);
-
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen(prev => !prev);
-  }, []);
-
-  // Handle responsive behavior
+  // Handle URL search parameters
   useEffect(() => {
-    const handleResize = () => {
-      // On mobile, close sidebar when resizing to desktop
-      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-        setSidebarOpen(true); // Keep open on tablet
-      } else if (window.innerWidth >= 1024) {
-        setSidebarOpen(true); // Keep open on desktop
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setSidebarOpen(false);
-      }
-    };
-
-    // Initialize sidebar state based on screen size
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false); // Closed on mobile by default
-    } else {
-      setSidebarOpen(true); // Open on tablet and desktop by default
+    const searchParam = searchParams.get('search');
+    if (searchParam && searchParam !== searchQuery) {
+      setSearchQuery(searchParam);
+      // Scroll to search results if there's a search query
+      setTimeout(() => {
+        const element = document.getElementById('filtered-items-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
     }
+  }, [searchParams, searchQuery]);
 
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('keydown', handleKeyDown);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showAllCategories && !event.target.closest('.categories-dropdown')) {
+        setShowAllCategories(false);
+      }
     };
-  }, []); // Empty dependency array for stable effect
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showAllCategories]);
+
+
+
+  const getFilteredItems = () => {
+    if (searchQuery.trim()) {
+      return searchItems(searchQuery);
+    }
+    if (!selectedCategory) return [];
+    return getItemsByCategory(selectedCategory);
+  };
+
+  const handleProductClick = (item) => {
+    // Add product click functionality here
+    console.log('Product clicked:', item.title);
+    // This could navigate to a product detail page or open a modal
+  };
+
+  const handleShowAllToggle = (section, currentState, setter) => {
+    setter(!currentState);
+    // If expanding, scroll to show the expanded content
+    if (!currentState) {
+      setTimeout(() => {
+        const element = document.getElementById(`${section}-section`);
+        if (element) {
+          const elementRect = element.getBoundingClientRect();
+          const offset = window.pageYOffset + elementRect.bottom - window.innerHeight + 100;
+          window.scrollTo({ 
+            top: Math.max(0, offset), 
+            behavior: 'smooth' 
+          });
+        }
+      }, 200);
+    }
+  };
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleCarouselItemClick = (item) => {
+    scrollToSection(item.targetSection);
+  };
+
+  const handlePopularSearchClick = (searchTerm) => {
+    setSearchQuery(searchTerm);
+    // Scroll to search results
+    setTimeout(() => {
+      const element = document.getElementById('filtered-items-section');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
 
   return (
-    <div className="bg-stone-50 min-h-screen">
+    <div className="bg-stone-50 min-h-screen overflow-x-hidden">
       <Navbar />
       
-      <main className="flex-1 flex pt-20">
-        {/* Mobile backdrop overlay */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/20 z-[5] md:hidden"
-            onClick={toggleSidebar}
-          ></div>
-        )}
-        
-        {/* Sidebar */}
-        <aside 
-          className={`${sidebarOpen ? 'w-64' : 'w-0 md:w-12'} bg-gradient-to-br from-stone-50 to-stone-100 border-r border-stone-200 shrink-0 absolute md:relative inset-y-0 left-0 z-10 md:z-0 transition-all duration-300 ease-in-out ${
-            sidebarOpen ? 'translate-x-0 p-6' : '-translate-x-full md:translate-x-0 p-0 md:p-2'
-          }`}
-        >
-          {sidebarOpen ? (
-            <>
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-stone-900 text-lg font-bold tracking-tight">Categories</h3>
-                <div className="flex gap-2">
-                  <button 
-                    className="hidden md:block text-stone-600 hover:text-stone-900 transition-colors p-1 rounded-md hover:bg-stone-200/50"
-                    onClick={toggleSidebar}
-                    title="Hide sidebar"
-                  >
-                    <span className="material-symbols-outlined text-lg">chevron_left</span>
-                  </button>
-                  <button 
-                    className="md:hidden text-stone-600 hover:text-stone-900 transition-colors p-1 rounded-md hover:bg-stone-200/50"
-                    onClick={toggleSidebar}
-                  >
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
+      {/* Hero Section with Carousel */}
+      <section className="relative pt-20 pb-8 sm:pb-12 bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6 sm:mb-8 px-2">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-stone-800 mb-3 sm:mb-4">
+              Discover Unique Collectibles
+            </h1>
+            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
+              Explore our curated collection of handcrafted treasures from talented artisans
+            </p>
+          </div>
+
+          {/* Carousel Container */}
+          <HeroCarousel 
+            items={carouselItems}
+            autoAdvanceInterval={4000}
+            onItemClick={handleCarouselItemClick}
+          />
+        </div>
+      </section>
+
+      {/* Search Bar Section */}
+      <section className="py-8 sm:py-12 bg-white border-b border-stone-200">
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={() => {
+            // Optional: Add search analytics or additional search logic here
+            if (searchQuery.trim()) {
+              const element = document.getElementById('filtered-items-section');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }}
+          placeholder="Search collectibles..."
+          popularTags={['Vintage Coins', 'Comic Books', 'Antique Jewelry', 'Rare Stamps', 'Music Collectibles']}
+          onPopularTagClick={handlePopularSearchClick}
+          title="Find Your Perfect Collectible"
+          subtitle="Search through thousands of unique items from talented artisans"
+        />
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-8 sm:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12 px-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 mb-3 sm:mb-4">
+              Browse Categories
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
+              Discover collectibles across diverse categories, each curated by passionate artisans and collectors
+            </p>
+          </div>
+
+          {/* Categories Grid */}
+          <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+            {/* Show first 4 categories */}
+            {categories.slice(0, 4).map((category, index) => (
+              <div
+                key={index}
+                onClick={() => {
+                  setSelectedCategory(category.name);
+                  // Scroll to filtered items section with a slight delay to allow state update
+                  setTimeout(() => {
+                    const element = document.getElementById('filtered-items-section');
+                    if (element) {
+                      element.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }
+                  }, 100);
+                }}
+                className={`group cursor-pointer p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                  selectedCategory === category.name
+                    ? 'border-amber-500 bg-amber-50 shadow-lg'
+                    : 'border-stone-200 bg-white hover:border-amber-300'
+                }`}
+              >
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 mb-4 group-hover:scale-110 transition-transform">
+                  <span className="text-white text-xl font-bold">
+                    {category.name.charAt(0)}
+                  </span>
+                </div>
+                <h3 className={`text-lg font-semibold mb-2 transition-colors ${
+                  selectedCategory === category.name ? 'text-amber-700' : 'text-stone-800 group-hover:text-amber-600'
+                }`}>
+                  {category.name}
+                </h3>
+                <p className="text-sm text-stone-600 leading-relaxed">
+                  {category.description}
+                </p>
+                <div className="mt-4 flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>Explore Collection</span>
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
-              <nav className="flex flex-col gap-1.5">
-                {categories.map((category, index) => (
-                  <a 
-                    key={index}
-                    href="#" 
-                    className={`text-stone-700 hover:bg-stone-200/50 hover:text-[var(--primary-color)] text-base font-medium leading-normal transition-colors px-3 py-2 rounded-lg ${
-                      index === categories.length - 1 ? 'border-t border-stone-200 mt-2 pt-3' : ''
-                    }`}
-                  >
-                    {category}
-                  </a>
-                ))}
-              </nav>
-            </>
-          ) : (
-            <div className="flex flex-col items-center pt-4">
-              <button 
-                className="text-stone-600 hover:text-stone-900 transition-colors p-2 rounded-md hover:bg-stone-200/50 mb-4"
-                onClick={toggleSidebar}
-                title="Show sidebar"
-              >
-                <span className="material-symbols-outlined text-xl">chevron_right</span>
-              </button>
-              <div className="flex flex-col gap-2">
-                {categories.slice(0, 3).map((category, index) => (
-                  <div 
-                    key={index}
-                    className="w-2 h-2 bg-stone-400 rounded-full"
-                    title={category}
-                  ></div>
-                ))}
-                <div className="w-2 h-2 bg-stone-300 rounded-full" title="More categories"></div>
-              </div>
-            </div>
-          )}
-        </aside>
+            ))}
 
-        {/* Main Content */}
-        <div className="flex-1 px-8 py-6 lg:px-16 xl:px-24">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-4">
-              <button 
-                className="p-2 rounded-md hover:bg-stone-100 text-stone-600 transition-colors md:hidden"
-                onClick={toggleSidebar}
-              >
-                <span className="material-symbols-outlined">menu</span>
-              </button>
-              {!sidebarOpen && (
-                <button 
-                  className="hidden md:block p-2 rounded-md hover:bg-stone-100 text-stone-600 transition-colors"
-                  onClick={toggleSidebar}
-                  title="Show categories"
+            {/* More Categories Dropdown */}
+            {categories.length > 4 && (
+              <div className="relative categories-dropdown">
+                <div
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className="group cursor-pointer p-6 rounded-xl border-2 border-dashed border-stone-300 hover:border-amber-300 bg-stone-50 hover:bg-amber-50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col items-center justify-center text-center"
                 >
-                  <span className="material-symbols-outlined">menu</span>
-                </button>
-              )}
-              <div className="flex flex-col gap-1.5">
-                <h1 className="text-stone-900 text-2xl font-bold leading-tight tracking-tight">Collectibles</h1>
-                <p className="text-stone-500 text-sm italic">Discover unique and rare collectibles from local artisans.</p>
-              </div>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-3 mb-5">
-              <div className="flex-1">
-                <div className="flex w-full items-stretch rounded-md h-10 border border-stone-300 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[var(--primary-color)] focus-within:border-[var(--primary-color)]">
-                  <div className="text-stone-500 flex items-center justify-center pl-3 border-r border-stone-300">
-                    <span className="material-symbols-outlined text-xl">search</span>
+                  <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-stone-400 to-stone-500 group-hover:from-amber-400 group-hover:to-orange-500 mb-4 group-hover:scale-110 transition-all">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
                   </div>
-                  <input 
-                    className="flex-1 px-3 text-stone-900 bg-transparent placeholder:text-stone-500 text-sm font-normal leading-normal focus:outline-none" 
-                    placeholder="Search for collectibles..." 
-                    defaultValue=""
-                    aria-label="Search for collectibles"
-                  />
+                  <h3 className="text-lg font-semibold mb-2 text-stone-800 group-hover:text-amber-600 transition-colors">
+                    More Categories
+                  </h3>
+                  <p className="text-sm text-stone-600 leading-relaxed">
+                    Explore {categories.length - 4} additional categories
+                  </p>
+                  <div className="mt-4 flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>View All</span>
+                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
+
+                {/* Multi-column Dropdown */}
+                {showAllCategories && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-stone-200 z-50 overflow-hidden">
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-4 border-b border-stone-200 pb-3">
+                        <h4 className="text-lg font-semibold text-stone-800">
+                          All Categories ({categories.length - 4} more)
+                        </h4>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAllCategories(false);
+                          }}
+                          className="p-2 text-stone-400 hover:text-stone-600 transition-colors rounded-lg hover:bg-stone-100"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        {categories.slice(4).map((category, index) => (
+                          <div
+                            key={index + 4}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCategory(category.name);
+                              setShowAllCategories(false);
+                              // Scroll to filtered items section with a slight delay to allow state update
+                              setTimeout(() => {
+                                const element = document.getElementById('filtered-items-section');
+                                if (element) {
+                                  element.scrollIntoView({ 
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                  });
+                                }
+                              }, 100);
+                            }}
+                            className={`group cursor-pointer p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${
+                              selectedCategory === category.name
+                                ? 'border-amber-500 bg-amber-50 shadow-md'
+                                : 'border-stone-200 bg-white hover:border-amber-300'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 mb-3 group-hover:scale-110 transition-transform">
+                              <span className="text-white text-lg font-bold">
+                                {category.name.charAt(0)}
+                              </span>
+                            </div>
+                            <h3 className={`text-base font-semibold mb-2 transition-colors ${
+                              selectedCategory === category.name ? 'text-amber-700' : 'text-stone-800 group-hover:text-amber-600'
+                            }`}>
+                              {category.name}
+                            </h3>
+                            <p className="text-xs text-stone-600 leading-relaxed">
+                              {category.description}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2 items-center">
-                <button className="flex h-10 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-white border border-stone-300 px-3 hover:bg-stone-100 transition-colors">
-                  <p className="text-stone-700 text-sm font-medium leading-normal">Price Range</p>
-                  <span className="material-symbols-outlined text-stone-500 text-base">expand_more</span>
-                </button>
-                <button className="flex h-10 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-white border border-stone-300 px-3 hover:bg-stone-100 transition-colors">
-                  <p className="text-stone-700 text-sm font-medium leading-normal">Rarity</p>
-                  <span className="material-symbols-outlined text-stone-500 text-base">expand_more</span>
-                </button>
-              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Clear Filter Button */}
+      {selectedCategory && (
+        <section className="py-8 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="inline-flex items-center px-6 py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg transition-colors font-medium"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear Filter
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Filtered Items Display */}
+      {(selectedCategory || searchQuery.trim()) && (
+        <section id="filtered-items-section" className="py-16 bg-stone-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
+                {searchQuery.trim() 
+                  ? `Search Results for "${searchQuery}"` 
+                  : `${selectedCategory} Collection`
+                }
+              </h3>
+              <p className="text-stone-600">
+                {searchQuery.trim()
+                  ? `Found ${getFilteredItems().length} items matching your search`
+                  : `Explore our curated selection of ${selectedCategory.toLowerCase()} items`
+                }
+              </p>
             </div>
 
-            {/* Collectibles Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {collectibles.map((item) => (
-                <CollectibleItem key={item.id} item={item} />
+            {/* Filtered Items Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {getFilteredItems().map((item) => (
+                <ProductCard key={item.id} item={item} onClick={handleProductClick} />
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-center mt-6">
-              <nav aria-label="Pagination" className="flex items-center gap-1.5">
-                <button className="flex items-center justify-center rounded-md text-stone-500 hover:bg-stone-100 disabled:text-stone-300 disabled:hover:bg-transparent h-8 w-8 transition-colors">
-                  <span className="material-symbols-outlined text-xl">chevron_left</span>
-                </button>
-                <button className="flex items-center justify-center rounded-md font-medium text-white bg-[var(--primary-color)] h-8 w-8 text-xs transition-colors">1</button>
-                <button className="flex items-center justify-center rounded-md font-medium text-stone-600 hover:bg-stone-100 h-8 w-8 text-xs transition-colors">2</button>
-                <button className="flex items-center justify-center rounded-md font-medium text-stone-600 hover:bg-stone-100 h-8 w-8 text-xs transition-colors">3</button>
-                <span className="text-stone-400 text-xs">...</span>
-                <button className="flex items-center justify-center rounded-md font-medium text-stone-600 hover:bg-stone-100 h-8 w-8 text-xs transition-colors">10</button>
-                <button className="flex items-center justify-center rounded-md text-stone-500 hover:bg-stone-100 h-8 w-8 transition-colors">
-                  <span className="material-symbols-outlined text-xl">chevron_right</span>
-                </button>
-              </nav>
-            </div>
+            {getFilteredItems().length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-24 h-24 mx-auto mb-4 bg-stone-100 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-7 7-7-7" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-semibold text-stone-800 mb-2">No Items Found</h4>
+                <p className="text-stone-600">
+                  {searchQuery.trim()
+                    ? `No items match your search for "${searchQuery}". Try a different search term.`
+                    : `We're currently building our ${selectedCategory.toLowerCase()} collection. Check back soon!`
+                  }
+                </p>
+              </div>
+            )}
           </div>
+        </section>
+      )}
+
+      {/* Placeholder sections for smooth scrolling targets */}
+      <section id="featured-section" className="py-8 sm:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-3 sm:mb-4">Featured Collectibles</h2>
+            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
+              Handpicked rare finds from our curated collection of exceptional items
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {(showAllFeatured ? getFeaturedItems() : getFeaturedItems().slice(0, 8)).map((item) => (
+              <ProductCard key={item.id} item={item} onClick={handleProductClick} />
+            ))}
+          </div>
+          {getFeaturedItems().length > 8 && (
+            <div className="text-center">
+              <button 
+                onClick={() => handleShowAllToggle('featured', showAllFeatured, setShowAllFeatured)}
+                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
+              >
+                {showAllFeatured 
+                  ? `Show Less Featured Items` 
+                  : `View All Featured Items (${getFeaturedItems().length})`
+                }
+              </button>
+            </div>
+          )}
         </div>
-      </main>
+      </section>
+
+      <section id="popular-section" className="py-8 sm:py-16 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-3 sm:mb-4">Popular Items</h2>
+            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
+              Most loved pieces by our community of collectors and enthusiasts
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {(showAllPopular ? getPopularItems() : getPopularItems().slice(0, 8)).map((item) => (
+              <ProductCard key={item.id} item={item} onClick={handleProductClick} />
+            ))}
+          </div>
+          {getPopularItems().length > 8 && (
+            <div className="text-center">
+              <button 
+                onClick={() => handleShowAllToggle('popular', showAllPopular, setShowAllPopular)}
+                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
+              >
+                {showAllPopular 
+                  ? `Show Less Popular Items` 
+                  : `View All Popular Items (${getPopularItems().length})`
+                }
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section id="recent-section" className="py-8 sm:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-3 sm:mb-4">Recent Items</h2>
+            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
+              Fresh arrivals from talented artisans and collectors worldwide
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            {(showAllRecent ? getRecentItems() : getRecentItems().slice(0, 8)).map((item) => (
+              <ProductCard key={item.id} item={item} onClick={handleProductClick} />
+            ))}
+          </div>
+          {getRecentItems().length > 8 && (
+            <div className="text-center">
+              <button 
+                onClick={() => handleShowAllToggle('recent', showAllRecent, setShowAllRecent)}
+                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
+              >
+                {showAllRecent 
+                  ? `Show Less Recent Items` 
+                  : `View All Recent Items (${getRecentItems().length})`
+                }
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 };
