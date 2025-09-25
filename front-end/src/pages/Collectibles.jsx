@@ -5,6 +5,8 @@ import Footer from '@/components/Footer';
 import HeroCarousel from '@/components/HeroCarousel';
 import ProductCard from '@/components/ProductCard';
 import SearchBar from '@/components/SearchBar';
+import CategoryGrid from '@/components/CategoryGrid';
+import CategoryDropdown from '@/components/CategoryDropdown';
 import { carouselItems, categories, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems } from '@/data/Products';
 
 const Collectibles = () => {
@@ -14,8 +16,6 @@ const Collectibles = () => {
   const [showAllFeatured, setShowAllFeatured] = useState(false);
   const [showAllPopular, setShowAllPopular] = useState(false);
   const [showAllRecent, setShowAllRecent] = useState(false);
-  const [showAllCategories, setShowAllCategories] = useState(false);
-
   // Handle URL search parameters
   useEffect(() => {
     const searchParam = searchParams.get('search');
@@ -30,20 +30,6 @@ const Collectibles = () => {
       }, 500);
     }
   }, [searchParams, searchQuery]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showAllCategories && !event.target.closest('.categories-dropdown')) {
-        setShowAllCategories(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showAllCategories]);
 
 
 
@@ -160,15 +146,15 @@ const Collectibles = () => {
             </p>
           </div>
 
-          {/* Categories Grid */}
-          <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-            {/* Show first 4 categories */}
-            {categories.slice(0, 4).map((category, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  setSelectedCategory(category.name);
-                  // Scroll to filtered items section with a slight delay to allow state update
+          {/* Categories Grid - Direct usage */}
+          <div className="mb-8 sm:mb-12">
+            <CategoryGrid
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={(categoryName) => {
+                setSelectedCategory(categoryName);
+                // Scroll to filtered items section with a slight delay to allow state update
+                if (categoryName) {
                   setTimeout(() => {
                     const element = document.getElementById('filtered-items-section');
                     if (element) {
@@ -178,127 +164,31 @@ const Collectibles = () => {
                       });
                     }
                   }, 100);
-                }}
-                className={`group cursor-pointer p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                  selectedCategory === category.name
-                    ? 'border-amber-500 bg-amber-50 shadow-lg'
-                    : 'border-stone-200 bg-white hover:border-amber-300'
-                }`}
-              >
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-white text-xl font-bold">
-                    {category.name.charAt(0)}
-                  </span>
-                </div>
-                <h3 className={`text-lg font-semibold mb-2 transition-colors ${
-                  selectedCategory === category.name ? 'text-amber-700' : 'text-stone-800 group-hover:text-amber-600'
-                }`}>
-                  {category.name}
-                </h3>
-                <p className="text-sm text-stone-600 leading-relaxed">
-                  {category.description}
-                </p>
-                <div className="mt-4 flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>Explore Collection</span>
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            ))}
+                }
+              }}
+              visibleCount={4}
+            />
+          </div>
 
-            {/* More Categories Dropdown */}
-            {categories.length > 4 && (
-              <div className="relative categories-dropdown">
-                <div
-                  onClick={() => setShowAllCategories(!showAllCategories)}
-                  className="group cursor-pointer p-6 rounded-xl border-2 border-dashed border-stone-300 hover:border-amber-300 bg-stone-50 hover:bg-amber-50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col items-center justify-center text-center"
-                >
-                  <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-stone-400 to-stone-500 group-hover:from-amber-400 group-hover:to-orange-500 mb-4 group-hover:scale-110 transition-all">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2 text-stone-800 group-hover:text-amber-600 transition-colors">
-                    More Categories
-                  </h3>
-                  <p className="text-sm text-stone-600 leading-relaxed">
-                    Explore {categories.length - 4} additional categories
-                  </p>
-                  <div className="mt-4 flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>View All</span>
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Multi-column Dropdown */}
-                {showAllCategories && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-stone-200 z-50 overflow-hidden">
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-4 border-b border-stone-200 pb-3">
-                        <h4 className="text-lg font-semibold text-stone-800">
-                          All Categories ({categories.length - 4} more)
-                        </h4>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowAllCategories(false);
-                          }}
-                          className="p-2 text-stone-400 hover:text-stone-600 transition-colors rounded-lg hover:bg-stone-100"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4">
-                        {categories.slice(4).map((category, index) => (
-                          <div
-                            key={index + 4}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCategory(category.name);
-                              setShowAllCategories(false);
-                              // Scroll to filtered items section with a slight delay to allow state update
-                              setTimeout(() => {
-                                const element = document.getElementById('filtered-items-section');
-                                if (element) {
-                                  element.scrollIntoView({ 
-                                    behavior: 'smooth',
-                                    block: 'start'
-                                  });
-                                }
-                              }, 100);
-                            }}
-                            className={`group cursor-pointer p-4 rounded-lg border-2 transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${
-                              selectedCategory === category.name
-                                ? 'border-amber-500 bg-amber-50 shadow-md'
-                                : 'border-stone-200 bg-white hover:border-amber-300'
-                            }`}
-                          >
-                            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 mb-3 group-hover:scale-110 transition-transform">
-                              <span className="text-white text-lg font-bold">
-                                {category.name.charAt(0)}
-                              </span>
-                            </div>
-                            <h3 className={`text-base font-semibold mb-2 transition-colors ${
-                              selectedCategory === category.name ? 'text-amber-700' : 'text-stone-800 group-hover:text-amber-600'
-                            }`}>
-                              {category.name}
-                            </h3>
-                            <p className="text-xs text-stone-600 leading-relaxed">
-                              {category.description}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Category Dropdown - Direct usage */}
+          <div className="max-w-2xl mx-auto">
+            <CategoryDropdown
+              onCategorySelect={(categoryName) => {
+                setSelectedCategory(categoryName);
+                if (categoryName) {
+                  setTimeout(() => {
+                    const element = document.getElementById('filtered-items-section');
+                    if (element) {
+                      element.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }
+                  }, 100);
+                }
+              }}
+              placeholder="Choose a collectible category..."
+            />
           </div>
         </div>
       </section>

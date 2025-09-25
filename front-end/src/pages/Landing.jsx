@@ -2,7 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import CategoryGrid from "@/components/CategoryGrid";
+import { categories } from "@/data/Products";
 
 export default function Landing() {
   return (
@@ -37,10 +39,19 @@ export default function Landing() {
         {/* Categories */}
         <section className="bg-stone-50 py-16 px-4 md:px-10 lg:px-20">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-8 text-center">Explore Our Categories</h2>
+            <div className="text-center mb-8 sm:mb-12 px-2">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 mb-3 sm:mb-4">
+                Explore Our Categories
+              </h2>
+              <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
+                Discover collectibles across diverse categories, each curated by passionate artisans and collectors
+              </p>
+            </div>
+
+            {/* Category Navigation Tabs */}
             <div className="border-b border-[#e6e0db] mb-8">
               <div className="flex justify-center gap-8">
-                <Link to="" className="flex flex-col items-center justify-center border-b-2 border-b-[var(--primary-color)] text-[var(--text-primary)] pb-3 pt-2">
+                <Link to="/collectibles" className="flex flex-col items-center justify-center border-b-2 border-b-[var(--primary-color)] text-[var(--text-primary)] pb-3 pt-2">
                   <p className="text-base font-bold">Collectibles</p>
                 </Link>
                 <a href="#" className="flex flex-col items-center justify-center border-b-2 border-b-transparent text-[var(--text-secondary)] pb-3 pt-2 hover:border-b-[var(--primary-color)] hover:text-[var(--text-primary)] transition-colors">
@@ -49,12 +60,17 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              <CardItem title="Vintage Stamps" subtitle="Explore a collection of vintage stamps from around the world." imageClass="category-image-vintage-stamps-bg" compact />
-              <CardItem title="Rare Coins" subtitle="Discover rare coins and currency from different eras." imageClass="category-image-rare-coins-bg" compact />
-              <CardItem title="Antique Books" subtitle="Find antique books and manuscripts with historical significance." imageClass="category-image-antique-books-bg" compact />
-              <CardItem title="Classic Toys" subtitle="Browse classic toys and games from past generations." imageClass="category-image-classic-toys-bg" compact />
-            </div>
+            {/* CategoryGrid Implementation */}
+            <CategoryGrid
+              categories={categories}
+              selectedCategory={null}
+              onCategorySelect={(categoryName) => {
+                // Navigate to collectibles page with selected category
+                window.location.href = `/collectibles?category=${encodeURIComponent(categoryName)}`;
+              }}
+              visibleCount={8}
+              className="mb-8"
+            />
           </div>
         </section>
 
@@ -142,9 +158,23 @@ export default function Landing() {
   );
 }
 
+function CardItem({ title, subtitle, imageClass }) {
+  return (
+    <div className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
+      <div className="relative w-full aspect-square">
+        <div className={`${imageClass} absolute inset-0 bg-center bg-no-repeat bg-cover rounded-lg transform group-hover:scale-105 transition-transform duration-300`} />
+      </div>
+      <div className="p-2">
+        <p className="text-[var(--text-primary)] text-lg font-semibold">{title}</p>
+        <p className="text-[var(--text-secondary)] text-sm">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
 function FeaturedProducts() {
   const [api, setApi] = useState(null)
-  const { canScrollPrev, canScrollNext } = useCarouselControls(api)
+  useCarouselControls(api)
 
   const handleNext = useCallback(() => {
     if (!api) return
@@ -201,20 +231,6 @@ function FeaturedProducts() {
       </div>
     </div>
   )
-}
-
-function CardItem({ title, subtitle, imageClass, compact = false }) {
-  return (
-    <div className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
-      <div className="relative w-full aspect-square">
-        <div className={`${imageClass} absolute inset-0 bg-center bg-no-repeat bg-cover rounded-lg transform group-hover:scale-105 transition-transform duration-300`} />
-      </div>
-      <div className="p-2">
-        <p className="text-[var(--text-primary)] text-lg font-semibold">{title}</p>
-        <p className="text-[var(--text-secondary)] text-sm">{subtitle}</p>
-      </div>
-    </div>
-  );
 }
 
 function Step({ num, title, text, filled = false }) {
