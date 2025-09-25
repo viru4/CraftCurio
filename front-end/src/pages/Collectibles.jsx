@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import HeroCarousel from '@/components/HeroCarousel';
@@ -7,35 +6,51 @@ import ProductCard from '@/components/ProductCard';
 import SearchBar from '@/components/SearchBar';
 import CategoryGrid from '@/components/CategoryGrid';
 import CategoryDropdown from '@/components/CategoryDropdown';
+import ProductSection from '@/components/ProductSection';
+import ScrollManager from '@/components/ScrollManager';
+import SearchManager from '@/components/SearchManager';
 import { carouselItems, categories, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems } from '@/data/Products';
 
 const Collectibles = () => {
-  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [showAllFeatured, setShowAllFeatured] = useState(false);
-  const [showAllPopular, setShowAllPopular] = useState(false);
-  const [showAllRecent, setShowAllRecent] = useState(false);
-  // Handle URL search parameters
+  
+  // Initialize managers
+  const {
+    delayedScrollToSection,
+    scrollToFilteredItems,
+    handleCarouselItemClick,
+    handleCategorySelectWithScroll
+  } = ScrollManager();
+
+  const {
+    searchQuery,
+    handleSearchSubmit,
+    handlePopularTagClick,
+    hasActiveSearch,
+    getTrimmedQuery,
+    getSearchBarProps,
+    createUrlParamHandler
+  } = SearchManager();
+  // Handle URL search parameter changes with scroll
   useEffect(() => {
-    const searchParam = searchParams.get('search');
-    if (searchParam && searchParam !== searchQuery) {
-      setSearchQuery(searchParam);
-      // Scroll to search results if there's a search query
-      setTimeout(() => {
-        const element = document.getElementById('filtered-items-section');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 500);
+    const urlParamHandler = createUrlParamHandler(
+      null, // No additional callback needed
+      () => delayedScrollToSection('filtered-items-section', 500, 'start')
+    );
+    
+    // The SearchManager handles URL parameter synchronization internally
+    // This effect just handles the scroll behavior when URL changes
+    if (searchQuery && searchQuery.trim()) {
+      urlParamHandler(searchQuery);
     }
-  }, [searchParams, searchQuery]);
+  }, [searchQuery, delayedScrollToSection, createUrlParamHandler]);
 
 
 
   const getFilteredItems = () => {
-    if (searchQuery.trim()) {
-      return searchItems(searchQuery);
+    const trimmedQuery = getTrimmedQuery();
+    if (trimmedQuery) {
+      return searchItems(trimmedQuery);
     }
     if (!selectedCategory) return [];
     return getItemsByCategory(selectedCategory);
@@ -47,44 +62,14 @@ const Collectibles = () => {
     // This could navigate to a product detail page or open a modal
   };
 
-  const handleShowAllToggle = (section, currentState, setter) => {
-    setter(!currentState);
-    // If expanding, scroll to show the expanded content
-    if (!currentState) {
-      setTimeout(() => {
-        const element = document.getElementById(`${section}-section`);
-        if (element) {
-          const elementRect = element.getBoundingClientRect();
-          const offset = window.pageYOffset + elementRect.bottom - window.innerHeight + 100;
-          window.scrollTo({ 
-            top: Math.max(0, offset), 
-            behavior: 'smooth' 
-          });
-        }
-      }, 200);
-    }
-  };
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
-  const handleCarouselItemClick = (item) => {
-    scrollToSection(item.targetSection);
-  };
+
 
   const handlePopularSearchClick = (searchTerm) => {
-    setSearchQuery(searchTerm);
-    // Scroll to search results
-    setTimeout(() => {
-      const element = document.getElementById('filtered-items-section');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+    handlePopularTagClick(searchTerm, () => {
+      scrollToFilteredItems();
+    });
   };
 
   return (
@@ -115,22 +100,21 @@ const Collectibles = () => {
       {/* Search Bar Section */}
       <section className="py-8 sm:py-12 bg-white border-b border-stone-200">
         <SearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onSearch={() => {
-            // Optional: Add search analytics or additional search logic here
-            if (searchQuery.trim()) {
-              const element = document.getElementById('filtered-items-section');
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }
-          }}
-          placeholder="Search collectibles..."
-          popularTags={['Vintage Coins', 'Comic Books', 'Antique Jewelry', 'Rare Stamps', 'Music Collectibles']}
-          onPopularTagClick={handlePopularSearchClick}
-          title="Find Your Perfect Collectible"
-          subtitle="Search through thousands of unique items from talented artisans"
+          {...getSearchBarProps({
+            onSearch: () => {
+              // Optional: Add search analytics or additional search logic here
+              handleSearchSubmit(() => {
+                if (searchQuery.trim()) {
+                  scrollToFilteredItems();
+                }
+              });
+            },
+            placeholder: "Search collectibles...",
+            popularTags: ['Vintage Coins', 'Comic Books', 'Antique Jewelry', 'Rare Stamps', 'Music Collectibles'],
+            onPopularTagClick: handlePopularSearchClick,
+            title: "Find Your Perfect Collectible",
+            subtitle: "Search through thousands of unique items from talented artisans"
+          })}
         />
       </section>
 
@@ -152,19 +136,7 @@ const Collectibles = () => {
               categories={categories}
               selectedCategory={selectedCategory}
               onCategorySelect={(categoryName) => {
-                setSelectedCategory(categoryName);
-                // Scroll to filtered items section with a slight delay to allow state update
-                if (categoryName) {
-                  setTimeout(() => {
-                    const element = document.getElementById('filtered-items-section');
-                    if (element) {
-                      element.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                      });
-                    }
-                  }, 100);
-                }
+                handleCategorySelectWithScroll(categoryName, setSelectedCategory);
               }}
               visibleCount={4}
             />
@@ -174,18 +146,7 @@ const Collectibles = () => {
           <div className="max-w-2xl mx-auto">
             <CategoryDropdown
               onCategorySelect={(categoryName) => {
-                setSelectedCategory(categoryName);
-                if (categoryName) {
-                  setTimeout(() => {
-                    const element = document.getElementById('filtered-items-section');
-                    if (element) {
-                      element.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                      });
-                    }
-                  }, 100);
-                }
+                handleCategorySelectWithScroll(categoryName, setSelectedCategory);
               }}
               placeholder="Choose a collectible category..."
             />
@@ -213,18 +174,18 @@ const Collectibles = () => {
       )}
 
       {/* Filtered Items Display */}
-      {(selectedCategory || searchQuery.trim()) && (
+      {(selectedCategory || hasActiveSearch()) && (
         <section id="filtered-items-section" className="py-16 bg-stone-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h3 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
-                {searchQuery.trim() 
-                  ? `Search Results for "${searchQuery}"` 
+                {hasActiveSearch() 
+                  ? `Search Results for "${getTrimmedQuery()}"` 
                   : `${selectedCategory} Collection`
                 }
               </h3>
               <p className="text-stone-600">
-                {searchQuery.trim()
+                {hasActiveSearch()
                   ? `Found ${getFilteredItems().length} items matching your search`
                   : `Explore our curated selection of ${selectedCategory.toLowerCase()} items`
                 }
@@ -247,8 +208,8 @@ const Collectibles = () => {
                 </div>
                 <h4 className="text-xl font-semibold text-stone-800 mb-2">No Items Found</h4>
                 <p className="text-stone-600">
-                  {searchQuery.trim()
-                    ? `No items match your search for "${searchQuery}". Try a different search term.`
+                  {hasActiveSearch()
+                    ? `No items match your search for "${getTrimmedQuery()}". Try a different search term.`
                     : `We're currently building our ${selectedCategory.toLowerCase()} collection. Check back soon!`
                   }
                 </p>
@@ -258,93 +219,33 @@ const Collectibles = () => {
         </section>
       )}
 
-      {/* Placeholder sections for smooth scrolling targets */}
-      <section id="featured-section" className="py-8 sm:py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-3 sm:mb-4">Featured Collectibles</h2>
-            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
-              Handpicked rare finds from our curated collection of exceptional items
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-            {(showAllFeatured ? getFeaturedItems() : getFeaturedItems().slice(0, 8)).map((item) => (
-              <ProductCard key={item.id} item={item} onClick={handleProductClick} />
-            ))}
-          </div>
-          {getFeaturedItems().length > 8 && (
-            <div className="text-center">
-              <button 
-                onClick={() => handleShowAllToggle('featured', showAllFeatured, setShowAllFeatured)}
-                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
-              >
-                {showAllFeatured 
-                  ? `Show Less Featured Items` 
-                  : `View All Featured Items (${getFeaturedItems().length})`
-                }
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+      {/* Product sections using ProductSection component */}
+      <ProductSection
+        id="featured"
+        title="Featured Collectibles"
+        description="Handpicked rare finds from our curated collection of exceptional items"
+        items={getFeaturedItems()}
+        onProductClick={handleProductClick}
+        backgroundColor="bg-white"
+      />
 
-      <section id="popular-section" className="py-8 sm:py-16 bg-stone-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-3 sm:mb-4">Popular Items</h2>
-            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
-              Most loved pieces by our community of collectors and enthusiasts
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-            {(showAllPopular ? getPopularItems() : getPopularItems().slice(0, 8)).map((item) => (
-              <ProductCard key={item.id} item={item} onClick={handleProductClick} />
-            ))}
-          </div>
-          {getPopularItems().length > 8 && (
-            <div className="text-center">
-              <button 
-                onClick={() => handleShowAllToggle('popular', showAllPopular, setShowAllPopular)}
-                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
-              >
-                {showAllPopular 
-                  ? `Show Less Popular Items` 
-                  : `View All Popular Items (${getPopularItems().length})`
-                }
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+      <ProductSection
+        id="popular"
+        title="Popular Items"
+        description="Most loved pieces by our community of collectors and enthusiasts"
+        items={getPopularItems()}
+        onProductClick={handleProductClick}
+        backgroundColor="bg-stone-50"
+      />
 
-      <section id="recent-section" className="py-8 sm:py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-800 mb-3 sm:mb-4">Recent Items</h2>
-            <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
-              Fresh arrivals from talented artisans and collectors worldwide
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
-            {(showAllRecent ? getRecentItems() : getRecentItems().slice(0, 8)).map((item) => (
-              <ProductCard key={item.id} item={item} onClick={handleProductClick} />
-            ))}
-          </div>
-          {getRecentItems().length > 8 && (
-            <div className="text-center">
-              <button 
-                onClick={() => handleShowAllToggle('recent', showAllRecent, setShowAllRecent)}
-                className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-200 shadow-lg hover:shadow-xl"
-              >
-                {showAllRecent 
-                  ? `Show Less Recent Items` 
-                  : `View All Recent Items (${getRecentItems().length})`
-                }
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+      <ProductSection
+        id="recent"
+        title="Recent Items"
+        description="Fresh arrivals from talented artisans and collectors worldwide"
+        items={getRecentItems()}
+        onProductClick={handleProductClick}
+        backgroundColor="bg-white"
+      />
 
       <Footer />
     </div>
