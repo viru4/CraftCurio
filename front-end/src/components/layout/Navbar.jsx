@@ -4,7 +4,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import SearchBar from "@/components/SearchBar";
+import { SearchBar } from "@/components/search";
 
 import { isValidPublishableKey } from '@/lib/utils'
 
