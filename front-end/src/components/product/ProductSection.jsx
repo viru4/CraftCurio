@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import ProductCard from '@/components/ProductCard';
-import ScrollManager from '@/components/ScrollManager';
+import { ProductCard } from '@/components/product';
+import { ScrollManager } from '@/components/managers';
 
 const ProductSection = ({
   id,

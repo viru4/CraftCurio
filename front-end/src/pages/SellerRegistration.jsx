@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { sellerRegistrationSchema, sellerRegistrationDefaults } from '@/forms/SellerRegistrationSchema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import Navbar from '@/components/Navbar'
+import { Navbar } from '@/components/layout'
 
 export default function SellerRegistration() {
   const [submitted, setSubmitted] = useState(false)

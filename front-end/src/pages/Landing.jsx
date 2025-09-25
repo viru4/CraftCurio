@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { Navbar, Footer } from "@/components/layout";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
 import { Link } from 'react-router-dom';
-import CategoryGrid from "@/components/CategoryGrid";
+import { CategoryGrid } from "@/components/category";
 import { categories } from "@/data/Products";
 
 export default function Landing() {

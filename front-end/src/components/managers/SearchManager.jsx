@@ -12,9 +12,7 @@ const SearchManager = (initialSearchQuery = '') => {
     const searchParam = searchParams.get('search');
     if (searchParam && searchParam !== searchQuery) {
       setSearchQuery(searchParam);
-      return searchParam; // Return the updated search query for callback
     }
-    return null;
   }, [searchParams, searchQuery]);
 
   // Update search query programmatically

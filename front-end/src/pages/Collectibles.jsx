@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import HeroCarousel from '@/components/HeroCarousel';
-import ProductCard from '@/components/ProductCard';
-import SearchBar from '@/components/SearchBar';
-import CategoryGrid from '@/components/CategoryGrid';
-import CategoryDropdown from '@/components/CategoryDropdown';
-import ProductSection from '@/components/ProductSection';
-import ScrollManager from '@/components/ScrollManager';
-import SearchManager from '@/components/SearchManager';
+import { Navbar, Footer } from '@/components/layout';
+import { HeroCarousel } from '@/components/carousel';
+import { ProductCard, ProductSection } from '@/components/product';
+import { SearchBar } from '@/components/search';
+import { CategoryGrid, CategoryDropdown } from '@/components/category';
+import { ScrollManager, SearchManager } from '@/components/managers';
 import { carouselItems, categories, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems } from '@/data/Products';
 
 const Collectibles = () => {
