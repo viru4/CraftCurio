@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, Footer } from '@/components/layout';
 import { HeroCarousel } from '@/components/carousel';
-import { ProductCard, ProductSection } from '@/components/product';
-import { SearchBar } from '@/components/search';
+import { ProductSection } from '@/components/product';
+import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
-import { carouselItems, categories, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems } from '@/data/Products';
+import { categories, collectibleItems, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems, getRandomCarouselItems } from '@/data/Products';
 
 const Collectibles = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -22,7 +22,6 @@ const Collectibles = () => {
     searchQuery,
     handleSearchSubmit,
     handlePopularTagClick,
-    hasActiveSearch,
     getTrimmedQuery,
     getSearchBarProps,
     createUrlParamHandler
@@ -45,11 +44,19 @@ const Collectibles = () => {
 
   const getFilteredItems = () => {
     const trimmedQuery = getTrimmedQuery();
+    
+    // Apply search filter
     if (trimmedQuery) {
       return searchItems(trimmedQuery);
     }
-    if (!selectedCategory) return [];
-    return getItemsByCategory(selectedCategory);
+    
+    // Apply category filter
+    if (selectedCategory) {
+      return getItemsByCategory(selectedCategory);
+    }
+    
+    // Return all items when no filters are applied
+    return collectibleItems;
   };
 
   const handleProductClick = (item) => {
@@ -86,7 +93,7 @@ const Collectibles = () => {
 
           {/* Carousel Container */}
           <HeroCarousel 
-            items={carouselItems}
+            items={getRandomCarouselItems(3)}
             autoAdvanceInterval={4000}
             onItemClick={handleCarouselItemClick}
           />
@@ -169,51 +176,16 @@ const Collectibles = () => {
         </section>
       )}
 
-      {/* Filtered Items Display */}
-      {(selectedCategory || hasActiveSearch()) && (
-        <section id="filtered-items-section" className="py-16 bg-stone-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h3 className="text-2xl md:text-3xl font-bold text-stone-800 mb-4">
-                {hasActiveSearch() 
-                  ? `Search Results for "${getTrimmedQuery()}"` 
-                  : `${selectedCategory} Collection`
-                }
-              </h3>
-              <p className="text-stone-600">
-                {hasActiveSearch()
-                  ? `Found ${getFilteredItems().length} items matching your search`
-                  : `Explore our curated selection of ${selectedCategory.toLowerCase()} items`
-                }
-              </p>
-            </div>
-
-            {/* Filtered Items Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {getFilteredItems().map((item) => (
-                <ProductCard key={item.id} item={item} onClick={handleProductClick} />
-              ))}
-            </div>
-
-            {getFilteredItems().length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 mx-auto mb-4 bg-stone-100 rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8l-7 7-7-7" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-stone-800 mb-2">No Items Found</h4>
-                <p className="text-stone-600">
-                  {hasActiveSearch()
-                    ? `No items match your search for "${getTrimmedQuery()}". Try a different search term.`
-                    : `We're currently building our ${selectedCategory.toLowerCase()} collection. Check back soon!`
-                  }
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      {/* Filtered Items Display - Using Advanced FilteredItemsSection Component */}
+      <FilteredItemsSection
+        items={getFilteredItems()}
+        searchQuery={getTrimmedQuery()}
+        selectedCategory={selectedCategory}
+        onProductClick={handleProductClick}
+        isVisible={true}
+        totalProductCount={collectibleItems.length}
+        initialDisplayCount={12}
+      />
 
       {/* Product sections using ProductSection component */}
       <ProductSection

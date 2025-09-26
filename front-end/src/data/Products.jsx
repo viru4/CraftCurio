@@ -67,9 +67,12 @@ export const collectibleItems = [
     price: "$125.00",
     category: "Coins, Currency, and Stamps",
     image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 2,
@@ -80,7 +83,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1601645191163-3fc0d5d64e35?w=400&h=300&fit=crop",
     featured: false,
     popular: true,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 3,
@@ -89,9 +95,12 @@ export const collectibleItems = [
     price: "$299.00",
     category: "Action Figures and Toys",
     image: "https://images.unsplash.com/photo-1606041011872-596597976b25?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: true,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 4,
@@ -100,9 +109,12 @@ export const collectibleItems = [
     price: "$450.00",
     category: "Pop Culture Memorabilia",
     image: "https://images.unsplash.com/photo-1489599511086-4d1b81c8d46b?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 5,
@@ -113,7 +125,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1566479179817-ff8dc4ce9c47?w=400&h=300&fit=crop",
     featured: false,
     popular: true,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 6,
@@ -124,7 +139,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop",
     featured: false,
     popular: false,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 7,
@@ -133,9 +151,12 @@ export const collectibleItems = [
     price: "$675.00",
     category: "Scientific Instruments",
     image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 8,
@@ -146,7 +167,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
     featured: false,
     popular: true,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 9,
@@ -157,7 +181,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=300&fit=crop",
     featured: false,
     popular: true,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 10,
@@ -166,9 +193,12 @@ export const collectibleItems = [
     price: "$3,200.00",
     category: "Music Collectibles",
     image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 11,
@@ -177,9 +207,12 @@ export const collectibleItems = [
     price: "$285.00",
     category: "Antiques and Vintage Items",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 12,
@@ -190,7 +223,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=300&fit=crop",
     featured: false,
     popular: false,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 13,
@@ -199,9 +235,12 @@ export const collectibleItems = [
     price: "$145.00",
     category: "Automotive Collectibles",
     image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: true,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 14,
@@ -210,9 +249,12 @@ export const collectibleItems = [
     price: "$380.00",
     category: "Home Collectibles",
     image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 15,
@@ -223,7 +265,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1601645191163-3fc0d5d64e35?w=400&h=300&fit=crop",
     featured: false,
     popular: true,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 16,
@@ -232,9 +277,12 @@ export const collectibleItems = [
     price: "$8,500.00",
     category: "Vintage Fashion",
     image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: true,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 17,
@@ -245,7 +293,10 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1606041011872-596597976b25?w=400&h=300&fit=crop",
     featured: false,
     popular: true,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 18,
@@ -254,9 +305,12 @@ export const collectibleItems = [
     price: "$525.00",
     category: "Scientific Instruments",
     image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: false
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 19,
@@ -265,9 +319,12 @@ export const collectibleItems = [
     price: "$2,750.00",
     category: "Pop Culture Memorabilia",
     image: "https://images.unsplash.com/photo-1489599511086-4d1b81c8d46b?w=400&h=300&fit=crop",
-    featured: true,
+    featured: false,
     popular: false,
-    recent: true
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
   },
   {
     id: 20,
@@ -278,34 +335,191 @@ export const collectibleItems = [
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
     featured: false,
     popular: false,
-    recent: true
-  }
-];
-
-// Carousel items data for hero sections
-export const carouselItems = [
-  {
-    id: 'featured',
-    title: 'Featured Collectibles',
-    description: 'Handpicked rare finds from our curated collection',
-    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=400&fit=crop&crop=center',
-    targetSection: 'featured-section',
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
     buttonText: 'Explore Collection'
   },
   {
-    id: 'popular',
-    title: 'Popular Items',
-    description: 'Most loved pieces by our community',
-    image: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=800&h=400&fit=crop&crop=center',
-    targetSection: 'popular-section',
+    id: 21,
+    title: "Audemars Piguet Royal Oak 34mm Silver Dial Watch",
+    description: "Luxury Swiss watch with distinct octagonal bezel and timeless design. Highly sought-after by watch collectors for its blend of elegance and engineering. A statement piece among timepiece enthusiasts.",
+    price: "$30,451.00",
+    category: "Vintage Fashion",
+    image: "/src/assets/CollectiblesItemsData/Audemars Piguet Royal Oak 34mm Silver Dial Watch.png",
+    featured: true,
+    popular: true,
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
     buttonText: 'Explore Collection'
   },
   {
-    id: 'recent',
-    title: 'Recent Items',
-    description: 'Fresh arrivals from talented artisans',
-    image: 'https://images.unsplash.com/photo-1582582621959-48d27397dc69?w=800&h=400&fit=crop&crop=center',
-    targetSection: 'recent-section',
+    id: 22,
+    title: "Rolex Yacht-Master 42mm Black Dial",
+    description: "Rolex's Yacht-Master series celebrated for combining functionality and style. The 42mm version in black is a modern classic that appeals to investment-minded collectors and luxury aficionados.",
+    price: "$31,680.00",
+    category: "Vintage Fashion",
+    image: "/src/assets/CollectiblesItemsData/Rolex Yacht-Master 42mm Black Dial.png",
+    featured: true,
+    popular: true,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 23,
+    title: "Subodh Gupta Sculpture \"Gober Ganesha\"",
+    description: "Contemporary art piece by renowned Indian artist Subodh Gupta, prized for its cultural symbolism and unique materials. Gupta's works regularly feature in high-profile exhibitions and auctions.",
+    price: "$40,000.00",
+    category: "Antiques and Vintage Items",
+    image: "/src/assets/CollectiblesItemsData/Subodh Gupta Sculpture \"Gober Ganesha\".png",
+    featured: true,
+    popular: false,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 24,
+    title: "Patek Philippe Calatrava 40mm Black Dial Watch",
+    description: "Iconic luxury watchmaking at its finest. The Calatrava series is revered for its simplicity and elegance. The 40mm version with black dial is amongst the most collectible vintage watches.",
+    price: "$33,000.00",
+    category: "Vintage Fashion",
+    image: "/src/assets/CollectiblesItemsData/Patek Philippe Calatrava 40mm Black Dial Watch.png",
+    featured: true,
+    popular: true,
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 25,
+    title: "Vintage Oil Painting in Ornate Frame",
+    description: "19th and early 20th-century oil painting with luxurious original frame and clear documentation of creator and history. Large signed piece with provenance perfect for serious collectors.",
+    price: "$35,000.00",
+    category: "Antiques and Vintage Items",
+    image: "/src/assets/CollectiblesItemsData/Vintage Paintings (Oil Paintings in Ornate Frames).png",
+    featured: true,
+    popular: false,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 26,
+    title: "British Guiana 1c Magenta Stamp",
+    description: "The world's rarest and most valuable stamp dating from 1856, famed for its single surviving specimen. It has a magenta background and was used in British Guiana (now Guyana). A true collector's gem, breaking world records for stamp auctions.",
+    price: "$9,480,000.00",
+    category: "Coins, Currency, and Stamps",
+    image: "/src/assets/CollectiblesItemsData/(Enhanced)_British_Guiana_1856_1c_magenta_stamp.png",
+    featured: true,
+    popular: true,
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 27,
+    title: "1909 T206 Honus Wagner Baseball Card",
+    description: "Considered the 'Holy Grail' of sports cards, featuring legendary player Honus Wagner. Highly sought-after for its rarity due to limited production. Its scarcity and connection to baseball history make it the most prized trading card.",
+    price: "$7,250,000.00",
+    category: "Sports Memorabilia",
+    image: "/src/assets/CollectiblesItemsData/1909_T206_Honus_Wagner_Baseball_Card_with_PSA_grade_EX_5-MC.png",
+    featured: true,
+    popular: true,
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 28,
+    title: "Pinner Qing Dynasty Vase",
+    description: "An 18th-century Chinese porcelain vase adorned with intricate floral designs and vibrant colors, discovered in a modest home in London. Exceptional craftsmanship and historical significance from the Qing Dynasty.",
+    price: "$80,200,000.00",
+    category: "Antiques and Vintage Items",
+    image: "/src/assets/CollectiblesItemsData/Pinner-Qing-Dynasty-Vase.png",
+    featured: true,
+    popular: true,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 29,
+    title: "Badminton Cabinet",
+    description: "An opulent 18th-century Florentine cabinet, over 12 feet tall and featuring elaborate inlays of semi-precious stones. Its grandeur and artistry make it one of the most expensive furniture pieces ever sold.",
+    price: "$36,000,000.00",
+    category: "Antiques and Vintage Items",
+    image: "/src/assets/CollectiblesItemsData/Badminton Cabinet.png",
+    featured: true,
+    popular: false,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 30,
+    title: "1933 Saint-Gaudens Double Eagle Gold Coin",
+    description: "The only legal-to-own coin of its kind, survived the gold recall in the Great Depression. Considered the most valuable coin. Symbolizes historic monetary events and coin collecting prestige.",
+    price: "$18,900,000.00",
+    category: "Coins, Currency, and Stamps",
+    image: "/src/assets/CollectiblesItemsData/1933-saint-gaudens-gold-double-eagle.png",
+    featured: true,
+    popular: true,
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 31,
+    title: "Once Upon a Time in Shaolin (Wu-Tang Clan)",
+    description: "A one-of-a-kind music album produced by the Wu-Tang Clan, with only one copy ever released. Comes in a custom silver-and-nickel box. Shrouded in exclusivity and subject to strict usage agreements.",
+    price: "$2,000,000.00",
+    category: "Music Collectibles",
+    image: "/src/assets/CollectiblesItemsData/once-upon-a-time-in-shaolin.png",
+    featured: true,
+    popular: true,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 32,
+    title: "Super Mario Bros. (NES, Sealed Copy)",
+    description: "Early run, unopened copy of Nintendo's original game, preserved for decades. Gaming history landmark and prized among video game collectors. A true piece of gaming nostalgia.",
+    price: "$2,000,000.00",
+    category: "Action Figures and Toys",
+    image: "/src/assets/CollectiblesItemsData/sealed-nes-super-mario-bros-canadian-version-v0-fr940qbgil1c1.png",
+    featured: true,
+    popular: true,
+    recent: false,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    id: 33,
+    title: "Apollo 11 Lunar Sample Bag",
+    description: "Used by astronauts on the Apollo 11 mission to collect moon dust. Unique piece of space exploration history. An extraordinary artifact from humanity's first moon landing mission.",
+    price: "$1,800,000.00",
+    category: "Scientific Instruments",
+    image: "/src/assets/CollectiblesItemsData/Apollo 11 Lunar Sample Bag.png",
+    featured: true,
+    popular: false,
+    recent: true,
+    // Carousel-ready format
+    targetSection: 'filtered-items-section',
     buttonText: 'Explore Collection'
   }
 ];
@@ -331,6 +545,10 @@ export const getItemById = (id) => {
   return collectibleItems.find(item => item.id === id);
 };
 
+export const getAllItems = () => {
+  return collectibleItems;
+};
+
 export const searchItems = (query) => {
   const searchTerm = query.toLowerCase();
   return collectibleItems.filter(item => 
@@ -338,4 +556,57 @@ export const searchItems = (query) => {
     item.description.toLowerCase().includes(searchTerm) ||
     item.category.toLowerCase().includes(searchTerm)
   );
+};
+
+// Generate default carousel items (Featured, Popular, Recent)
+export const getDefaultCarouselItems = () => {
+  const featuredItem = getFeaturedItems()[0] || collectibleItems[0];
+  const popularItem = getPopularItems()[0] || collectibleItems[1];
+  const recentItem = getRecentItems()[0] || collectibleItems[2];
+
+  return [
+    {
+      ...featuredItem,
+      id: `carousel-featured-${featuredItem.id}`,
+      title: 'Featured Collectibles',
+      description: 'Handpicked rare finds from our curated collection'
+    },
+    {
+      ...popularItem,
+      id: `carousel-popular-${popularItem.id}`,
+      title: 'Popular Items',
+      description: 'Most loved pieces by our community'
+    },
+    {
+      ...recentItem,
+      id: `carousel-recent-${recentItem.id}`,
+      title: 'Recent Items',
+      description: 'Fresh arrivals from talented artisans'
+    }
+  ];
+};
+
+// Generate random carousel items from different categories
+export const getRandomCarouselItems = (count = 3) => {
+  // Get unique categories that have items
+  const categoriesWithItems = [...new Set(collectibleItems.map(item => item.category))];
+  
+  // Shuffle categories and take the first 'count' number
+  const shuffledCategories = categoriesWithItems.sort(() => Math.random() - 0.5).slice(0, count);
+  
+  return shuffledCategories.map((category, index) => {
+    // Get items from this category
+    const categoryItems = collectibleItems.filter(item => item.category === category);
+    
+    // Pick a random item from this category
+    const randomItem = categoryItems[Math.floor(Math.random() * categoryItems.length)];
+    
+    // Since all items now have consistent format, we can directly use them
+    return {
+      ...randomItem,
+      id: `carousel-${index}-${randomItem.id}`,
+      title: `${category} Collection`,
+      description: `Discover ${randomItem.title} and more amazing ${category.toLowerCase()} items`
+    };
+  });
 };
