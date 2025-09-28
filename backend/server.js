@@ -1,8 +1,18 @@
-import express from 'express'
+import dotenv from 'dotenv';
+import connectDB from './src/config/dbConfig.js';
+import app from './src/app.js';
 
-const app = express()
-const port = process.env.PORT || 5000;
+// Load environment variables
+dotenv.config();
 
-app.listen(port, ()=>{
-    console.log(`server is running on ${port}`)
-})
+// Connect to database
+connectDB();
+
+const port = process.env.PORT || 3000;
+
+// Start server
+app.listen(port, () => {
+    console.log(`🚀 Server is running on port ${port}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📊 Database: MongoDB`);
+});
