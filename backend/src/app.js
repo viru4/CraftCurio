@@ -31,10 +31,15 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Import routes here when ready
-// app.use('/api/auth', authRoutes);
-// app.use('/api/products', productRoutes);
-// app.use('/api/collectibles', collectibleRoutes);
+// Import routes
+import categoryRoutes from './routes/categories.js';
+import collectibleRoutes from './routes/collectibles.js';
+import seedRoutes from './routes/seed.js';
+
+// Use routes
+app.use('/api/categories', categoryRoutes);
+app.use('/api/collectibles', collectibleRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {

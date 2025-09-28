@@ -98,4 +98,3 @@ This document explains the purpose of each folder and key file in the backend of
 ## Summary
 
 This thoughtfully organized folder structure helps maintain clean, readable, and scalable code. By separating concerns into models, controllers, routes, and utilities, development and maintenance become manageable even as CraftCurio’s backend grows in features and complexity.
-

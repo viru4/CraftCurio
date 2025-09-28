@@ -5,7 +5,11 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "seed:data": "node scripts/seedData.js seed",
+    "clear:data": "node scripts/seedData.js clear",
+    "stats:data": "node scripts/seedData.js stats",
+    "reseed:data": "node scripts/seedData.js reseed"
   },
   "author": "",
   "license": "ISC",

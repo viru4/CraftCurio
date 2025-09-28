@@ -1,10 +1,11 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Landing from '@/pages/Landing'
-import SignInPage from '@/pages/SignIn'
-import SignUpPage from '@/pages/SignUp'
-import SellerRegistration from '@/pages/SellerRegistration'
-import Collectibles from '@/pages/Collectibles'
+import SignInPage from '@/pages/auth/SignIn'
+import SignUpPage from '@/pages/auth/SignUp'
+import SellerRegistration from '@/pages/auth/SellerRegistration'
+import Collectibles from '@/pages/Collectibles/Collectibles'
+import ArtisansProducts from '@/pages/artisans/ArtisansProducts'
 
 import { isValidPublishableKey } from '@/lib/utils'
 
@@ -29,6 +30,7 @@ export default function AppRoutes() {
       <Route path="/sign-up" element={hasClerk ? <SignUpPage /> : <AuthDisabled />} />
       <Route path="/become-seller" element={<SellerRegistration />} />
       <Route path="/collectibles" element={<Collectibles />} />
+      <Route path="/artisans" element={<ArtisansProducts />} />
     </Routes>
   )
 }

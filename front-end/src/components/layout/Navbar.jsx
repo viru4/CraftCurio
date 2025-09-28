@@ -38,7 +38,7 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Home</Link>
             <Link to="/collectibles" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</Link>
-            <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Products</a>
+            <Link to="/artisans" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Products</Link>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
         </div>
@@ -103,7 +103,7 @@ const Navbar = () => {
                 <div className="h-px bg-gray-200" />
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
                 <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
-                <a href="#" className="text-[var(--text-primary)]">Artisan Products</a>
+                <Link to="/artisans" className="text-[var(--text-primary)]">Artisan Products</Link>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />
                 {hasClerk ? (
