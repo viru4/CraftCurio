@@ -1,15 +1,29 @@
 import express from 'express';
-import { createCategories, getCategories, getCategoryBySlug } from '../controllers/categoryController.js';
+import { 
+  createCategories, 
+  getCategories, 
+  getCategoryBySlug,
+  getCollectibleCategories,
+  getArtisanCategories,
+  createCollectibleCategories,
+  createArtisanCategories,
+  getCollectibleCategoryByName,
+  getArtisanCategoryByName
+} from '../controllers/categoryController.js';
 
 const router = express.Router();
 
-// GET /api/categories - Get all categories
+// Unified routes (backwards compatible)
 router.get('/', getCategories);
-
-// GET /api/categories/:slug - Get category by slug
 router.get('/:slug', getCategoryBySlug);
-
-// POST /api/categories/bulk - Create multiple categories
 router.post('/bulk', createCategories);
+
+// Specific category type routes
+router.get('/collectible/all', getCollectibleCategories);
+router.get('/artisan/all', getArtisanCategories);
+router.post('/collectible/bulk', createCollectibleCategories);
+router.post('/artisan/bulk', createArtisanCategories);
+router.get('/collectible/:name', getCollectibleCategoryByName);
+router.get('/artisan/:name', getArtisanCategoryByName);
 
 export default router;

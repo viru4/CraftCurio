@@ -5,10 +5,13 @@ import { ProductSection } from '@/components/product';
 import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
-import { categories, collectibleItems, getItemsByCategory, getFeaturedItems, getPopularItems, getRecentItems, searchItems, getRandomCarouselItems } from '@/data/Products';
 
 const Collectibles = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [collectibleCategories, setCollectibleCategories] = useState([]);
+  const [collectibleItems, setCollectibleItems] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [itemsLoading, setItemsLoading] = useState(true);
   
   // Initialize managers
   const {
@@ -26,6 +29,50 @@ const Collectibles = () => {
     getSearchBarProps,
     createUrlParamHandler
   } = SearchManager();
+
+  // Fetch collectible categories from API
+  useEffect(() => {
+    const fetchCollectibleCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/categories?type=collectible');
+        const data = await response.json();
+        
+        if (data.data && Array.isArray(data.data)) {
+          setCollectibleCategories(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch collectible categories:', err);
+        setCollectibleCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCollectibleCategories();
+  }, []);
+
+  // Fetch collectible items from API (when implemented)
+  useEffect(() => {
+    const fetchCollectibleItems = async () => {
+      try {
+        // Enable the actual API endpoint
+        const response = await fetch('http://localhost:3000/api/collectibles');
+        const data = await response.json();
+        
+        if (data.data && Array.isArray(data.data)) {
+          setCollectibleItems(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch collectible items:', err);
+        setCollectibleItems([]);
+      } finally {
+        setItemsLoading(false);
+      }
+    };
+
+    fetchCollectibleItems();
+  }, []);
+
   // Handle URL search parameter changes with scroll
   useEffect(() => {
     const urlParamHandler = createUrlParamHandler(
@@ -42,32 +89,49 @@ const Collectibles = () => {
 
 
 
+  // Updated filter functions to work with database data
   const getFilteredItems = () => {
     const trimmedQuery = getTrimmedQuery();
     
     // Apply search filter
     if (trimmedQuery) {
-      return searchItems(trimmedQuery);
+      return collectibleItems.filter(item => 
+        item.title?.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
+        item.description?.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
+        item.category?.toLowerCase().includes(trimmedQuery.toLowerCase())
+      );
     }
     
     // Apply category filter
     if (selectedCategory) {
-      return getItemsByCategory(selectedCategory);
+      return collectibleItems.filter(item => item.category === selectedCategory);
     }
     
     // Return all items when no filters are applied
     return collectibleItems;
   };
 
+  const getFeaturedItems = () => {
+    return collectibleItems.filter(item => item.featured === true);
+  };
+
+  const getPopularItems = () => {
+    return collectibleItems.filter(item => item.popular === true);
+  };
+
+  const getRecentItems = () => {
+    return collectibleItems.filter(item => item.recent === true);
+  };
+
+  const getRandomCarouselItems = (count = 3) => {
+    const shuffled = [...collectibleItems].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
   const handleProductClick = (item) => {
-    // Add product click functionality here
     console.log('Product clicked:', item.title);
     // This could navigate to a product detail page or open a modal
   };
-
-
-
-
 
   const handlePopularSearchClick = (searchTerm) => {
     handlePopularTagClick(searchTerm, () => {
@@ -92,11 +156,20 @@ const Collectibles = () => {
           </div>
 
           {/* Carousel Container */}
-          <HeroCarousel 
-            items={getRandomCarouselItems(3)}
-            autoAdvanceInterval={4000}
-            onItemClick={handleCarouselItemClick}
-          />
+          {!itemsLoading && collectibleItems.length > 0 ? (
+            <HeroCarousel 
+              items={getRandomCarouselItems(3)}
+              autoAdvanceInterval={4000}
+              onItemClick={handleCarouselItemClick}
+            />
+          ) : (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto"></div>
+                <span className="ml-3 text-stone-600">Loading collectibles...</span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -105,7 +178,6 @@ const Collectibles = () => {
         <SearchBar
           {...getSearchBarProps({
             onSearch: () => {
-              // Optional: Add search analytics or additional search logic here
               handleSearchSubmit(() => {
                 if (searchQuery.trim()) {
                   scrollToFilteredItems();
@@ -129,31 +201,41 @@ const Collectibles = () => {
               Browse Categories
             </h2>
             <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto">
-              Discover collectibles across diverse categories, each curated by passionate artisans and collectors
+              Discover collectibles across {collectibleCategories.length} diverse categories, each curated by passionate artisans and collectors
             </p>
           </div>
 
-          {/* Categories Grid - Direct usage */}
-          <div className="mb-8 sm:mb-12">
-            <CategoryGrid
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategorySelect={(categoryName) => {
-                handleCategorySelectWithScroll(categoryName, setSelectedCategory);
-              }}
-              visibleCount={4}
-            />
-          </div>
+          {categoriesLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+              <span className="ml-3 text-stone-600">Loading categories...</span>
+            </div>
+          ) : (
+            <>
+              {/* Categories Grid - Using API data */}
+              <div className="mb-8 sm:mb-12">
+                <CategoryGrid
+                  categories={collectibleCategories}
+                  selectedCategory={selectedCategory}
+                  onCategorySelect={(categoryName) => {
+                    handleCategorySelectWithScroll(categoryName, setSelectedCategory);
+                  }}
+                  visibleCount={8}
+                />
+              </div>
 
-          {/* Category Dropdown - Direct usage */}
-          <div className="max-w-2xl mx-auto">
-            <CategoryDropdown
-              onCategorySelect={(categoryName) => {
-                handleCategorySelectWithScroll(categoryName, setSelectedCategory);
-              }}
-              placeholder="Choose a collectible category..."
-            />
-          </div>
+              {/* Category Dropdown - Using API data */}
+              <div className="max-w-2xl mx-auto">
+                <CategoryDropdown
+                  categories={collectibleCategories}
+                  onCategorySelect={(categoryName) => {
+                    handleCategorySelectWithScroll(categoryName, setSelectedCategory);
+                  }}
+                  placeholder="Choose a collectible category..."
+                />
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -176,7 +258,7 @@ const Collectibles = () => {
         </section>
       )}
 
-      {/* Filtered Items Display - Using Advanced FilteredItemsSection Component */}
+      {/* Filtered Items Display */}
       <FilteredItemsSection
         items={getFilteredItems()}
         searchQuery={getTrimmedQuery()}
@@ -187,7 +269,7 @@ const Collectibles = () => {
         initialDisplayCount={12}
       />
 
-      {/* Product sections using ProductSection component */}
+      {/* Product sections using database data */}
       <ProductSection
         id="featured"
         title="Featured Collectibles"

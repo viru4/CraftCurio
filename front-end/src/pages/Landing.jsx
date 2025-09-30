@@ -3,9 +3,32 @@ import { Navbar, Footer } from "@/components/layout";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
 import { Link } from 'react-router-dom';
 import { CategoryGrid } from "@/components/category";
-import { categories } from "@/data/Products";
 
 export default function Landing() {
+  const [collectibleCategories, setCollectibleCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // Fetch collectible categories from API
+  useEffect(() => {
+    const fetchCollectibleCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/categories?type=collectible');
+        const data = await response.json();
+        
+        if (data.data && Array.isArray(data.data)) {
+          setCollectibleCategories(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch collectible categories:', err);
+        setCollectibleCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCollectibleCategories();
+  }, []);
+
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
       <Navbar />
@@ -60,16 +83,23 @@ export default function Landing() {
             </div>
 
             {/* CategoryGrid Implementation */}
-            <CategoryGrid
-              categories={categories}
-              selectedCategory={null}
-              onCategorySelect={(categoryName) => {
-                // Navigate to collectibles page with selected category
-                window.location.href = `/collectibles?category=${encodeURIComponent(categoryName)}`;
-              }}
-              visibleCount={8}
-              className="mb-8"
-            />
+            {categoriesLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                <span className="ml-3 text-stone-600">Loading categories...</span>
+              </div>
+            ) : (
+              <CategoryGrid
+                categories={collectibleCategories}  // <- Use API data
+                selectedCategory={null}
+                onCategorySelect={(categoryName) => {
+                  // Navigate to collectibles page with selected category
+                  window.location.href = `/collectibles?category=${encodeURIComponent(categoryName)}`;
+                }}
+                visibleCount={8}
+                className="mb-8"
+              />
+            )}
           </div>
         </section>
 

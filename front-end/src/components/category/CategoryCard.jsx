@@ -13,26 +13,44 @@ import woodworking from '@/assets/corousel images/woodworking.jpg';
  * CategoryCard Component
  * 
  * A reusable card component for displaying individual categories with background images
- * 
- * @param {Object} props
- * @param {Object} props.category - Category object with name and description
- * @param {boolean} props.isSelected - Whether this category is currently selected
- * @param {function} props.onClick - Callback when card is clicked
- * @param {string} props.className - Additional CSS classes (optional)
  */
 const CategoryCard = ({ category, isSelected, onClick, className = "" }) => {
-  // Category background image mapping
+  // Category background image mapping - now handles database categories
   const getCategoryBackgroundImage = (categoryName) => {
     const imageMap = {
+      // Collectible categories
+      "Coins": ceramicDishes,
+      "Stamps": handcraftedGoods,
+      "Vintage Banknotes": pottery,
+      "Sports Memorabilia": traditionalBowls,
+      "Comic Books": woodworking,
+      "Movie Posters": pottery1,
+      "Antique Cameras": stoneWork,
+      "Autographs": ceramicDishes,
+      "Porcelain and Glassware": handcraftedGoods,
+      "Vintage Toys": pottery,
+      "Militaria": traditionalBowls,
+      "Old Maps and Atlases": woodworking,
+      "Vintage Fashion": pottery1,
+      "Music Records and Memorabilia": stoneWork,
+      "Scientific Instruments": ceramicDishes,
+      "Art Deco Objects": handcraftedGoods,
+      "Ephemera": pottery,
+      "Film Props and Collectibles": traditionalBowls,
+      "Classic Car Spare Parts": woodworking,
+      "Trading Cards": pottery1,
+      "Photos and Photographs": stoneWork,
+      "Book First Editions": ceramicDishes,
+      "Ethnic Artifacts": handcraftedGoods,
+      "Watches and Timepieces": pottery,
+      "Jewelry": traditionalBowls,
+      
+      // Legacy static categories (fallback)
       "Coins, Currency, and Stamps": ceramicDishes,
       "Books and Periodicals": handcraftedGoods,
       "Action Figures and Toys": pottery,
       "Pop Culture Memorabilia": traditionalBowls,
-      "Vintage Fashion": woodworking,
       "Mid-Century Modern": pottery1,
-      "Scientific Instruments": stoneWork,
-      "Ephemera": ceramicDishes,
-      "Sports Memorabilia": handcraftedGoods,
       "Music Collectibles": pottery,
       "Antiques and Vintage Items": traditionalBowls,
       "Digital Collectibles": woodworking,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Select,
   SelectContent,
@@ -6,20 +6,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Tag, Sparkles, X } from "lucide-react";
+import { ChevronDown, Tag, Sparkles, X, Loader2 } from "lucide-react";
 
 /**
  * CategoryDropdown Component
  * 
- * A modern Figma-style dropdown for selecting categories with icons and gradients
- * 
- * @param {Object} props
- * @param {function} props.onCategorySelect - Callback when a category is selected
- * @param {string} props.selectedValue - Currently selected category value
- * @param {function} props.onSelectionChange - Callback when selection changes (internal state)
- * @param {Array} props.categories - Array of enhanced category objects (optional, uses default if not provided)
- * @param {string} props.placeholder - Placeholder text (optional)
- * @param {string} props.className - Additional CSS classes (optional)
+ * A modern Figma-style dropdown for selecting collectible categories with icons and gradients
  */
 const CategoryDropdown = ({ 
   onCategorySelect,
@@ -30,40 +22,116 @@ const CategoryDropdown = ({
   className = ""
 }) => {
   const [internalSelectedValue, setInternalSelectedValue] = useState(selectedValue);
+  const [collectibleCategories, setCollectibleCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Default enhanced categories data with icons and colors
-  const defaultEnhancedCategories = [
-    { value: "trading-cards", label: "Trading Cards", icon: "🃏", color: "from-blue-500 to-purple-500" },
-    { value: "comic-books", label: "Comic Books", icon: "📖", color: "from-red-500 to-orange-500" },
-    { value: "action-figures", label: "Action Figures", icon: "🦸", color: "from-green-500 to-teal-500" },
-    { value: "vintage-toys", label: "Vintage Toys", icon: "🧸", color: "from-pink-500 to-rose-500" },
-    { value: "coins-currency", label: "Coins & Currency", icon: "🪙", color: "from-yellow-500 to-amber-500" },
-    { value: "stamps", label: "Stamps", icon: "📮", color: "from-indigo-500 to-blue-500" },
-    { value: "antiques", label: "Antiques", icon: "🏺", color: "from-amber-600 to-orange-600" },
-    { value: "art-prints", label: "Art & Prints", icon: "🎨", color: "from-purple-500 to-pink-500" },
-    { value: "memorabilia", label: "Sports Memorabilia", icon: "🏆", color: "from-orange-500 to-red-500" },
-    { value: "model-trains", label: "Model Trains", icon: "🚂", color: "from-gray-600 to-gray-800" },
-    { value: "die-cast-cars", label: "Die-Cast Cars", icon: "🚗", color: "from-red-600 to-red-800" },
-    { value: "dolls-figurines", label: "Dolls & Figurines", icon: "🪆", color: "from-pink-400 to-purple-400" },
-    { value: "vinyl-records", label: "Vinyl Records", icon: "💿", color: "from-slate-600 to-gray-700" },
-    { value: "video-game-collectibles", label: "Gaming Collectibles", icon: "🎮", color: "from-cyan-500 to-blue-500" },
-    { value: "movie-props", label: "Movie Props & Posters", icon: "🎬", color: "from-violet-500 to-purple-600" },
+  // Category icons mapping
+  const categoryIcons = {
+    "Coins": "🪙",
+    "Stamps": "📮", 
+    "Vintage Banknotes": "💵",
+    "Sports Memorabilia": "🏆",
+    "Comic Books": "📖",
+    "Movie Posters": "🎬",
+    "Antique Cameras": "📷",
+    "Autographs": "✍️",
+    "Porcelain and Glassware": "🏺",
+    "Vintage Toys": "🧸",
+    "Militaria": "🎖️",
+    "Old Maps and Atlases": "🗺️",
+    "Vintage Fashion": "👗",
+    "Music Records and Memorabilia": "💿",
+    "Scientific Instruments": "🔬",
+    "Art Deco Objects": "🎨",
+    "Ephemera": "📄",
+    "Film Props and Collectibles": "🎭",
+    "Classic Car Spare Parts": "🚗",
+    "Trading Cards": "🃏",
+    "Photos and Photographs": "📸",
+    "Book First Editions": "📚",
+    "Ethnic Artifacts": "🏛️",
+    "Watches and Timepieces": "⌚",
+    "Jewelry": "💎"
+  };
+
+  // Color gradients for categories
+  const categoryColors = [
+    "from-blue-500 to-purple-500",
+    "from-red-500 to-orange-500", 
+    "from-green-500 to-teal-500",
+    "from-pink-500 to-rose-500",
+    "from-yellow-500 to-amber-500",
+    "from-indigo-500 to-blue-500",
+    "from-amber-600 to-orange-600",
+    "from-purple-500 to-pink-500",
+    "from-orange-500 to-red-500",
+    "from-gray-600 to-gray-800",
+    "from-cyan-500 to-blue-500",
+    "from-violet-500 to-purple-600"
   ];
 
-  const enhancedCategories = categories || defaultEnhancedCategories;
+  // Fetch collectible categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (categories) {
+        // Use provided categories
+        const enhancedCategories = categories.map((cat, index) => ({
+          value: cat.name.toLowerCase().replace(/\s+/g, '-'),
+          label: cat.name,
+          description: cat.description,
+          icon: categoryIcons[cat.name] || "📦",
+          color: categoryColors[index % categoryColors.length]
+        }));
+        setCollectibleCategories(enhancedCategories);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log('Fetching categories from API...'); // Debug log
+        const response = await fetch('http://localhost:3000/api/categories?type=collectible');
+        console.log('Response status:', response.status); // Debug log
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API response:', data); // Debug log
+        
+        if (data.data && Array.isArray(data.data)) {
+          const enhancedCategories = data.data.map((cat, index) => ({
+            value: cat.name.toLowerCase().replace(/\s+/g, '-'),
+            label: cat.name,
+            description: cat.description,
+            icon: categoryIcons[cat.name] || "📦",
+            color: categoryColors[index % categoryColors.length]
+          }));
+          console.log('Enhanced categories:', enhancedCategories); // Debug log
+          setCollectibleCategories(enhancedCategories);
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setError(`Failed to load categories: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [categories]);
+
   const currentSelectedValue = selectedValue || internalSelectedValue;
 
   const handleCategorySelect = (categoryValue) => {
-    const newValue = categoryValue;
-    setInternalSelectedValue(newValue);
+    setInternalSelectedValue(categoryValue);
     
-    // Call the external selection change handler if provided
     if (onSelectionChange) {
-      onSelectionChange(newValue);
+      onSelectionChange(categoryValue);
     }
 
-    // Find the category data and call the category select callback
-    const categoryData = enhancedCategories.find(cat => cat.value === categoryValue);
+    const categoryData = collectibleCategories.find(cat => cat.value === categoryValue);
     if (categoryData && onCategorySelect) {
       onCategorySelect(categoryData.label);
     }
@@ -79,7 +147,28 @@ const CategoryDropdown = ({
     }
   };
 
-  const selectedCategoryData = enhancedCategories.find(cat => cat.value === currentSelectedValue);
+  const selectedCategoryData = collectibleCategories.find(cat => cat.value === currentSelectedValue);
+
+  if (loading) {
+    return (
+      <div className={`w-full ${className}`}>
+        <div className="flex items-center justify-center h-14 bg-gradient-to-r from-white to-amber-50/30 border-2 border-stone-200/50 rounded-xl">
+          <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
+          <span className="ml-2 text-stone-600">Loading categories...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`w-full ${className}`}>
+        <div className="flex items-center justify-center h-14 bg-red-50 border-2 border-red-200 rounded-xl">
+          <span className="text-red-600">{error}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-full ${className}`}>
@@ -96,7 +185,7 @@ const CategoryDropdown = ({
           </SelectTrigger>
           <SelectContent className="w-full max-h-80 overflow-y-auto border-2 border-stone-200/50 rounded-xl shadow-2xl bg-white/95 backdrop-blur-sm">
             <div className="p-2">
-              {enhancedCategories.map((category) => (
+              {collectibleCategories.map((category) => (
                 <SelectItem 
                   key={category.value} 
                   value={category.value}
@@ -110,6 +199,11 @@ const CategoryDropdown = ({
                       <div className="font-medium group-hover:text-amber-600 transition-colors">
                         {category.label}
                       </div>
+                      {category.description && (
+                        <div className="text-xs text-stone-500 mt-1 truncate">
+                          {category.description}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </SelectItem>
@@ -143,7 +237,7 @@ const CategoryDropdown = ({
                 {selectedCategoryData.label}
               </h3>
               <p className="text-sm text-stone-600 mt-1">
-                Browse through our curated collection of {selectedCategoryData.label.toLowerCase()} from various eras and conditions.
+                {selectedCategoryData.description || `Browse through our curated collection of ${selectedCategoryData.label.toLowerCase()} from various eras and conditions.`}
               </p>
             </div>
           </div>

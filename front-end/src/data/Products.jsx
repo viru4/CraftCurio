@@ -1,23 +1,23 @@
-// Categories data for collectibles
-export const categories = [
-  {
-    name: "Coins, Currency, and Stamps",
-    description: "Numismatics, paper currency, banknotes, stamps, and postal collectibles from around the world."
-  },
-  {
-    name: "Books and Periodicals",
-    description: "Comic books, magazines, printed materials, rare editions, and literary collectibles."
-  },
-  {
-    name: "Action Figures and Toys",
-    description: "Star Wars figures, G.I. Joe, Funko Pop, Barbie dolls, Hot Wheels cars, LEGO themed sets."
-  },
-  {
-    name: "Pop Culture Memorabilia",
-    description: "Movie posters, TV show memorabilia, celebrity autographs, comic books, graphic novels."
-  },
-  {
-    name: "Vintage Fashion",
+// This file is now deprecated - all data is fetched from database APIs
+// Categories are fetched from: GET /api/categories?type=collectible
+// Items are fetched from: GET /api/collectibles
+
+console.warn('⚠️  Products.jsx is deprecated. All data is now fetched from database APIs.');
+
+// Export empty arrays to prevent import errors during transition
+export const categories = [];
+export const collectibleItems = [];
+
+// Utility functions now use database data via API calls
+export const getItemsByCategory = () => [];
+export const getFeaturedItems = () => [];
+export const getPopularItems = () => [];
+export const getRecentItems = () => [];
+export const getItemById = () => null;
+export const getAllItems = () => [];
+export const searchItems = () => [];
+export const getDefaultCarouselItems = () => [];
+export const getRandomCarouselItems = () => [];
     description: "Retro clothing, hats, sneakers, handbags, and accessories from past decades."
   },
   {
