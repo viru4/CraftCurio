@@ -1,5 +1,5 @@
 import express from 'express';
-import { seedDatabase, clearDatabase, getDatabaseStats } from '../../scripts/seedData.js';
+import { seedDatabase, clearDatabase, getDatabaseStats } from '../../../scripts/seedData.js';
 
 const router = express.Router();
 

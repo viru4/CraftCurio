@@ -1,5 +1,5 @@
 import express from 'express';
-import Collectible from '../models/Collectible.js';
+import Collectible from '../../models/Collectible.js';
 
 const router = express.Router();
 

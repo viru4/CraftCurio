@@ -1,5 +1,5 @@
-import CollectibleCategory from '../models/collectiblecategory.js';
-import ArtisanProductCategory from '../models/ArtisanProductCategory.js';
+import CollectibleCategory from '../../models/collectiblecategory.js';
+import ArtisanProductCategory from '../../models/ArtisanProductCategory.js';
 
 // Unified category controllers (backwards compatibility)
 export const getCategories = async (req, res) => {

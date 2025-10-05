@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatPrice } from '@/lib/currency';
 
 /**
  * ProductCard - A reusable component for displaying product information
@@ -80,7 +81,7 @@ const ProductCard = ({ item, onClick }) => {
         </p>
         <div className="flex items-center justify-between">
           <span className="text-xl sm:text-2xl font-bold text-amber-600">
-            {item.price}
+            {formatPrice(item.price, item.currency)}
           </span>
           <button 
             onClick={handleViewDetails}

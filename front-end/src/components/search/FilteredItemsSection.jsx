@@ -31,7 +31,7 @@ const FilteredItemsSection = ({
               ? `Search Results for "${searchQuery}"` 
               : selectedCategory 
                 ? `${selectedCategory} Collection`
-                : "Explore All Collectibles"
+                : "Explore All Items"
             }
           </h3>
           <p className="text-stone-600">

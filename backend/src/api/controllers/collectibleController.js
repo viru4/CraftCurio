@@ -1,4 +1,4 @@
-import Collectible from '../models/Collectible.js';
+import Collectible from '../../models/Collectible.js';
 
 export const createCollectibles = async (req, res) => {
   try {
