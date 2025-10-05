@@ -1,4 +1,5 @@
-import { seedDatabase as seedDB, clearDatabase as clearDB, getDatabaseStats as getStats } from '../../scripts/seedData.js';
+import { seedDatabase as seedDB } from '../../scripts/seed.js';
+import { clearDatabase as clearDB, getDatabaseStats as getStats } from '../../scripts/seeders/utils.js';
 
 export const seedDatabase = async (req, res) => {
   try {

@@ -1,76 +1,159 @@
-# Database Scripts
+# CraftCurio Database Scripts
 
-This folder contains utility scripts for managing the CraftCurio database.
+This folder contains utility scripts for managing the CraftCurio database with a modern, modular architecture.
 
-## seedData.js
-
-A comprehensive script for managing database seeding operations with the following commands:
-
-### Available Commands
+## 🎯 Quick Start
 
 ```bash
-# Seed the database with categories and collectibles
-npm run seed:data
+# Seed entire database (recommended)
+npm run seed
 
-# Clear all data from database
-npm run clear:data
+# Legacy seeding (backup)
+npm run seed:legacy
 
-# Get database statistics
-npm run stats:data
+# Clear database
+npm run clear
 
-# Clear and reseed database
-npm run reseed:data
+# Get statistics
+npm run stats
 ```
 
-### Features
+## 📁 File Structure
 
-- **Dynamic Data Loading**: Automatically reads and parses data from `../front-end/src/data/Products.jsx`
-- **Fallback Data**: Uses embedded data if Products.jsx cannot be read
-- **MongoDB Connection**: Automatic connection management with proper cleanup
-- **CLI Interface**: Command-line arguments for different operations
-- **Error Handling**: Comprehensive error handling and logging
-- **Statistics**: Detailed counts and metrics
+```text
+scripts/
+├── data/                          # Organized data definitions
+│   ├── artisanProducts.js        # 20 artisan products with full metadata
+│   ├── categories.js             # Category definitions (25+24 categories)
+│   └── collectibleItems.js       # 10 collectible items
+├── seeders/                      # Modular seeder functions
+│   ├── artisanSeeder.js         # Artisan product seeding with bulkWrite
+│   ├── categorySeeder.js        # Category seeding with subcategories
+│   ├── collectibleSeeder.js     # Collectible item seeding
+│   └── utils.js                 # Database utilities and stats
+├── seed.js                      # 🔥 Main modular orchestrator
+├── seedData.js                  # Legacy monolithic seeder (backup)
+├── testDatabase.js              # Direct database testing utility
+└── README.md                    # This documentation
+```
 
-### Data Processing
+## 🚀 Modern Modular System
 
-The script processes:
-
-- **14 Categories**: Various collectible categories with descriptions and slugs
-- **33 Collectible Items**: Complete product catalog with pricing and metadata
-- **Automatic Indexing**: Creates text search indexes for better performance
-- **Category Counts**: Updates category item counts automatically
-
-### Usage Examples
+### Primary Commands
 
 ```bash
-# Direct script usage
-node scripts/seedData.js seed
-node scripts/seedData.js clear
-node scripts/seedData.js stats
-node scripts/seedData.js reseed
+# Full database seeding with categories and products
+npm run seed
 
-# Via npm scripts (recommended)
-npm run seed:data
-npm run clear:data
-npm run stats:data
-npm run reseed:data
+# Quiet mode (minimal output)
+npm run seed:quiet
+
+# Preserve existing data (no clearing)
+npm run seed:no-clear
+
+# Database utilities
+npm run clear           # Clear all collections
+npm run stats          # Show detailed statistics
 ```
 
-### Output Format
+### Legacy Commands (Backup)
 
-The script provides detailed console output with emojis for better readability:
+```bash
+npm run seed:legacy     # Original monolithic seeder
+npm run clear:legacy    # Legacy clear command
+npm run stats:legacy    # Legacy statistics
+npm run reseed:legacy   # Legacy reseed command
+```
 
-- ✅ Success operations
-- 🌱 Seeding operations
-- 🗑️ Clearing operations  
-- 📊 Statistics
-- ❌ Error conditions
-- 👋 Connection status
+## 📊 What Gets Seeded
 
-### Error Handling
+### Collections & Counts
 
-- File system errors (Products.jsx not found)
-- Database connection failures
-- Invalid command arguments
-- Mongoose operation errors
-- Automatic connection cleanup
+- **✅ 25 Collectible Categories** - Comprehensive subcategories with metadata
+- **✅ 24 Artisan Categories** - Craft techniques, materials, and regional info
+- **✅ 10 Collectible Items** - High-value collectibles with pricing
+- **✅ 20 Artisan Products** - Handcrafted items with complete product data
+- **📈 Total: 79 Documents** across 4 collections
+
+### Data Features
+
+- **🔄 Upsert Logic**: BulkWrite operations for efficient updates
+- **🌍 Regional Info**: Craft origins and traditional techniques
+- **💰 Pricing**: INR pricing with proper currency handling
+- **⭐ Ratings**: Customer reviews and popularity metrics
+- **🏷️ Categorization**: Detailed tags and classification
+- **📸 Images**: Updated image URLs from reliable sources
+
+## 🛠️ Technical Features
+
+### Performance Optimizations
+
+- **Bulk Operations**: Uses MongoDB bulkWrite for efficiency
+- **Modular Architecture**: Separated concerns for maintainability
+- **Error Handling**: Comprehensive error reporting and recovery
+- **Statistics**: Real-time seeding progress and final metrics
+
+### Advanced Options
+
+```bash
+# Direct script execution with options
+node scripts/seed-working.js --quiet      # Minimal output
+node scripts/seed-working.js --no-clear   # Preserve existing data
+
+# Module-specific utilities
+node -e "import('./scripts/seeders/utils.js').then(m => m.clearDatabase())"
+node -e "import('./scripts/seeders/utils.js').then(m => m.getDatabaseStats().then(console.log))"
+```
+
+## 📈 Sample Output
+
+```text
+🔄 Starting modular seeding system...
+✅ Connected to MongoDB
+🌱 Starting database seeding...
+📦 Loading seeder modules...
+✅ Category seeder loaded
+✅ Collectible seeder loaded  
+✅ Artisan seeder loaded
+✅ Utils loaded
+🗑️  Database cleared successfully
+📂 25 collectible subcategories processed
+📂 24 artisan subcategories processed
+🎯 10 collectibles seeded
+🎨 Artisan Products - Upserted: 20, Modified: 0
+
+✅ Database seeding completed successfully!
+📈 Final Statistics:
+   Collectible Categories: 25
+   Artisan Categories: 24
+   Collectibles: 10
+   Artisan Products: 20
+
+📊 Database Summary:
+   Total Collections: 4
+   Total Documents: 79
+   Featured Items: 12
+   Popular Items: 15
+   Recent Items: 11
+👋 Database connection closed
+```
+
+## 🔧 Development Notes
+
+### Import Structure
+
+- Uses ES6 modules with proper default/named exports
+- Modular imports for better code organization
+- Proper error handling for import failures
+
+### Database Operations
+
+- MongoDB Atlas connection with proper cleanup
+- Mongoose schema validation and indexing
+- Bulk operations for performance optimization
+
+### Extensibility
+
+- Easy to add new product categories
+- Simple to extend with additional collections
+- Modular seeders can be run independently

@@ -1,4 +1,4 @@
-import ArtisanProduct from '../../models/ArisanProduct.js';
+import ArtisanProduct from '../../models/ArtisanProduct.js';
 
 // GET /api/artisan-products - Get all artisan products
 export const getArtisanProducts = async (req, res) => {

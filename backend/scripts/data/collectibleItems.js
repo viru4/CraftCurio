@@ -1,0 +1,122 @@
+export const collectibleItems = [
+  {
+    title: "1965 Morgan Silver Dollar",
+    description: "Pristine condition Morgan Silver Dollar from 1965, certified authentic.",
+    price: "₹9,999",
+    category: "Coins",
+    image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=400&h=300&fit=crop",
+    featured: false,
+    popular: false,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Amazing Spider-Man #1 Reprint",
+    description: "High-quality reprint of the iconic first Amazing Spider-Man comic book.",
+    price: "₹7,499",
+    category: "Comic Books",
+    image: "https://images.unsplash.com/photo-1601645191163-3fc0d5d64e35?w=400&h=300&fit=crop",
+    featured: false,
+    popular: true,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Vintage Star Wars Luke Skywalker",
+    description: "Original 1977 Luke Skywalker action figure in mint condition with packaging.",
+    price: "₹24,999",
+    category: "Vintage Toys",
+    image: "https://images.unsplash.com/photo-1606041011872-596597976b25?w=400&h=300&fit=crop",
+    featured: false,
+    popular: true,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Jaws Movie Poster (1975)",
+    description: "Original theatrical release poster from Steven Spielberg's classic thriller.",
+    price: "₹37,499",
+    category: "Movie Posters",
+    image: "https://images.unsplash.com/photo-1489599511086-4d1b81c8d46b?w=400&h=300&fit=crop",
+    featured: false,
+    popular: false,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Signed Baseball - Derek Jeter",
+    description: "Official MLB baseball signed by Yankees legend Derek Jeter with certificate.",
+    price: "₹33,249",
+    category: "Sports Memorabilia",
+    image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=300&fit=crop",
+    featured: true,
+    popular: true,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "British Guiana 1c Magenta Stamp",
+    description: "The world's rarest and most valuable stamp dating from 1856, famed for its single surviving specimen.",
+    price: "₹79,00,00,000",
+    category: "Stamps",
+    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
+    featured: true,
+    popular: true,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "1909 T206 Honus Wagner Baseball Card",
+    description: "Considered the 'Holy Grail' of sports cards, featuring legendary player Honus Wagner.",
+    price: "₹60,41,66,667",
+    category: "Trading Cards",
+    image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=300&fit=crop",
+    featured: true,
+    popular: true,
+    recent: false,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Vintage Rolex Submariner Watch",
+    description: "1970s Rolex Submariner in excellent condition with original box and papers.",
+    price: "₹7,08,333",
+    category: "Watches and Timepieces",
+    image: "https://images.unsplash.com/photo-1594534475808-b18fc33b045e?w=400&h=300&fit=crop",
+    featured: true,
+    popular: true,
+    recent: true,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Apollo 11 Lunar Sample Bag",
+    description: "Used by astronauts on the Apollo 11 mission to collect moon dust. Unique piece of space exploration history.",
+    price: "₹15,00,00,000",
+    category: "Scientific Instruments",
+    image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=400&h=300&fit=crop",
+    featured: true,
+    popular: false,
+    recent: true,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  },
+  {
+    title: "Civil War Era Compass",
+    description: "Authentic brass pocket compass from the American Civil War period with leather case.",
+    price: "₹43,749",
+    category: "Scientific Instruments",
+    image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=400&h=300&fit=crop",
+    featured: false,
+    popular: false,
+    recent: true,
+    targetSection: 'filtered-items-section',
+    buttonText: 'Explore Collection'
+  }
+];

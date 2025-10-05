@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import ArtisanProductCategory from '../src/models/ArtisanProductCategory.js';
-import ArtisanProduct from '../src/models/ArisanProduct.js';
+import ArtisanProduct from '../src/models/ArtisanProduct.js';
 import CollectibleCategory from '../src/models/collectiblecategory.js';
 import Collectible from '../src/models/Collectible.js';
 
@@ -148,7 +148,7 @@ const getDefaultData = () => {
       title: "Handwoven Cotton Saree",
       description: "Beautiful handwoven cotton saree with intricate traditional patterns and natural dyes. Each saree is unique and represents the rich cultural heritage of Indian textile traditions.",
       category: "Handloom Sarees and Textiles",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/handwoven-cotton-saree_1024x1024.jpg"],
+      images: ["https://t4.ftcdn.net/jpg/15/68/56/51/240_F_1568565126_PnDKSMOcnJND0pGqErj0RDcl4kKR3vbV.jpg"],
       price: 7499,
       currency: "INR",
       rating: { average: 4.8, count: 23 },
@@ -178,7 +178,7 @@ const getDefaultData = () => {
       title: "Terracotta Pottery Vase",
       description: "Handcrafted terracotta vase with traditional motifs and natural earth tones. Perfect for home decoration or as a unique gift.",
       category: "Terracotta Pottery and Sculpture",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/terracotta-vase_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/GQSfKUGbdx9S-zEagk8lL9c-GNWGUVayohbE_NhhNzg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmV0/c3lzdGF0aWMuY29t/Lzc5MjA3NzcvYy8y/MDAwLzIwMDAvNDAy/LzAvaWwvODc4MzYy/LzQzODkyMzAyNzAv/aWxfNjAweDYwMC40/Mzg5MjMwMjcwXzlp/cjQuanBn"],
       price: 3750,
       currency: "INR",
       rating: { average: 4.6, count: 18 },
@@ -208,7 +208,7 @@ const getDefaultData = () => {
       title: "Brass Handmade Jewelry Set",
       description: "Elegant brass jewelry set featuring traditional designs with intricate detailing. Includes necklace, earrings, and bracelet.",
       category: "Brassware and Metal Crafts",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/brass-necklace-set_1024x1024.jpg"],
+      images: ["https://media.istockphoto.com/id/175236572/photo/high-angle-view-of-jewelry-collection-on-slate.jpg?s=612x612&w=0&k=20&c=p30YIbgays5gGLi3ZtMHuJCgGfnPNi7XKQgklGg1k0w="],
       price: 10416,
       currency: "INR",
       rating: { average: 4.9, count: 31 },
@@ -238,7 +238,7 @@ const getDefaultData = () => {
       title: "Hand-carved Wooden Box",
       description: "Exquisite hand-carved wooden box with traditional motifs and smooth finish. Perfect for storing precious items or as a decorative piece.",
       category: "Wooden Furniture",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/wooden-carved-box_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/067COyFJUzbS9_zyKdimdUBK0ZEeRVLBAn_mJAw-OVc/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmV0/c3lzdGF0aWMuY29t/LzMyNTg0NjcwL3Iv/aWwvODg0Yzk1LzQ0/NzAzNzIyOTAvaWxf/NjAweDYwMC40NDcw/MzcyMjkwX2s4c3Au/anBn"],
       price: 6250,
       currency: "INR",
       rating: { average: 4.7, count: 22 },
@@ -268,7 +268,7 @@ const getDefaultData = () => {
       title: "Natural Indigo Dye Cotton Cloth",
       description: "Beautiful natural indigo dyed cotton cloth with traditional patterns. Each piece is unique due to the natural dyeing process.",
       category: "Block Printed Fabrics",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/indigo-dye-cotton_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/1rCbHRVIENsDFw8uAO-Sr73slMeViAlALXNoS6zL130/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTMx/NDEyMTUzNS9waG90/by9uYXR1cmFsLWJs/dWUtaW5kaWdvLWR5/ZWQtY2xvdGgtaW5k/aWdvLXRpZS1keWUt/cGF0dGVybi1vbi1j/b3R0b24tZmFicmlj/LWZvci1zZWxsLWlu/LW1hcmtldC5qcGc_/cz02MTJ4NjEyJnc9/MCZrPTIwJmM9VzdF/Zjk2YlZIV0VJZnlx/SUg1TENydGVtcGpG/ZVRaQzJ6MXZQbkRL/alhSVT0"],
       price: 2917,
       currency: "INR",
       rating: { average: 4.5, count: 16 },
@@ -298,7 +298,7 @@ const getDefaultData = () => {
       title: "Hand-painted Madhubani Art",
       description: "Authentic Madhubani painting on handmade paper featuring traditional motifs and vibrant colors. A true piece of Indian folk art.",
       category: "Madhubani Paintings",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/madhubani-painting_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/YQBVfba3jpxngQEa-QZ3LiIKjJwIAf8jMky1zJE3lUk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzg2LzUy/L2JjLzg2NTJiYzA1/NTMxZjg3YWYxOWM1/ZGJhZDAwYjkyMzkz/LmpwZw"],
       price: 7916,
       currency: "INR",
       rating: { average: 4.8, count: 27 },
@@ -328,7 +328,7 @@ const getDefaultData = () => {
       title: "Bamboo Basket Handmade",
       description: "Beautifully crafted bamboo basket with intricate weaving patterns. Perfect for home organization or decorative purposes.",
       category: "Bamboo and Cane Products",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/bamboo-basket_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/cT1j2JaGS9A4EkZa6iDrnoC1TmhzQM-hNGw-YIv9C78/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMjE3/NDMwMzIwNS9waG90/by9zdGFja2VkLWJh/bWJvby1iYXNrZXRz/LmpwZz9zPTYxMng2/MTImdz0wJms9MjAm/Yz0zeTFUbGdkLXBj/S0tPYWN5Y29XUmxY/YUs2dFd1TzdyaWNm/NEQxZmRuVmxJPQ"],
       price: 2333,
       currency: "INR",
       rating: { average: 4.4, count: 14 },
@@ -358,7 +358,7 @@ const getDefaultData = () => {
       title: "Handmade Wool Shawl",
       description: "Luxurious handmade wool shawl with traditional patterns and soft texture. Perfect for cold weather or as an elegant accessory.",
       category: "Embroidered Shawls",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/wool-shawl_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/Hkg6eacDzE1CKDgqmYgt-ZHb4jqmVDxpmzuq4Ta7WYg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9zaGFo/a2Fhci5jb20vY2Ru/L3Nob3AvZmlsZXMv/TmF0dXJhbC1UZWEt/RHllZC1Cb2lsZWQt/V29vbC1TaGF3bC13/aXRoLUhhbmQtRW1i/cm9pZGVyeS1TaGFo/a2Fhci0xNDQ3MjI2/ODIuanBnP3Y9MTc1/NTUwNTgyNiZ3aWR0/aD00MTI1"],
       price: 9999,
       currency: "INR",
       rating: { average: 4.7, count: 25 },
@@ -388,7 +388,7 @@ const getDefaultData = () => {
       title: "Embroidered Leather Wallet",
       description: "Handcrafted leather wallet with intricate embroidery work. Features traditional patterns and premium leather quality.",
       category: "Leathercraft",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/embroidered-wallet_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/aDDG18ectpGxa1iu9JumeyVaZFJ-wE0b2Pa5jGprRRQ/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/Y29sb3JmdWw0dS5j/b20vY2RuL3Nob3Av/ZmlsZXMvYm9oZW1p/YW4tZW1icm9pZGVy/ZWQtd2FsbGV0LWhh/bmRtYWRlLWxlYXRo/ZXItd2FsbGV0LTcx/NTQ0MF8xNDAweC5q/cGc_dj0xNzIzNDY0/NDQ2"],
       price: 5416,
       currency: "INR",
       rating: { average: 4.6, count: 19 },
@@ -418,7 +418,7 @@ const getDefaultData = () => {
       title: "Brass Oil Lamp",
       description: "Traditional brass oil lamp with intricate designs and smooth finish. Perfect for decorative purposes or traditional ceremonies.",
       category: "Brassware and Metal Crafts",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/brass-oil-lamp_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/3Ip9x3HGZS6VkxwOJnwHIUCsjbZXtp3IUBHnD3QeA6U/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4u/cGl4YWJheS5jb20v/cGhvdG8vMjAxNC8x/MC8zMS8xNS8zNC9v/aWwtbGFtcC01MTA3/NTVfNjQwLmpwZw"],
       price: 4583,
       currency: "INR",
       rating: { average: 4.5, count: 17 },
@@ -448,7 +448,7 @@ const getDefaultData = () => {
       title: "Hand-knotted Wool Rug",
       description: "Beautiful hand-knotted wool rug with traditional patterns and vibrant colors. Made using age-old techniques.",
       category: "Handloom Sarees and Textiles",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/wool-rug_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/vYx3NXIEo896ALKVvzJ7UQipbPxOfRPjf_Z7wXh-JJ4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/bWNnZWVhbmRjby5j/b20vY2RuL3Nob3Av/ZmlsZXMvV2F5bGFu/ZEhhbmQtS25vdHRl/ZFJ1Zy1NUlVHMDkx/MC1HUk4tNHg2LUQy/LVQuanBnP3Y9MTcz/OTQ3MTEyNiZ3aWR0/aD0xMjAw"],
       price: 14999,
       currency: "INR",
       rating: { average: 4.9, count: 33 },
@@ -478,7 +478,7 @@ const getDefaultData = () => {
       title: "Handcrafted Ceramic Tea Set",
       description: "Elegant ceramic tea set with traditional glazing and beautiful patterns. Perfect for tea ceremonies or home decoration.",
       category: "Blue Pottery",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/ceramic-tea-set_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/q0iEH9T28LlmwYSLh4gGWraA6zPupNiQi6Z1F_yKuig/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmV0/c3lzdGF0aWMuY29t/LzU3Mjk3MTIvci9p/bC9jMzE1ZTkvMjQ1/OTM3NTI1Mi9pbF8z/NDB4MjcwLjI0NTkz/NzUyNTJfOHp1eS5q/cGc"],
       price: 9166,
       currency: "INR",
       rating: { average: 4.7, count: 24 },
@@ -508,7 +508,7 @@ const getDefaultData = () => {
       title: "Beaded Tribal Necklace",
       description: "Stunning tribal necklace with colorful beads and traditional patterns. A unique piece of ethnic jewelry.",
       category: "Tribal Jewelry",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/tribal-necklace_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/6tsogcBfVF0l4Mn2kFk2G5kgEedKIKJ7h1davarlxo0/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9iZWFk/ZWQtbmVja2xhY2Vz/LWNvbG9yZnVsLWJl/YWRlZC1uZWNrbGFj/ZXMtd29tZW4tMTAz/NDY1OTQ5LmpwZw"],
       price: 7083,
       currency: "INR",
       rating: { average: 4.6, count: 20 },
@@ -538,7 +538,7 @@ const getDefaultData = () => {
       title: "Painted Clay Figurines",
       description: "Charming hand-painted clay figurines depicting traditional characters and scenes. Perfect for home decoration.",
       category: "Terracotta Pottery and Sculpture",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/clay-figurines_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/GaszCwmmwuUeZ2AF_qceC1p8JC1s3OMX5bKfgZhp3rk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/bWFuZWx5bi5jb20v/Y2RuL3Nob3AvZmls/ZXMvNV82MWZmMTRm/Ni03M2MyLTQ0ZjAt/OWI0YS02OWZiOGNi/YTVlMGEucG5nP3Y9/MTY5MjI3MTcwNiZ3/aWR0aD01MzM"],
       price: 3500,
       currency: "INR",
       rating: { average: 4.4, count: 15 },
@@ -568,7 +568,7 @@ const getDefaultData = () => {
       title: "Natural Shea Butter Soap",
       description: "Handmade natural shea butter soap with organic ingredients and traditional recipes. Perfect for sensitive skin.",
       category: "Crochet Lace Products",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/shea-butter-soap_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/8KlySmIdvapjsQE9h52E1MXjAYX_8HJEjdVYSFcN9e0/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NzFzWWplOFZPQkwu/anBn"],
       price: 1500,
       currency: "INR",
       rating: { average: 4.8, count: 26 },
@@ -598,7 +598,7 @@ const getDefaultData = () => {
       title: "Handloom Silk Scarf",
       description: "Luxurious handloom silk scarf with intricate patterns and soft texture. A perfect blend of tradition and elegance.",
       category: "Handloom Sarees and Textiles",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/silk-scarf_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/v_9UhD8TAe-iuDQBrX9bdYYc5LWBfSWYT7omf_zxXWk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93d3cu/dGV4dGlsZXRyYWRl/cnMuY28udWsvY2Ru/L3Nob3AvZmlsZXMv/U2lsay1CYXRpay1T/Y2FyZi1UZXh0aWxl/LVRyYWRlcnMuanBn/P3Y9MTc0MjI5NDEz/OSZ3aWR0aD01MzM"],
       price: 7916,
       currency: "INR",
       rating: { average: 4.7, count: 23 },
@@ -628,7 +628,7 @@ const getDefaultData = () => {
       title: "Traditional Cane Chair",
       description: "Beautiful traditional cane chair with intricate weaving patterns. Comfortable and durable for everyday use.",
       category: "Bamboo and Cane Products",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/cane-chair_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/dLfxZn6ubausrLUXYqeWl60jGsy_yHGC7JVHZc1oGw8/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTIw/OTg5MjcxL3Bob3Rv/L3dpY2tlci1jaGFp/ci1hbmQtc3Rvb2wt/b24tZ3JleS1iYWNr/Z3JvdW5kLmpwZz9z/PTYxMng2MTImdz0w/Jms9MjAmYz1xUGNs/S0hqMDhGcnRpLTF0/SFNhZFUxTDRSZ2Mx/RnljdnBwSEhCM2pq/VzBVPQ"],
       price: 12499,
       currency: "INR",
       rating: { average: 4.6, count: 21 },
@@ -658,7 +658,7 @@ const getDefaultData = () => {
       title: "Woolen Handmade Gloves",
       description: "Warm and cozy handmade woolen gloves with traditional patterns. Perfect for cold weather protection.",
       category: "Embroidered Shawls",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/woolen-gloves_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/lW7mq495UuXHGh3OSfME2eg0JN9NbwOZzdqOzhUzITA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmV0/c3lzdGF0aWMuY29t/LzQ4NDk0MDgxL3Iv/aWwvM2JiNzAzLzU2/MDcyNzIwMDcvaWxf/NjAweDYwMC41NjA3/MjcyMDA3X200bWwu/anBn"],
       price: 2917,
       currency: "INR",
       rating: { average: 4.5, count: 16 },
@@ -688,7 +688,7 @@ const getDefaultData = () => {
       title: "Handwoven Jute Bag",
       description: "Eco-friendly handwoven jute bag with traditional patterns. Perfect for shopping or as a stylish accessory.",
       category: "Bamboo and Cane Products",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/jute-bag_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/p2HsyyshIl-Z1Sm2MCFt8RyNNSwJ13yFJLZmQrcLRR8/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9z/dGlsbC1saWZlLWhh/bmdpbmctYmFnXzIz/LTIxNTEwMDg5OTQu/anBnP3NlbXQ9YWlz/X2h5YnJpZCZ3PTc0/MA"],
       price: 2083,
       currency: "INR",
       rating: { average: 4.3, count: 12 },
@@ -718,7 +718,7 @@ const getDefaultData = () => {
       title: "Brass Handcrafted Bells",
       description: "Beautiful handcrafted brass bells with traditional designs and clear sound. Perfect for decorative purposes or ceremonies.",
       category: "Brassware and Metal Crafts",
-      images: ["https://cdn.shopify.com/s/files/1/0074/4783/6915/products/brass-bells_1024x1024.jpg"],
+      images: ["https://imgs.search.brave.com/6Bg3tNIHthXnLYItcNGCs4w2TzGLLOqStB-BLh_znJw/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvNDcy/MjkzOTUyL3Bob3Rv/L2xpdHRsZS10ZW1w/bGUtYmVsbHMuanBn/P3M9NjEyeDYxMiZ3/PTAmaz0yMCZjPXdE/Ul9GRjN4M2dfd0JD/QkVOR1JKLWg3Zklo/Ynd2ck5nUEwtcUhj/RUNSUUE9"],
       price: 3167,
       currency: "INR",
       rating: { average: 4.4, count: 14 },
@@ -1247,6 +1247,30 @@ const getArtisanSubcategories = () => {
   ];
 };
 
+// Generate a seeder function that upserts artisan products with images using Mongoose bulkWrite
+async function seedArtisanProducts(artisanProducts, verbose = true) {
+  // artisanProducts is an array of product objects with fields matching ArtisanProduct schema
+  
+  const bulkOps = artisanProducts.map(product => ({
+    updateOne: {
+      filter: { id: product.id },  // Find product by unique ID
+      update: { $set: product },   // Update all fields including images
+      upsert: true                 // Insert if not found
+    }
+  }));
+
+  try {
+    const result = await ArtisanProduct.bulkWrite(bulkOps);
+    if (verbose) {
+      console.log(`🎨 Artisan Products - Upserted: ${result.upsertedCount}, Modified: ${result.modifiedCount}`);
+    }
+    return result;
+  } catch (err) {
+    console.error('❌ Seeder bulk upsert error:', err);
+    throw err;
+  }
+}
+
 // Enhanced seeding with subcategories and duplicate handling
 const seedDatabase = async (options = {}) => {
   const { clearFirst = true, verbose = true } = options;
@@ -1302,10 +1326,10 @@ const seedDatabase = async (options = {}) => {
     const savedCollectibles = await Collectible.insertMany(collectibleDocs);
     if (verbose) console.log(`🎯 ${savedCollectibles.length} collectibles seeded`);
     
-    // Seed artisan products
+    // Seed artisan products using upsert logic
     if (artisanProducts && artisanProducts.length > 0) {
-      const savedArtisanProducts = await ArtisanProduct.insertMany(artisanProducts);
-      if (verbose) console.log(`🎨 ${savedArtisanProducts.length} artisan products seeded`);
+      const result = await seedArtisanProducts(artisanProducts, verbose);
+      if (verbose) console.log(`🎨 ${artisanProducts.length} artisan products processed`);
     }
     
     // Generate summary
