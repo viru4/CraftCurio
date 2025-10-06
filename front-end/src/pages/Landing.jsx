@@ -6,27 +6,39 @@ import { CategoryGrid } from "@/components/category";
 
 export default function Landing() {
   const [collectibleCategories, setCollectibleCategories] = useState([]);
+  const [artisanCategories, setArtisanCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('collectibles');
 
-  // Fetch collectible categories from API
+  // Fetch both collectible and artisan categories from API
   useEffect(() => {
-    const fetchCollectibleCategories = async () => {
+    const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/categories?type=collectible');
-        const data = await response.json();
+        const [collectibleRes, artisanRes] = await Promise.all([
+          fetch('http://localhost:3000/api/categories?type=collectible'),
+          fetch('http://localhost:3000/api/categories/artisan/all')
+        ]);
         
-        if (data.data && Array.isArray(data.data)) {
-          setCollectibleCategories(data.data);
+        const collectibleData = await collectibleRes.json();
+        const artisanData = await artisanRes.json();
+        
+        if (collectibleData.data && Array.isArray(collectibleData.data)) {
+          setCollectibleCategories(collectibleData.data);
+        }
+        
+        if (artisanData.data && Array.isArray(artisanData.data)) {
+          setArtisanCategories(artisanData.data);
         }
       } catch (err) {
-        console.error('Failed to fetch collectible categories:', err);
+        console.error('Failed to fetch categories:', err);
         setCollectibleCategories([]);
+        setArtisanCategories([]);
       } finally {
         setCategoriesLoading(false);
       }
     };
 
-    fetchCollectibleCategories();
+    fetchCategories();
   }, []);
 
   return (
@@ -73,12 +85,26 @@ export default function Landing() {
             {/* Category Navigation Tabs */}
             <div className="border-b border-[#e6e0db] mb-8">
               <div className="flex justify-center gap-8">
-                <Link to="/collectibles" className="flex flex-col items-center justify-center border-b-2 border-b-[var(--primary-color)] text-[var(--text-primary)] pb-3 pt-2">
+                <button 
+                  onClick={() => setActiveTab('collectibles')}
+                  className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-2 transition-colors ${
+                    activeTab === 'collectibles' 
+                      ? 'border-b-[var(--primary-color)] text-[var(--text-primary)]' 
+                      : 'border-b-transparent text-[var(--text-secondary)] hover:border-b-[var(--primary-color)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
                   <p className="text-base font-bold">Collectibles</p>
-                </Link>
-                <a href="#" className="flex flex-col items-center justify-center border-b-2 border-b-transparent text-[var(--text-secondary)] pb-3 pt-2 hover:border-b-[var(--primary-color)] hover:text-[var(--text-primary)] transition-colors">
+                </button>
+                <button 
+                  onClick={() => setActiveTab('artisan')}
+                  className={`flex flex-col items-center justify-center border-b-2 pb-3 pt-2 transition-colors ${
+                    activeTab === 'artisan' 
+                      ? 'border-b-[var(--primary-color)] text-[var(--text-primary)]' 
+                      : 'border-b-transparent text-[var(--text-secondary)] hover:border-b-[var(--primary-color)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
                   <p className="text-base font-bold">Artisan Products</p>
-                </a>
+                </button>
               </div>
             </div>
 
@@ -86,19 +112,24 @@ export default function Landing() {
             {categoriesLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-                <span className="ml-3 text-stone-600">Loading categories...</span>
+                <span className="ml-3 text-stone-600">
+                  Loading {activeTab === 'collectibles' ? 'collectible' : 'artisan'} categories...
+                </span>
               </div>
             ) : (
-              <CategoryGrid
-                categories={collectibleCategories}  // <- Use API data
-                selectedCategory={null}
-                onCategorySelect={(categoryName) => {
-                  // Navigate to collectibles page with selected category
-                  window.location.href = `/collectibles?category=${encodeURIComponent(categoryName)}`;
-                }}
-                visibleCount={8}
-                className="mb-8"
-              />
+              <>
+                <CategoryGrid
+                  categories={activeTab === 'collectibles' ? collectibleCategories : artisanCategories}
+                  selectedCategory={null}
+                  onCategorySelect={(categoryName) => {
+                    // Navigate to appropriate page based on active tab
+                    const baseUrl = activeTab === 'collectibles' ? '/collectibles' : '/artisans';
+                    window.location.href = `${baseUrl}?category=${encodeURIComponent(categoryName)}`;
+                  }}
+                  visibleCount={8}
+                  className="mb-8"
+                />
+              </>
             )}
           </div>
         </section>
@@ -187,15 +218,34 @@ export default function Landing() {
   );
 }
 
-function CardItem({ title, subtitle, imageClass }) {
+function CardItem({ title, subtitle, image, imageClass, price }) {
   return (
-    <div className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
+    <div className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl bg-white">
       <div className="relative w-full aspect-square">
-        <div className={`${imageClass} absolute inset-0 bg-center bg-no-repeat bg-cover rounded-lg transform group-hover:scale-105 transition-transform duration-300`} />
+        {image ? (
+          <img 
+            src={image} 
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover rounded-t-lg transform group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              // Fallback to a placeholder or hide the image on error
+              e.target.style.display = 'none';
+            }}
+          />
+        ) : imageClass ? (
+          <div className={`${imageClass} absolute inset-0 bg-center bg-no-repeat bg-cover rounded-t-lg transform group-hover:scale-105 transition-transform duration-300`} />
+        ) : (
+          <div className="absolute inset-0 bg-gray-200 rounded-t-lg flex items-center justify-center">
+            <span className="text-gray-400 text-sm">No Image</span>
+          </div>
+        )}
       </div>
-      <div className="p-2">
-        <p className="text-[var(--text-primary)] text-lg font-semibold">{title}</p>
-        <p className="text-[var(--text-secondary)] text-sm">{subtitle}</p>
+      <div className="p-4">
+        <p className="text-[var(--text-primary)] text-lg font-semibold truncate">{title}</p>
+        <p className="text-[var(--text-secondary)] text-sm mb-2 h-10 overflow-hidden">{subtitle}</p>
+        {price && (
+          <p className="text-[var(--primary-color)] text-lg font-bold">{price}</p>
+        )}
       </div>
     </div>
   );
@@ -203,7 +253,104 @@ function CardItem({ title, subtitle, imageClass }) {
 
 function FeaturedProducts() {
   const [api, setApi] = useState(null)
+  const [products, setProducts] = useState([])
+  const [productsLoading, setProductsLoading] = useState(true)
   useCarouselControls(api)
+
+  // Fetch featured products from both collectibles and artisan products
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        const [collectiblesRes, artisanProductsRes] = await Promise.all([
+          fetch('http://localhost:3000/api/collectibles/featured'),
+          fetch('http://localhost:3000/api/artisan-products/featured')
+        ]);
+
+        const collectiblesData = await collectiblesRes.json();
+        const artisanProductsData = await artisanProductsRes.json();
+
+        // Combine and format the products
+        const combinedProducts = [];
+        
+        // Add collectibles (limit to 4)
+        if (collectiblesData.data && Array.isArray(collectiblesData.data)) {
+          const collectibles = collectiblesData.data.slice(0, 4).map(item => ({
+            id: item._id || `collectible-${Date.now()}-${Math.random()}`,
+            title: item.title || 'Untitled Collectible',
+            subtitle: item.description || 'No description available',
+            image: item.image,
+            price: item.price || 'Price on request',
+            type: 'collectible'
+          }));
+          combinedProducts.push(...collectibles);
+        }
+
+        // Add artisan products (limit to 4)
+        if (artisanProductsData.data && Array.isArray(artisanProductsData.data)) {
+          const artisanProducts = artisanProductsData.data.slice(0, 4).map(item => ({
+            id: item._id || `artisan-${Date.now()}-${Math.random()}`,
+            title: item.title || 'Untitled Artisan Product',
+            subtitle: item.description || 'No description available',
+            image: item.image, // This comes from the backend transformation
+            price: item.price ? `₹${item.price}` : 'Price on request',
+            type: 'artisan-product'
+          }));
+          combinedProducts.push(...artisanProducts);
+        }
+
+        // Shuffle and limit to 8 products max
+        let finalProducts = combinedProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
+        
+        // If no products from API, use fallback products
+        if (finalProducts.length === 0) {
+          finalProducts = [
+            { 
+              id: 'fallback-1', 
+              title: 'Ceramic Vase', 
+              subtitle: 'Handcrafted ceramic vase with unique glaze', 
+              imageClass: 'card-image-ceramic-vase-bg',
+              price: '₹2,999',
+              type: 'fallback' 
+            },
+            { 
+              id: 'fallback-2', 
+              title: 'Vintage Pocket Watch', 
+              subtitle: 'Vintage pocket watch with intricate detailing', 
+              imageClass: 'card-image-pocket-watch-bg',
+              price: '₹15,999',
+              type: 'fallback' 
+            },
+            { 
+              id: 'fallback-3', 
+              title: 'Silk Scarf', 
+              subtitle: 'Hand-painted silk scarf with floral design', 
+              imageClass: 'card-image-silk-scarf-bg',
+              price: '₹4,499',
+              type: 'fallback' 
+            },
+            { 
+              id: 'fallback-4', 
+              title: 'Wooden Bird Sculpture', 
+              subtitle: 'Hand-carved wooden sculpture of a bird', 
+              imageClass: 'card-image-bird-sculpture-bg',
+              price: '₹6,999',
+              type: 'fallback' 
+            }
+          ];
+        }
+        
+        setProducts(finalProducts);
+      } catch (err) {
+        console.error('Failed to fetch featured products:', err);
+        // Fallback to empty array on error
+        setProducts([]);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
 
   const handleNext = useCallback(() => {
     if (!api) return
@@ -219,13 +366,6 @@ function FeaturedProducts() {
       api.scrollTo(last)
     }
   }, [api])
-
-  const products = [
-    { id: 1, title: 'Ceramic Vase', subtitle: 'Handcrafted ceramic vase with unique glaze', imageClass: 'card-image-ceramic-vase-bg' },
-    { id: 2, title: 'Vintage Pocket Watch', subtitle: 'Vintage pocket watch with intricate detailing', imageClass: 'card-image-pocket-watch-bg' },
-    { id: 3, title: 'Silk Scarf', subtitle: 'Hand-painted silk scarf with floral design', imageClass: 'card-image-silk-scarf-bg' },
-    { id: 4, title: 'Wooden Bird Sculpture', subtitle: 'Hand-carved wooden sculpture of a bird', imageClass: 'card-image-bird-sculpture-bg' }
-  ]
 
   useEffect(() => {
     if (!api) return
@@ -248,15 +388,33 @@ function FeaturedProducts() {
       </div>
 
       <div className="relative">
-        <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: true, slidesToScroll: 1 }}>
-          {products.map((p) => (
-            <CarouselItem key={p.id} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 px-2">
-              <CardItem title={p.title} subtitle={p.subtitle} imageClass={p.imageClass} />
-            </CarouselItem>
-          ))}
-        </Carousel>
-        <CarouselPrevious onClick={handlePrev} />
-        <CarouselNext onClick={handleNext} />
+        {productsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+            <span className="ml-3 text-stone-600">Loading featured products...</span>
+          </div>
+        ) : products.length > 0 ? (
+          <>
+            <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: true, slidesToScroll: 1 }}>
+              {products.map((product) => (
+                <CarouselItem key={product.id} className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 px-2">
+                  <CardItem 
+                    title={product.title} 
+                    subtitle={product.subtitle} 
+                    image={product.image}
+                    price={product.price}
+                  />
+                </CarouselItem>
+              ))}
+            </Carousel>
+            <CarouselPrevious onClick={handlePrev} />
+            <CarouselNext onClick={handleNext} />
+          </>
+        ) : (
+          <div className="flex items-center justify-center py-12">
+            <p className="text-stone-600">No featured products available at the moment.</p>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -73,6 +73,20 @@ const Collectibles = () => {
     fetchCollectibleItems();
   }, []);
 
+  // Handle URL parameters on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+      // Scroll to filtered section after a short delay to allow content to load
+      setTimeout(() => {
+        delayedScrollToSection('filtered-items-section', 1000, 'start');
+      }, 500);
+    }
+  }, [delayedScrollToSection]);
+
   // Handle URL search parameter changes with scroll
   useEffect(() => {
     const urlParamHandler = createUrlParamHandler(

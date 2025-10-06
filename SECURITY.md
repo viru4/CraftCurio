@@ -2,9 +2,10 @@
 
 ## Environment Variables
 
-### 🚨 NEVER commit .env files to the repository!
+### 🚨 NEVER commit .env files to the repository
 
 Environment files contain sensitive information like:
+
 - Database credentials
 - API keys
 - JWT secrets
@@ -13,6 +14,7 @@ Environment files contain sensitive information like:
 ### Setup Instructions
 
 1. **Backend Setup:**
+
    ```bash
    cd backend
    cp .env.example .env
@@ -20,13 +22,14 @@ Environment files contain sensitive information like:
    ```
 
 2. **Frontend Setup:**
+
    ```bash
    cd front-end
    cp .env.example .env
    # Edit .env with your actual values
    ```
 
-### What to do if .env files are accidentally committed:
+### What to do if .env files are accidentally committed
 
 1. Remove from tracking: `git rm --cached .env`
 2. Create sanitized examples: `cp .env .env.example` (then remove sensitive data)
@@ -36,6 +39,7 @@ Environment files contain sensitive information like:
 ### Credential Rotation Checklist
 
 If environment variables were exposed in git history:
+
 - [ ] Change MongoDB passwords
 - [ ] Regenerate API keys
 - [ ] Update JWT secrets
