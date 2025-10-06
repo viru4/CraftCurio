@@ -1,9 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
 // Load environment variables
 dotenv.config();
+// Import routes
+import categoryRoutes from './api/routes/categories.js';
+import collectibleRoutes from './api/routes/collectibles.js';
+import artisanProductRoutes from './api/routes/artisanProducts.js';
+import seedRoutes from './api/routes/seed.js';
+import authRouter from './api/routes/auth.routes.js';
+
+
 
 const app = express();
 
@@ -11,6 +18,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+
 
 // Basic routes
 app.get('/', (req, res) => {
@@ -31,17 +41,13 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Import routes
-import categoryRoutes from './api/routes/categories.js';
-import collectibleRoutes from './api/routes/collectibles.js';
-import artisanProductRoutes from './api/routes/artisanProducts.js';
-import seedRoutes from './api/routes/seed.js';
 
 // Use routes
 app.use('/api/categories', categoryRoutes);
 app.use('/api/collectibles', collectibleRoutes);
 app.use('/api/artisan-products', artisanProductRoutes);
 app.use('/api/seed', seedRoutes);
+app.use('/api/auth', authRouter);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {
