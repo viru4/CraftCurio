@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { SearchBar } from "@/components/search";
-
-import { isValidPublishableKey } from '@/lib/utils'
-
-const hasClerk = isValidPublishableKey(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,24 +52,7 @@ const Navbar = () => {
             />
           </div>
           <div className="flex gap-2">
-            {hasClerk ? (
-              <>
-                <SignedOut>
-                  <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-                </SignedOut>
-                <SignedIn>
-                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors mr-2">
-                    <span className="material-symbols-outlined">shopping_cart</span>
-                  </button>
-                  <button className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--secondary-color)] text-[var(--text-primary)] hover:bg-gray-200 transition-colors mr-2">
-                    <span className="material-symbols-outlined">favorite</span>
-                  </button>
-                  <UserButton afterSignOutUrl="/" />
-                </SignedIn>
-              </>
-            ) : (
-              <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-            )}
+            <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
           </div>
         </div>
         <div className="md:hidden flex items-center gap-2">
@@ -106,22 +84,9 @@ const Navbar = () => {
                 <Link to="/artisans" className="text-[var(--text-primary)]">Artisan Products</Link>
                 <a href="#" className="text-[var(--text-primary)]">About Us</a>
                 <div className="h-px bg-gray-200" />
-                {hasClerk ? (
-                  <>
-                    <SignedOut>
-                      <Link to="/sign-in">
-                        <Button size="sm" className="w-full">Sign In</Button>
-                      </Link>
-                    </SignedOut>
-                    <SignedIn>
-                      <UserButton afterSignOutUrl="/" />
-                    </SignedIn>
-                  </>
-                ) : (
-                  <Link to="/sign-in">
-                    <Button size="sm" className="w-full">Sign In</Button>
-                  </Link>
-                )}
+                <Link to="/sign-in">
+                  <Button size="sm" className="w-full">Sign In</Button>
+                </Link>
               </div>
             </SheetContent>
           </Sheet>
