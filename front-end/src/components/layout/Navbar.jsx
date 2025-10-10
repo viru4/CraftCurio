@@ -1,25 +1,10 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import { SearchBar } from "@/components/search";
 
 const Navbar = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
-
-  const handleSearch = (query) => {
-    if (query.trim()) {
-      // Navigate to collectibles page with search query
-      navigate(`/collectibles?search=${encodeURIComponent(query.trim())}`);
-    }
-  };
-
-  const handlePopularTagClick = (tag) => {
-    setSearchQuery(tag);
-    handleSearch(tag);
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-b-[#f4f2f0]">
@@ -37,23 +22,8 @@ const Navbar = () => {
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
         </div>
-        <div className="hidden md:flex flex-1 items-center justify-end gap-4">
-          <div className="min-w-40 max-w-64">
-            <SearchBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onSearch={handleSearch}
-              placeholder="Search for treasures..."
-              popularTags={['Vintage Coins', 'Comics', 'Antiques', 'Stamps']}
-              onPopularTagClick={handlePopularTagClick}
-              showPopularTags={false}
-              size="small"
-              className="!max-w-none !px-0"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
-          </div>
+        <div className="hidden md:flex items-center gap-4">
+          <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
         </div>
         <div className="md:hidden flex items-center gap-2">
           <Sheet>
@@ -64,21 +34,6 @@ const Navbar = () => {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4">
-                {/* Mobile Search */}
-                <div className="mb-4">
-                  <SearchBar
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    onSearch={handleSearch}
-                    placeholder="Search for treasures..."
-                    popularTags={['Vintage Coins', 'Comics', 'Antiques', 'Stamps']}
-                    onPopularTagClick={handlePopularTagClick}
-                    showPopularTags={false}
-                    size="small"
-                    className="!max-w-none !px-0"
-                  />
-                </div>
-                <div className="h-px bg-gray-200" />
                 <Link to="/" className="text-[var(--text-primary)]">Home</Link>
                 <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
                 <Link to="/artisans" className="text-[var(--text-primary)]">Artisan Products</Link>
