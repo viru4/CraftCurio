@@ -14,7 +14,9 @@
     "seed:legacy": "node scripts/seedData.js seed",
     "clear:legacy": "node scripts/seedData.js clear",
     "stats:legacy": "node scripts/seedData.js stats",
-    "reseed:legacy": "node scripts/seedData.js reseed"
+    "reseed:legacy": "node scripts/seedData.js reseed",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "author": "",
   "license": "ISC",
@@ -26,5 +28,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
     "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "babel-jest": "^30.2.0"
   }
 }
