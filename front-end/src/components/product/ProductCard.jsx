@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/currency';
 
 /**
@@ -24,16 +25,21 @@ import { formatPrice } from '@/lib/currency';
  * />
  */
 const ProductCard = ({ item, onClick }) => {
+  const navigate = useNavigate();
+
   const handleClick = () => {
     if (onClick) {
       onClick(item);
+    } else {
+      // Default behavior: navigate to product details page
+      navigate(`/product/${item.id || item._id}`);
     }
   };
 
   const handleViewDetails = (e) => {
     e.stopPropagation();
-    // Add view details functionality here
-    console.log('View details for:', item.title);
+    // Navigate to product details page
+    navigate(`/product/${item.id || item._id}`);
   };
 
   return (

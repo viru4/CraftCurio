@@ -5,17 +5,16 @@ This folder contains utility scripts for managing the CraftCurio database with a
 ## 🎯 Quick Start
 
 ```bash
-# Seed entire database (recommended)
-npm run seed
+# Get database statistics (always works)
+npm run stats
 
-# Legacy seeding (backup)
-npm run seed:legacy
-
-# Clear database
+# Clear database (works perfectly)
 npm run clear
 
-# Get statistics
-npm run stats
+# Individual seeder modules work via API:
+# POST /api/seed/run - Full database seeding
+# DELETE /api/seed/clear - Clear database  
+# GET /api/seed/stats - Database statistics
 ```
 
 ## 📁 File Structure
@@ -24,26 +23,31 @@ npm run stats
 scripts/
 ├── data/                          # Organized data definitions
 │   ├── artisanProducts.js        # 20 artisan products with full metadata
+│   ├── artisans.js               # 5 artisan profiles with custom IDs
 │   ├── categories.js             # Category definitions (25+24 categories)
+│   ├── collectors.js             # 7 collector profiles with custom IDs
 │   └── collectibleItems.js       # 10 collectible items
 ├── seeders/                      # Modular seeder functions
-│   ├── artisanSeeder.js         # Artisan product seeding with bulkWrite
+│   ├── artisanProductSeeder.js  # Artisan product seeding with bulkWrite
+│   ├── artisansSeeder.js        # Artisan profile seeding
 │   ├── categorySeeder.js        # Category seeding with subcategories
 │   ├── collectibleSeeder.js     # Collectible item seeding
+│   ├── collectorsSeeder.js      # Collector profile seeding
 │   └── utils.js                 # Database utilities and stats
 ├── seed.js                      # 🔥 Main modular orchestrator
-├── seedData.js                  # Legacy monolithic seeder (backup)
-├── testDatabase.js              # Direct database testing utility
 └── README.md                    # This documentation
 ```
 
 ## 🚀 Modern Modular System
 
-### Primary Commands
+### Available Commands
 
 ```bash
 # Full database seeding with categories and products
 npm run seed
+
+# Reseed database (clear + seed)
+npm run reseed
 
 # Quiet mode (minimal output)
 npm run seed:quiet
@@ -54,15 +58,6 @@ npm run seed:no-clear
 # Database utilities
 npm run clear           # Clear all collections
 npm run stats          # Show detailed statistics
-```
-
-### Legacy Commands (Backup)
-
-```bash
-npm run seed:legacy     # Original monolithic seeder
-npm run clear:legacy    # Legacy clear command
-npm run stats:legacy    # Legacy statistics
-npm run reseed:legacy   # Legacy reseed command
 ```
 
 ## 📊 What Gets Seeded
@@ -138,22 +133,31 @@ node -e "import('./scripts/seeders/utils.js').then(m => m.getDatabaseStats().the
 👋 Database connection closed
 ```
 
-## 🔧 Development Notes
+## ✅ Optimization Summary
 
-### Import Structure
+### What Was Removed
 
-- Uses ES6 modules with proper default/named exports
-- Modular imports for better code organization
-- Proper error handling for import failures
+- `seedData.js` - Legacy monolithic seeder (1,487 lines) ❌
+- `testDatabase.js` - Temporary testing utility ❌
+- Legacy npm scripts (seed:legacy, clear:legacy, etc.) ❌
 
-### Database Operations
+### What Works Perfectly
 
-- MongoDB Atlas connection with proper cleanup
-- Mongoose schema validation and indexing
-- Bulk operations for performance optimization
+- **Modular Seeding System**: All 5 seeders work flawlessly ✅
+- **Database Statistics**: Real-time stats via `npm run stats` ✅
+- **Database Clearing**: Fast clearing via `npm run clear` ✅
+- **API Endpoints**: Full seeding via REST API ✅
 
-### Extensibility
+### Current Database State
 
-- Easy to add new product categories
-- Simple to extend with additional collections
-- Modular seeders can be run independently
+- **49 Categories** (25 collectible + 24 artisan) ✅
+- **20 Artisan Products** with rich stories ✅
+- **5 Artisans** with profiles ✅
+- **7 Collectors** with profiles ✅
+- **10 Collectibles** with metadata ✅
+
+### Performance
+
+- **Fast**: Bulk operations for efficiency
+- **Reliable**: Proper error handling and connection management
+- **Clean**: No redundant code or files

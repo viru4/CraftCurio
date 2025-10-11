@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const artisanProductSchema = new mongoose.Schema({
-  id: { type: String, unique: true, required: true },    // Unique product identifier
+  id: { type: String, unique: true, required: true },    // Unique product identifier (e.g., art1, art2)
   title: { type: String, required: true },                // Product name/title
   description: { type: String, required: true },          // Detailed product description
   category: { type: String, required: true },             // Product category (e.g., pottery, textiles)
@@ -18,15 +18,20 @@ const artisanProductSchema = new mongoose.Schema({
     comment: String,
     date: { type: Date, default: Date.now }
   }],
-  seller: {
-    id: { type: String, required: true },                 // Seller/Artisan unique ID
-    name: { type: String, required: true },               // Seller/Artisan name
-    profileUrl: String,                                    // Link to seller profile page
-    verified: { type: Boolean, default: false }           // Seller verification status
+  artisanInfo: {                                          // Artisan snippet information
+    id: { type: String },                               // Simple string ID for artisan
+    name: { type: String },                              // Artisan name
+    profilePhotoUrl: { type: String },                   // Artisan profile photo URL
+    briefBio: { type: String },                          // Brief biography of the artisan
+    verified: { type: Boolean, default: false }          // Seller verification status
   },
   craftMethod: { type: String },                           // Description of craft or technique
   provenance: { type: String },                            // Product origin or history info
   craftingStory: { type: String },                         // Artisan's story or background
+  productStory: {                                          // Product story object
+    storyText: { type: String },                          // Detailed product story text
+    storyMediaUrls: [{ type: String }]                    // Array of media URLs (images/videos)
+  },
   authenticityCertificateUrl: { type: String },            // URL to authenticity certificate
   availability: { type: Boolean, default: true },          // If product is in stock
   shippingInfo: {

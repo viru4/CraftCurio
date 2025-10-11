@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Navbar, Footer } from "@/components/layout";
 import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CategoryGrid } from "@/components/category";
 
 export default function Landing() {
@@ -66,12 +66,12 @@ export default function Landing() {
         </section>
 
         {/* Featured Products */}
-        <section className="py-16 px-4 md:px-10 lg:px-20">
+        <section className="py-8 md:py-12 px-4 md:px-10 lg:px-20">
           <FeaturedProducts />
         </section>
 
         {/* Categories */}
-        <section className="bg-stone-50 py-16 px-4 md:px-10 lg:px-20">
+        <section className="bg-stone-50 py-8 md:py-12 px-4 md:px-10 lg:px-20">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8 sm:mb-12 px-2">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 mb-3 sm:mb-4">
@@ -135,29 +135,42 @@ export default function Landing() {
         </section>
 
         {/* How it works */}
-        <section className="py-16 px-4 md:px-10 lg:px-20 bg-white">
-          <div className="max-w-7xl mx-auto text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-4">How CraftCurio Works</h2>
-            <p className="text-[var(--text-secondary)] text-lg mb-12 max-w-2xl mx-auto">A seamless experience for both buyers and artisans. Discover, connect, and thrive in our creative community.</p>
-            <div className="grid md:grid-cols-2 gap-12 items-center text-left">
-              <div>
-                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-6">For Buyers</h3>
-                <Step num={1} title="Discover Treasures" text="Browse through thousands of unique items, from handcrafted jewelry to rare vintage collectibles." filled />
-                <Step num={2} title="Connect with Artisans" text="Communicate directly with artisans to ask questions, request custom orders, and learn the story behind their creations." filled />
-                <Step num={3} title="Secure Purchase" text="Enjoy a safe and secure checkout process with multiple payment options. Your new treasure will be shipped directly to you." filled />
+        <section className="py-8 md:py-14 px-4 md:px-10 bg-[#fcfaf8]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className="text-4xl font-bold text-[#1b130d] tracking-tight">How CraftCurio Works</h2>
+              <p className="text-[#9a6c4c] text-lg mt-2 max-w-3xl mx-auto">
+                Simple steps to discover, connect with, and acquire unique, handcrafted items.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="bg-[#ec6d13]/10 p-4 rounded-full mb-6">
+                  <span className="material-symbols-outlined text-4xl text-[#ec6d13]">search</span>
+                </div>
+                <h3 className="text-[#1b130d] text-xl font-bold mb-2">Explore</h3>
+                <p className="text-[#9a6c4c] text-base leading-relaxed">Browse a diverse collection of handcrafted items and unique collectibles from local artisans.</p>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-6">For Artisans</h3>
-                <Step num={1} title="Create Your Shop" text="Set up your personalized shop in minutes. Showcase your products with high-quality photos and detailed descriptions." />
-                <Step num={2} title="Reach a Wider Audience" text="Connect with a passionate community of buyers who appreciate quality craftsmanship and unique finds." />
-                <Step num={3} title="Grow Your Business" text="Utilize our tools to manage your inventory, track sales, and grow your creative business with ease." />
+              <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="bg-[#ec6d13]/10 p-4 rounded-full mb-6">
+                  <span className="material-symbols-outlined text-4xl text-[#ec6d13]">handshake</span>
+                </div>
+                <h3 className="text-[#1b130d] text-xl font-bold mb-2">Connect</h3>
+                <p className="text-[#9a6c4c] text-base leading-relaxed">Engage directly with artisans, ask questions, and learn the stories behind their creations.</p>
+              </div>
+              <div className="flex flex-col items-center text-center p-8 rounded-2xl bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="bg-[#ec6d13]/10 p-4 rounded-full mb-6">
+                  <span className="material-symbols-outlined text-4xl text-[#ec6d13]">local_shipping</span>
+                </div>
+                <h3 className="text-[#1b130d] text-xl font-bold mb-2">Receive</h3>
+                <p className="text-[#9a6c4c] text-base leading-relaxed">Receive your carefully crafted items, knowing you've supported a local artisan's passion.</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Become a CraftCurio Artisan */}
-        <section className="bg-[var(--secondary-color)] py-20 px-4 md:px-10 lg:px-20">
+        <section className="bg-[var(--secondary-color)] py-8 md:py-12 px-4 md:px-10 lg:px-20">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">Become a CraftCurio Artisan</h2>
             <p className="mt-4 text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">Share your passion with the world. Join our community of talented artisans and start selling your creations today.</p>
@@ -168,9 +181,9 @@ export default function Landing() {
         </section>
 
         {/* Testimonials */}
-        <section className="bg-stone-50 py-16 px-4 md:px-10 lg:px-20">
+        <section className="bg-stone-50 py-8 md:py-12 px-4 md:px-10 lg:px-20">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-12 text-center">What Our Community Says</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-6 md:mb-8 text-center">What Our Community Says</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Testimonial name="Sarah L." role="Buyer" avatar="https://lh3.googleusercontent.com/a-/AOh14GhJ1QdY23c_C5E9zY_8Q_Z0j_X_Z_0_0_0_0_0=s96-c" text="I'm so glad I found CraftCurio! I discovered a beautiful handmade necklace that I cherish. The direct communication with the artist was a wonderful touch." rating={5} />
               <Testimonial name="David M." role="Artisan" avatar="https://lh3.googleusercontent.com/a-/AOh14Gg_2QdY23c_C5E9zY_8Q_Z0j_X_Z_0_0_0_0_0=s96-c" text="Selling my pottery on CraftCurio has been a game-changer. The platform is incredibly easy to use, and I've connected with so many amazing customers who truly value my work." rating={4} />
@@ -180,9 +193,9 @@ export default function Landing() {
         </section>
 
         {/* More to Explore */}
-        <section className="bg-stone-50 py-16 px-4 md:px-10 lg:px-20">
+        <section className="bg-stone-50 py-8 md:py-12 px-4 md:px-10 lg:px-20">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-12 text-center">More to Explore</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-6 md:mb-8 text-center">More to Explore</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
               <a href="#" className="group">
                 <div className="p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
@@ -218,9 +231,21 @@ export default function Landing() {
   );
 }
 
-function CardItem({ title, subtitle, image, imageClass, price }) {
+function CardItem({ title, subtitle, image, imageClass, price, productId, productType }) {
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    if (productId && productType && productType !== 'fallback') {
+      // Navigate to product details page
+      navigate(`/product/${productId}`);
+    }
+  };
+
   return (
-    <div className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl bg-white">
+    <div 
+      className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl bg-white cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="relative w-full aspect-square">
         {image ? (
           <img 
@@ -239,12 +264,19 @@ function CardItem({ title, subtitle, image, imageClass, price }) {
             <span className="text-gray-400 text-sm">No Image</span>
           </div>
         )}
+        {/* Add a subtle overlay on hover to indicate clickability */}
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-t-lg" />
       </div>
       <div className="p-4">
         <p className="text-[var(--text-primary)] text-lg font-semibold truncate">{title}</p>
         <p className="text-[var(--text-secondary)] text-sm mb-2 h-10 overflow-hidden">{subtitle}</p>
         {price && (
           <p className="text-[var(--primary-color)] text-lg font-bold">{price}</p>
+        )}
+        {productId && productType !== 'fallback' && (
+          <div className="mt-2">
+            <span className="text-xs text-gray-500 group-hover:text-amber-600 transition-colors">Click to view details</span>
+          </div>
         )}
       </div>
     </div>
@@ -275,7 +307,7 @@ function FeaturedProducts() {
         // Add collectibles (limit to 4)
         if (collectiblesData.data && Array.isArray(collectiblesData.data)) {
           const collectibles = collectiblesData.data.slice(0, 4).map(item => ({
-            id: item._id || `collectible-${Date.now()}-${Math.random()}`,
+            id: item.id || item._id, // Use simple ID (coll1, coll2, etc.)
             title: item.title || 'Untitled Collectible',
             subtitle: item.description || 'No description available',
             image: item.image,
@@ -288,7 +320,7 @@ function FeaturedProducts() {
         // Add artisan products (limit to 4)
         if (artisanProductsData.data && Array.isArray(artisanProductsData.data)) {
           const artisanProducts = artisanProductsData.data.slice(0, 4).map(item => ({
-            id: item._id || `artisan-${Date.now()}-${Math.random()}`,
+            id: item.id || item._id, // Use simple ID (art1, art2, etc.)
             title: item.title || 'Untitled Artisan Product',
             subtitle: item.description || 'No description available',
             image: item.image, // This comes from the backend transformation
@@ -300,6 +332,9 @@ function FeaturedProducts() {
 
         // Shuffle and limit to 8 products max
         let finalProducts = combinedProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
+        
+        // Debug: Log the products being set
+        console.log('Final products for carousel:', finalProducts);
         
         // If no products from API, use fallback products
         if (finalProducts.length === 0) {
@@ -403,6 +438,8 @@ function FeaturedProducts() {
                     subtitle={product.subtitle} 
                     image={product.image}
                     price={product.price}
+                    productId={product.id}
+                    productType={product.type}
                   />
                 </CarouselItem>
               ))}

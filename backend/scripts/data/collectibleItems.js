@@ -1,5 +1,6 @@
 export const collectibleItems = [
   {
+    id: "coll1",
     title: "1965 Morgan Silver Dollar",
     description: "Pristine condition Morgan Silver Dollar from 1965, certified authentic.",
     price: "₹9,999",
@@ -12,6 +13,7 @@ export const collectibleItems = [
     buttonText: 'Explore Collection'
   },
   {
+    id: "coll2",
     title: "Amazing Spider-Man #1 Reprint",
     description: "High-quality reprint of the iconic first Amazing Spider-Man comic book.",
     price: "₹7,499",
@@ -24,6 +26,7 @@ export const collectibleItems = [
     buttonText: 'Explore Collection'
   },
   {
+    id: "coll3",
     title: "Vintage Star Wars Luke Skywalker",
     description: "Original 1977 Luke Skywalker action figure in mint condition with packaging.",
     price: "₹24,999",

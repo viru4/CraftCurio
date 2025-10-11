@@ -140,3 +140,25 @@
 .category-image-rare-coins-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC65xCxlTmAp2mA5KGLqsUQSG7dZbiu2x0fu1Qu7P656YRxt54mn4jTNb9NvYx8YCh5ahoUBnBs_Ia2giD3dMBiYrMd9Msc0t0sw5TOrchcWD-VwR3geypT0ByUaClNnigh-RHBzLOkFPezLvOkwJumX1baaZSzR8Rk9zjLhK1XBvHfminCvUMb3IuGoNq0ULl2IgmTipc-totleX9D37ngz9Y4WD-nxkbDX7cg902ySnG-h6XWhzEsgM8F5WQzAWgD0MyrwKc3Vpsd"); }
 .category-image-antique-books-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBldxQsgwqad_9gOiYDKI9x0sMi8NBU4TQPOmfnKRmMW9XYgvBVzp4dVm-2fS8rHkalxZNny8MDCWvuinwTHl8Eoe14Y6nzHWW0I6GWjPYmsfHNjrb7ixigXBLQePqbC-FA2DrFNU7w_SSuGyuc9Meq2dTrWK7MY2NUTobXbcyW77XlbruuZmnziyBOqyRcuBaFvZy3G8kdYnpvXM7cwXTtYKguL1-100JZd9J4rNRDPB2juMp06UFcUt3_EDOsEhaK9qSbj2JNricp"); }
 .category-image-classic-toys-bg { background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmFu8fUvD05XTw5Ht293Tcb1SEur1OZ_ljLywYyvUbhJFUgm4SH3fD0LDG1OErajHyilnsEpYA5jCry3BqnOiz785JAY6NjOYpGy3gQh-FNH6uvUmHyMSWGA2_1_jDav5FtsRvJlOeqB859YlmJdvU3vLIkhEuM5p0y1fLhUbyrQ7VdwmBHdiadWnsTbQDWAuYlpdSIoAF-Lt9h3u3sgYHJOyhiZb5h1vItJT3MIG9pSbzpYSk8a6awtITImNBQzZJEVZT-1bCSHbt"); }
+
+/* Custom utilities for ProductDetails */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* Custom primary color for buttons and accents */
+:root {
+  --primary-color: #ec6d13;
+}

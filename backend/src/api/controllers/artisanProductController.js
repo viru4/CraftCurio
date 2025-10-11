@@ -157,7 +157,16 @@ export const getRecentArtisanProducts = async (req, res) => {
 // GET /api/artisan-products/:id - Get single artisan product
 export const getArtisanProductById = async (req, res) => {
   try {
-    const artisanProduct = await ArtisanProduct.findById(req.params.id);
+    console.log('Requested product ID:', req.params.id);
+    console.log('ID type:', typeof req.params.id);
+    
+    // Find by the custom 'id' field instead of MongoDB's '_id'
+    const artisanProduct = await ArtisanProduct.findOne({ id: req.params.id })
+      .populate('artisanInfo.id', 'name email profilePhotoUrl briefBio verified createdAt')
+      .populate('reviews.user', 'name email');
+    
+    console.log('Found product:', artisanProduct ? 'Yes' : 'No');
+    
     if (!artisanProduct) {
       return res.status(404).json({ error: 'Artisan product not found' });
     }
@@ -169,6 +178,24 @@ export const getArtisanProductById = async (req, res) => {
     // Convert to plain object and add top-level `image` for frontend
     const productObj = artisanProduct.toObject ? artisanProduct.toObject() : artisanProduct;
     productObj.image = (productObj.images && productObj.images.length) ? productObj.images[0] : (productObj.image || null);
+
+    // Ensure productStory and artisanInfo are properly included
+    if (productObj.productStory) {
+      productObj.productStory = {
+        storyText: productObj.productStory.storyText || '',
+        storyMediaUrls: productObj.productStory.storyMediaUrls || []
+      };
+    }
+
+    if (productObj.artisanInfo) {
+      productObj.artisanInfo = {
+        id: productObj.artisanInfo.id || null,
+        name: productObj.artisanInfo.name || '',
+        profilePhotoUrl: productObj.artisanInfo.profilePhotoUrl || '',
+        briefBio: productObj.artisanInfo.briefBio || '',
+        verified: productObj.artisanInfo.verified || false
+      };
+    }
 
     res.status(200).json({ data: productObj });
   } catch (error) {
