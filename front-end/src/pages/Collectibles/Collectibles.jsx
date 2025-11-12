@@ -5,6 +5,7 @@ import { ProductSection } from '@/components/product';
 import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
+import axios from 'axios'
 
 const Collectibles = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -34,11 +35,13 @@ const Collectibles = () => {
   useEffect(() => {
     const fetchCollectibleCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/categories?type=collectible');
-        const data = await response.json();
+        const response = await axios.get('http://localhost:3000/api/categories?type=collectible');
         
-        if (data.data && Array.isArray(data.data)) {
-          setCollectibleCategories(data.data);
+        // Axios automatically parses JSON
+        if (response.data && Array.isArray(response.data.data)) {
+          setCollectibleCategories(response.data.data);
+        } else {
+          setCollectibleCategories([]);
         }
       } catch (err) {
         console.error('Failed to fetch collectible categories:', err);
@@ -47,7 +50,7 @@ const Collectibles = () => {
         setCategoriesLoading(false);
       }
     };
-
+  
     fetchCollectibleCategories();
   }, []);
 
@@ -55,12 +58,12 @@ const Collectibles = () => {
   useEffect(() => {
     const fetchCollectibleItems = async () => {
       try {
-        // Enable the actual API endpoint
-        const response = await fetch('http://localhost:3000/api/collectibles');
-        const data = await response.json();
-        
-        if (data.data && Array.isArray(data.data)) {
-          setCollectibleItems(data.data);
+        const response = await axios.get('http://localhost:8000/api/collectibles');
+  
+        if (response.data && Array.isArray(response.data.data)) {
+          setCollectibleItems(response.data.data);
+        } else {
+          setCollectibleItems([]);
         }
       } catch (err) {
         console.error('Failed to fetch collectible items:', err);
@@ -69,7 +72,7 @@ const Collectibles = () => {
         setItemsLoading(false);
       }
     };
-
+  
     fetchCollectibleItems();
   }, []);
 
