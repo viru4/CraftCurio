@@ -10,6 +10,7 @@
     "seed:quiet": "node scripts/seed.js --quiet",
     "seed:no-clear": "node scripts/seed.js --no-clear",
     "reseed": "node scripts/seed.js",
+    "reseed:collectibles": "node scripts/reseed-collectibles.js",
     "clear": "node -e \"import('./scripts/seeders/utils.js').then(m => m.clearDatabase().then(() => process.exit(0)))\"",
     "stats": "node -e \"import('./scripts/seeders/utils.js').then(m => m.getDatabaseStats().then(s => console.log(JSON.stringify(s, null, 2)) || process.exit(0)))\"",
     "test": "jest",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
-    "babel-jest": "^30.2.0"
+    "babel-jest": "^30.2.0",
+    "jest": "^30.2.0"
   }
 }

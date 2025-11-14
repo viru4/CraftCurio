@@ -5,7 +5,8 @@ import { ProductSection } from '@/components/product';
 import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
-import axios from 'axios'
+import axios from 'axios';
+import API_BASE_URL from '@/config/api';
 
 const Collectibles = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -35,7 +36,7 @@ const Collectibles = () => {
   useEffect(() => {
     const fetchCollectibleCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/categories?type=collectible');
+        const response = await axios.get(`${API_BASE_URL}/api/categories?type=collectible`);
         
         // Axios automatically parses JSON
         if (response.data && Array.isArray(response.data.data)) {
@@ -284,6 +285,7 @@ const Collectibles = () => {
         isVisible={true}
         totalProductCount={collectibleItems.length}
         initialDisplayCount={12}
+        productType="collectible"
       />
 
       {/* Product sections using database data */}
@@ -294,6 +296,7 @@ const Collectibles = () => {
         items={getFeaturedItems()}
         onProductClick={handleProductClick}
         backgroundColor="bg-white"
+        productType="collectible"
       />
 
       <ProductSection
@@ -303,6 +306,7 @@ const Collectibles = () => {
         items={getPopularItems()}
         onProductClick={handleProductClick}
         backgroundColor="bg-stone-50"
+        productType="collectible"
       />
 
       <ProductSection
@@ -312,6 +316,7 @@ const Collectibles = () => {
         items={getRecentItems()}
         onProductClick={handleProductClick}
         backgroundColor="bg-white"
+        productType="collectible"
       />
 
       <Footer />

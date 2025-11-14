@@ -1,4 +1,14 @@
+import { randomUUID } from 'crypto';
+import mongoose from 'mongoose';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
+
+const toPositiveInt = (value, fallback) => {
+  const parsed = parseInt(value, 10);
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed;
+  }
+  return fallback;
+};
 
 // GET /api/artisan-products - Get all artisan products
 export const getArtisanProducts = async (req, res) => {
@@ -44,8 +54,8 @@ export const getArtisanProducts = async (req, res) => {
     }
     
     // Calculate pagination
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = toPositiveInt(page, 1);
+    const limitNum = Math.min(toPositiveInt(limit, 50), 100);
     const skip = (pageNum - 1) * limitNum;
     
     // Build sort object
@@ -160,10 +170,30 @@ export const getArtisanProductById = async (req, res) => {
     console.log('Requested product ID:', req.params.id);
     console.log('ID type:', typeof req.params.id);
     
-    // Find by the custom 'id' field instead of MongoDB's '_id'
-    const artisanProduct = await ArtisanProduct.findOne({ id: req.params.id })
-      .populate('artisanInfo.id', 'name email profilePhotoUrl briefBio verified createdAt')
-      .populate('reviews.user', 'name email');
+    const { id } = req.params;
+    let artisanProduct = null;
+    
+    // Check if ID is a valid MongoDB ObjectId format
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
+    
+    if (isValidObjectId) {
+      // Try MongoDB _id first if it's a valid ObjectId format
+      artisanProduct = await ArtisanProduct.findById(id);
+      
+      if (artisanProduct) {
+        await artisanProduct.populate([
+          { path: 'artisanInfo.id', select: 'name email profilePhotoUrl briefBio verified createdAt' },
+          { path: 'reviews.user', select: 'name email' }
+        ]);
+      }
+    }
+    
+    // If not found by _id or not a valid ObjectId, try custom 'id' field
+    if (!artisanProduct) {
+      artisanProduct = await ArtisanProduct.findOne({ id })
+        .populate('artisanInfo.id', 'name email profilePhotoUrl briefBio verified createdAt')
+        .populate('reviews.user', 'name email');
+    }
     
     console.log('Found product:', artisanProduct ? 'Yes' : 'No');
     
@@ -208,12 +238,30 @@ export const createArtisanProduct = async (req, res) => {
   try {
     const artisanProductData = { ...req.body };
     
-    // Store original ID if provided
-    if (req.body.id) {
-      artisanProductData.originalId = req.body.id;
-      delete artisanProductData.id; // Remove id field as MongoDB will create _id
+    if (!artisanProductData.title || !artisanProductData.description || !artisanProductData.category) {
+      return res.status(400).json({ error: 'Title, description, and category are required.' });
+    }
+
+    if (Array.isArray(artisanProductData.images) === false || artisanProductData.images.length === 0) {
+      return res.status(400).json({ error: 'At least one image is required.' });
+    }
+
+    if (typeof artisanProductData.price === 'string') {
+      const parsedPrice = Number(artisanProductData.price);
+      if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({ error: 'Price must be a non-negative number.' });
+      }
+      artisanProductData.price = parsedPrice;
+    }
+
+    if (typeof artisanProductData.price !== 'number' || !Number.isFinite(artisanProductData.price)) {
+      return res.status(400).json({ error: 'Price must be a valid number.' });
     }
     
+    artisanProductData.id = artisanProductData.id
+      ? String(artisanProductData.id).trim()
+      : `art-${randomUUID()}`;
+
     const artisanProduct = new ArtisanProduct(artisanProductData);
     const savedArtisanProduct = await artisanProduct.save();
     
@@ -229,7 +277,9 @@ export const createArtisanProduct = async (req, res) => {
 // PUT /api/artisan-products/:id/like - Like an artisan product
 export const likeArtisanProduct = async (req, res) => {
   try {
-    const artisanProduct = await ArtisanProduct.findById(req.params.id);
+    const { id } = req.params;
+
+    const artisanProduct = await ArtisanProduct.findOne({ id }) || await ArtisanProduct.findById(id);
     if (!artisanProduct) {
       return res.status(404).json({ error: 'Artisan product not found' });
     }

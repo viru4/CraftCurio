@@ -3,15 +3,20 @@ import { collectibleItems } from '../data/collectibleItems.js';
 
 // Utility function to format collectibles
 const formatCollectible = (item) => {
-  const { id, ...itemWithoutId } = item;
   return {
-    ...itemWithoutId,
+    ...item,
+    // Preserve custom ID if provided
+    id: item.id || undefined,
+    // Ensure price is a number
+    price: typeof item.price === 'string' ? parseFloat(item.price) || 0 : (item.price || 0),
     // Ensure required fields have defaults
     targetSection: item.targetSection || 'filtered-items-section',
     buttonText: item.buttonText || 'Explore Collection',
     featured: item.featured || false,
     popular: item.popular || false,
-    recent: item.recent || false
+    recent: item.recent || false,
+    views: item.views || 0,
+    likes: item.likes || 0
   };
 };
 

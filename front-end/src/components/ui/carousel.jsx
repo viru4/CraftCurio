@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -52,32 +52,6 @@ export function CarouselNext({ className = '', onClick, disabled, ...props }) {
       <ChevronRight className="h-5 w-5" />
     </Button>
   )
-}
-
-export function useCarouselControls(api) {
-  const [canScrollPrev, setCanScrollPrev] = useState(false)
-  const [canScrollNext, setCanScrollNext] = useState(false)
-
-  const onSelect = useCallback((embla) => {
-    setCanScrollPrev(embla.canScrollPrev())
-    setCanScrollNext(embla.canScrollNext())
-  }, [])
-
-  useEffect(() => {
-    if (!api) return
-    onSelect(api)
-    api.on('reInit', onSelect)
-    api.on('select', onSelect)
-    return () => {
-      api.off('select', onSelect)
-      api.off('reInit', onSelect)
-    }
-  }, [api, onSelect])
-
-  const scrollPrev = useCallback(() => api && api.scrollPrev(), [api])
-  const scrollNext = useCallback(() => api && api.scrollNext(), [api])
-
-  return { scrollPrev, scrollNext, canScrollPrev, canScrollNext }
 }
 
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Navbar, Footer } from "@/components/layout";
-import { Carousel, CarouselItem, CarouselPrevious, CarouselNext, useCarouselControls } from "@/components/ui/carousel";
+import { Carousel, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { useCarouselControls } from "@/components/ui/use-carousel-controls";
 import { Link, useNavigate } from 'react-router-dom';
 import { CategoryGrid } from "@/components/category";
+import API_BASE_URL from "@/config/api";
 
 export default function Landing() {
   const [collectibleCategories, setCollectibleCategories] = useState([]);
@@ -15,8 +17,8 @@ export default function Landing() {
     const fetchCategories = async () => {
       try {
         const [collectibleRes, artisanRes] = await Promise.all([
-          fetch('http://localhost:3000/api/categories?type=collectible'),
-          fetch('http://localhost:3000/api/categories/artisan/all')
+          fetch(`${API_BASE_URL}/api/categories?type=collectible`),
+          fetch(`${API_BASE_URL}/api/categories/artisan/all`)
         ]);
         
         const collectibleData = await collectibleRes.json();
@@ -236,8 +238,8 @@ function CardItem({ title, subtitle, image, imageClass, price, productId, produc
   
   const handleClick = () => {
     if (productId && productType && productType !== 'fallback') {
-      // Navigate to product details page
-      navigate(`/product/${productId}`);
+      // Navigate to product details page with type
+      navigate(`/product/${productType}/${productId}`);
     }
   };
 
@@ -246,26 +248,24 @@ function CardItem({ title, subtitle, image, imageClass, price, productId, produc
       className="group flex h-full flex-col gap-4 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl bg-white cursor-pointer"
       onClick={handleClick}
     >
-      <div className="relative w-full aspect-square">
+      <div className="relative w-full aspect-square overflow-hidden rounded-t-lg">
         {image ? (
           <img 
             src={image} 
             alt={title}
-            className="absolute inset-0 w-full h-full object-cover rounded-t-lg transform group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               // Fallback to a placeholder or hide the image on error
               e.target.style.display = 'none';
             }}
           />
         ) : imageClass ? (
-          <div className={`${imageClass} absolute inset-0 bg-center bg-no-repeat bg-cover rounded-t-lg transform group-hover:scale-105 transition-transform duration-300`} />
+          <div className={`${imageClass} w-full h-full bg-center bg-no-repeat bg-cover transform group-hover:scale-105 transition-transform duration-300`} />
         ) : (
-          <div className="absolute inset-0 bg-gray-200 rounded-t-lg flex items-center justify-center">
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
             <span className="text-gray-400 text-sm">No Image</span>
           </div>
         )}
-        {/* Add a subtle overlay on hover to indicate clickability */}
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-t-lg" />
       </div>
       <div className="p-4">
         <p className="text-[var(--text-primary)] text-lg font-semibold truncate">{title}</p>
@@ -294,8 +294,8 @@ function FeaturedProducts() {
     const fetchFeaturedProducts = async () => {
       try {
         const [collectiblesRes, artisanProductsRes] = await Promise.all([
-          fetch('http://localhost:3000/api/collectibles/featured'),
-          fetch('http://localhost:3000/api/artisan-products/featured')
+          fetch(`${API_BASE_URL}/api/collectibles/featured`),
+          fetch(`${API_BASE_URL}/api/artisan-products/featured`)
         ]);
 
         const collectiblesData = await collectiblesRes.json();

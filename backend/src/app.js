@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
     res.json({ 
         message: 'CraftCurio Backend Server is running!', 
         status: 'success',
-        port: process.env.PORT || 3000,
+        port: process.env.PORT || 8000,
         database: 'Connected to MongoDB'
     });
 });

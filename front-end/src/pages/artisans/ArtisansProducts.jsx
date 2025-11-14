@@ -5,6 +5,7 @@ import { ProductSection } from '@/components/product';
 import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
+import API_BASE_URL from '@/config/api';
 
 const ArtisansProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -34,7 +35,7 @@ const ArtisansProducts = () => {
   useEffect(() => {
     const fetchArtisanCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/categories?type=artisan');
+        const response = await fetch(`${API_BASE_URL}/api/categories?type=artisan`);
         const data = await response.json();
         
         if (data.data && Array.isArray(data.data)) {
@@ -55,7 +56,7 @@ const ArtisansProducts = () => {
   useEffect(() => {
     const fetchArtisanProducts = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/artisan-products');
+        const response = await fetch(`${API_BASE_URL}/api/artisan-products`);
         const data = await response.json();
         
         if (data.data && Array.isArray(data.data)) {
@@ -278,6 +279,7 @@ const ArtisansProducts = () => {
         isVisible={true}
         totalProductCount={artisanProducts.length}
         initialDisplayCount={12}
+        productType="artisan-product"
       />
 
       {/* Product sections using database data */}
@@ -288,6 +290,7 @@ const ArtisansProducts = () => {
         items={getFeaturedItems()}
         onProductClick={handleProductClick}
         backgroundColor="bg-white"
+        productType="artisan-product"
       />
 
       <ProductSection
@@ -297,6 +300,7 @@ const ArtisansProducts = () => {
         items={getPopularItems()}
         onProductClick={handleProductClick}
         backgroundColor="bg-stone-50"
+        productType="artisan-product"
       />
 
       <ProductSection
@@ -306,6 +310,7 @@ const ArtisansProducts = () => {
         items={getRecentItems()}
         onProductClick={handleProductClick}
         backgroundColor="bg-white"
+        productType="artisan-product"
       />
 
       <Footer />

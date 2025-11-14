@@ -12,7 +12,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/product/:id" element={<ProductDetails />} />
+      <Route path="/product/:type/:id" element={<ProductDetails />} />
       <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/sign-up" element={<SignUpPage />} />
       <Route path="/become-seller" element={<SellerRegistration />} />

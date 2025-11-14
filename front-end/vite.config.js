@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwind from '@tailwindcss/vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import process from 'node:process';
 
 // __dirname is not defined in ESM; compute it for path.resolve
 const __filename = fileURLToPath(import.meta.url);
@@ -31,21 +32,12 @@ export default defineConfig(({ mode }) => {
             // Separate vendor chunks for better caching
             vendor: ['react', 'react-dom'],
             router: ['react-router-dom'],
-            ui: ['lucide-react'],
-            clerk: ['@clerk/clerk-react']
+            ui: ['lucide-react']
           }
         }
       },
       // Increase chunk size warning limit
-      chunkSizeWarningLimit: 1000,
-      // Optimize for production
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: mode === 'production',
-          drop_debugger: mode === 'production'
-        }
-      }
+      chunkSizeWarningLimit: 1000
     }
   };
 });

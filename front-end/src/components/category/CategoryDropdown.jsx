@@ -7,6 +7,52 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronDown, Tag, Sparkles, X, Loader2 } from "lucide-react";
+import API_BASE_URL from "@/config/api";
+
+// Category icons mapping - moved outside component to avoid dependency issues
+const categoryIcons = {
+  "Coins": "🪙",
+  "Stamps": "📮", 
+  "Vintage Banknotes": "💵",
+  "Sports Memorabilia": "🏆",
+  "Comic Books": "📖",
+  "Movie Posters": "🎬",
+  "Antique Cameras": "📷",
+  "Autographs": "✍️",
+  "Porcelain and Glassware": "🏺",
+  "Vintage Toys": "🧸",
+  "Militaria": "🎖️",
+  "Old Maps and Atlases": "🗺️",
+  "Vintage Fashion": "👗",
+  "Music Records and Memorabilia": "💿",
+  "Scientific Instruments": "🔬",
+  "Art Deco Objects": "🎨",
+  "Ephemera": "📄",
+  "Film Props and Collectibles": "🎭",
+  "Classic Car Spare Parts": "🚗",
+  "Trading Cards": "🃏",
+  "Photos and Photographs": "📸",
+  "Book First Editions": "📚",
+  "Ethnic Artifacts": "🏛️",
+  "Watches and Timepieces": "⌚",
+  "Jewelry": "💎"
+};
+
+// Color gradients for categories - moved outside component to avoid dependency issues
+const categoryColors = [
+  "from-blue-500 to-purple-500",
+  "from-red-500 to-orange-500", 
+  "from-green-500 to-teal-500",
+  "from-pink-500 to-rose-500",
+  "from-yellow-500 to-amber-500",
+  "from-indigo-500 to-blue-500",
+  "from-amber-600 to-orange-600",
+  "from-purple-500 to-pink-500",
+  "from-orange-500 to-red-500",
+  "from-gray-600 to-gray-800",
+  "from-cyan-500 to-blue-500",
+  "from-violet-500 to-purple-600"
+];
 
 /**
  * CategoryDropdown Component
@@ -25,51 +71,6 @@ const CategoryDropdown = ({
   const [collectibleCategories, setCollectibleCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Category icons mapping
-  const categoryIcons = {
-    "Coins": "🪙",
-    "Stamps": "📮", 
-    "Vintage Banknotes": "💵",
-    "Sports Memorabilia": "🏆",
-    "Comic Books": "📖",
-    "Movie Posters": "🎬",
-    "Antique Cameras": "📷",
-    "Autographs": "✍️",
-    "Porcelain and Glassware": "🏺",
-    "Vintage Toys": "🧸",
-    "Militaria": "🎖️",
-    "Old Maps and Atlases": "🗺️",
-    "Vintage Fashion": "👗",
-    "Music Records and Memorabilia": "💿",
-    "Scientific Instruments": "🔬",
-    "Art Deco Objects": "🎨",
-    "Ephemera": "📄",
-    "Film Props and Collectibles": "🎭",
-    "Classic Car Spare Parts": "🚗",
-    "Trading Cards": "🃏",
-    "Photos and Photographs": "📸",
-    "Book First Editions": "📚",
-    "Ethnic Artifacts": "🏛️",
-    "Watches and Timepieces": "⌚",
-    "Jewelry": "💎"
-  };
-
-  // Color gradients for categories
-  const categoryColors = [
-    "from-blue-500 to-purple-500",
-    "from-red-500 to-orange-500", 
-    "from-green-500 to-teal-500",
-    "from-pink-500 to-rose-500",
-    "from-yellow-500 to-amber-500",
-    "from-indigo-500 to-blue-500",
-    "from-amber-600 to-orange-600",
-    "from-purple-500 to-pink-500",
-    "from-orange-500 to-red-500",
-    "from-gray-600 to-gray-800",
-    "from-cyan-500 to-blue-500",
-    "from-violet-500 to-purple-600"
-  ];
 
   // Fetch collectible categories from API
   useEffect(() => {
@@ -90,7 +91,7 @@ const CategoryDropdown = ({
 
       try {
         console.log('Fetching categories from API...'); // Debug log
-        const response = await fetch('http://localhost:3000/api/categories?type=collectible');
+        const response = await fetch(`${API_BASE_URL}/api/categories?type=collectible`);
         console.log('Response status:', response.status); // Debug log
         
         if (!response.ok) {

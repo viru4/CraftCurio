@@ -15,16 +15,19 @@ import { formatPrice } from '@/lib/currency';
  *   - featured: boolean - shows featured badge
  *   - popular: boolean - shows popular badge
  *   - recent: boolean - shows new badge
+ *   - type: 'artisan-product' or 'collectible' (optional, defaults to 'artisan-product')
  * 
  * @param {Function} onClick - Optional callback when card is clicked, receives item as parameter
+ * @param {string} productType - Type of product: 'artisan-product' or 'collectible'
  * 
  * @example
  * <ProductCard 
  *   item={productData} 
+ *   productType="collectible"
  *   onClick={(item) => navigateToProduct(item.id)} 
  * />
  */
-const ProductCard = ({ item, onClick }) => {
+const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -32,14 +35,16 @@ const ProductCard = ({ item, onClick }) => {
       onClick(item);
     } else {
       // Default behavior: navigate to product details page
-      navigate(`/product/${item.id || item._id}`);
+      const type = item.type || productType;
+      navigate(`/product/${type}/${item.id || item._id}`);
     }
   };
 
   const handleViewDetails = (e) => {
     e.stopPropagation();
     // Navigate to product details page
-    navigate(`/product/${item.id || item._id}`);
+    const type = item.type || productType;
+    navigate(`/product/${type}/${item.id || item._id}`);
   };
 
   return (
