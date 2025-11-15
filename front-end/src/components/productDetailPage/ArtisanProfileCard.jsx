@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * ArtisanProfileCard Component
@@ -8,12 +9,21 @@ import React from 'react';
  * @param {boolean} showInSidebar - Whether this is in the desktop sidebar
  */
 const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = false }) => {
+  const navigate = useNavigate();
+  
   if (!artisanInfo) return null;
+
+  const handleArtisanClick = () => {
+    const artisanId = artisanInfo.id;
+    if (artisanId) {
+      navigate(`/artisan-stories/${artisanId}`);
+    }
+  };
 
   if (isMobile) {
     return (
-      <div className="artisan-profile flex items-center gap-4 border-t border-stone-200 pt-6 mt-6">
-        <div className="h-12 w-12 bg-stone-200 rounded-full border-2 border-orange-500 flex-shrink-0 overflow-hidden">
+      <div className="artisan-profile flex items-center gap-4 border-t border-stone-200 pt-6 mt-6 cursor-pointer group" onClick={handleArtisanClick}>
+        <div className="h-12 w-12 bg-stone-200 rounded-full border-2 border-orange-500 flex-shrink-0 overflow-hidden group-hover:border-orange-600 transition-colors">
           <img
             src={artisanInfo.profilePhotoUrl || '/placeholder-avatar.svg'}
             alt={artisanInfo.name}
@@ -24,7 +34,7 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-stone-800 text-base truncate">
+          <h3 className="font-semibold text-stone-800 text-base truncate group-hover:text-orange-600 transition-colors">
             {artisanInfo.name}
           </h3>
           {artisanInfo.briefBio && (
@@ -32,7 +42,13 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
               {artisanInfo.briefBio}
             </p>
           )}
-          <button className="text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleArtisanClick();
+            }}
+            className="text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
+          >
             View Profile & Items
           </button>
         </div>
@@ -44,8 +60,8 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
     return (
       <div className="border-t border-stone-200 pt-6">
         <h3 className="text-lg font-bold text-stone-900 mb-4">Artisan</h3>
-        <div className="flex items-start gap-3">
-          <div className="h-12 w-12 bg-stone-200 rounded-full border-2 border-orange-500 flex-shrink-0 overflow-hidden">
+        <div className="flex items-start gap-3 cursor-pointer group" onClick={handleArtisanClick}>
+          <div className="h-12 w-12 bg-stone-200 rounded-full border-2 border-orange-500 flex-shrink-0 overflow-hidden group-hover:border-orange-600 transition-colors">
             <img
               src={artisanInfo.profilePhotoUrl || '/placeholder-avatar.svg'}
               alt={artisanInfo.name}
@@ -56,7 +72,7 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h4 className="font-semibold text-stone-800 text-base">
+            <h4 className="font-semibold text-stone-800 text-base group-hover:text-orange-600 transition-colors">
               {artisanInfo.name}
             </h4>
             {artisanInfo.verified && (
@@ -65,7 +81,13 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
                 <span className="text-xs font-medium">Verified Artisan</span>
               </div>
             )}
-            <button className="text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleArtisanClick();
+              }}
+              className="text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-2"
+            >
               View Profile & Items
             </button>
           </div>

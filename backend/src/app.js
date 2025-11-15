@@ -11,13 +11,19 @@ import artisanRoutes from './api/routes/artisans.js';
 import collectorRoutes from './api/routes/collectors.js';
 import seedRoutes from './api/routes/seed.js';
 import authRouter from './api/routes/auth.routes.js';
+import orderRoutes from './api/routes/orders.js';
 
 
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -58,6 +64,7 @@ app.use('/api/artisans', artisanRoutes);
 app.use('/api/collectors', collectorRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/auth', authRouter);
+app.use('/api/orders', orderRoutes);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {

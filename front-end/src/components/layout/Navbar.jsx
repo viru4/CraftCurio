@@ -1,10 +1,42 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, User, LogOut, Settings, ShoppingCart, Heart } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 const Navbar = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const { getCartCount } = useCart();
+  const navigate = useNavigate();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef(null);
+  
+  const cartCount = getCartCount();
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileMenu]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+    setShowProfileMenu(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-b-[#f4f2f0]">
@@ -19,11 +51,113 @@ const Navbar = () => {
             <Link to="/" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Home</Link>
             <Link to="/collectibles" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</Link>
             <Link to="/artisans" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Products</Link>
+            <Link to="/artisan-stories" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Stories</Link>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
         </div>
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
+          {isAuthenticated ? (
+            <>
+              {/* Cart Icon with Badge */}
+              <Link 
+                to="/cart" 
+                className="relative p-2 rounded-full hover:bg-stone-100 transition-colors"
+                aria-label="Shopping cart"
+              >
+                <ShoppingCart className="h-6 w-6 text-stone-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[var(--primary-color)] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Wishlist Icon */}
+              <Link 
+                to="/wishlist" 
+                className="relative p-2 rounded-full hover:bg-stone-100 transition-colors"
+                aria-label="Wishlist"
+              >
+                <Heart className="h-6 w-6 text-stone-700" />
+              </Link>
+              
+              {/* Profile Dropdown */}
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 p-2 rounded-full hover:bg-stone-100 transition-colors"
+                  aria-label="User menu"
+                >
+                  <div className="h-10 w-10 rounded-full bg-[var(--primary-color)] flex items-center justify-center text-white font-semibold">
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                </button>
+                {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-stone-200 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-stone-200">
+                    <p className="text-sm font-semibold text-stone-900">{user?.name}</p>
+                    <p className="text-xs text-stone-500">{user?.email}</p>
+                    <p className="text-xs text-[var(--primary-color)] mt-1 capitalize">{user?.role}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigate('/cart');
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>Cart</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/wishlist');
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                  >
+                    <Heart className="h-4 w-4" />
+                    <span>Wishlist</span>
+                  </button>
+                  <div className="h-px bg-stone-200 my-2" />
+                  <button
+                    onClick={() => {
+                      navigate('/profile');
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/settings');
+                      setShowProfileMenu(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </button>
+                  <div className="h-px bg-stone-200 my-2" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+              </div>
+            </>
+          ) : (
+            <>
+              <Link to="/sign-in" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all">Sign In</Link>
+              <Link to="/sign-up" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-10 px-6 border-2 border-[var(--primary-color)] text-[var(--primary-color)] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[var(--primary-color)] hover:text-white transition-all">Sign Up</Link>
+            </>
+          )}
         </div>
         <div className="md:hidden flex items-center gap-2">
           <Sheet>
@@ -32,16 +166,81 @@ const Navbar = () => {
                 <Menu />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
-              <div className="flex flex-col gap-4">
-                <Link to="/" className="text-[var(--text-primary)]">Home</Link>
-                <Link to="/collectibles" className="text-[var(--text-primary)]">Collectibles</Link>
-                <Link to="/artisans" className="text-[var(--text-primary)]">Artisan Products</Link>
-                <a href="#" className="text-[var(--text-primary)]">About Us</a>
-                <div className="h-px bg-gray-200" />
-                <Link to="/sign-in">
-                  <Button size="sm" className="w-full">Sign In</Button>
-                </Link>
+            <SheetContent side="right" className="p-0">
+              <div className="flex flex-col h-full">
+                {/* Logo Section */}
+                <div className="px-6 pt-16 pb-4 border-b border-gray-200">
+                  <Link to="/" className="flex items-center gap-3 text-[var(--text-primary)] no-underline">
+                    <img src="/cc_favicon.png" alt="CraftCurio logo" className="h-8 w-8 rounded" />
+                    <h2 className="text-xl font-bold tracking-tight">CraftCurio</h2>
+                  </Link>
+                </div>
+
+                {/* Navigation Links */}
+                <nav className="flex-1 px-6 py-4 space-y-1">
+                  <Link to="/" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Home</Link>
+                  <Link to="/collectibles" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Collectibles</Link>
+                  <Link to="/artisans" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Artisan Products</Link>
+                  <Link to="/artisan-stories" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Artisan Stories</Link>
+                  <a href="#" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">About Us</a>
+                </nav>
+
+                {/* User Section */}
+                <div className="border-t border-gray-200 px-6 py-4 space-y-2">
+                  {isAuthenticated ? (
+                    <>
+                      {/* User Info */}
+                      <div className="px-3 py-3 bg-stone-50 rounded-lg mb-3">
+                        <p className="text-sm font-semibold text-stone-900 truncate">{user?.name}</p>
+                        <p className="text-xs text-stone-500 truncate">{user?.email}</p>
+                        <p className="text-xs text-[var(--primary-color)] mt-1 capitalize font-medium">{user?.role}</p>
+                      </div>
+                      
+                      {/* Cart & Wishlist */}
+                      <Link to="/cart" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                        <ShoppingCart className="h-5 w-5" />
+                        <span>Cart</span>
+                        {cartCount > 0 && (
+                          <span className="ml-auto bg-[var(--primary-color)] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {cartCount > 9 ? '9+' : cartCount}
+                          </span>
+                        )}
+                      </Link>
+                      <Link to="/wishlist" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                        <Heart className="h-5 w-5" />
+                        <span>Wishlist</span>
+                      </Link>
+                      
+                      <div className="h-px bg-gray-200 my-3" />
+                      
+                      {/* Profile & Settings */}
+                      <Link to="/profile" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                        <User className="h-5 w-5" />
+                        <span>Profile</span>
+                      </Link>
+                      <Link to="/settings" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                        <Settings className="h-5 w-5" />
+                        <span>Settings</span>
+                      </Link>
+                      
+                      <div className="pt-3">
+                        <Button onClick={handleLogout} variant="destructive" size="sm" className="w-full h-11 text-base font-semibold">
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/sign-in" className="block">
+                        <Button size="lg" className="w-full h-11 text-base font-semibold">Sign In</Button>
+                      </Link>
+                      <Link to="/sign-up" className="block">
+                        <Button size="lg" variant="outline" className="w-full h-11 text-base font-semibold">Sign Up</Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>

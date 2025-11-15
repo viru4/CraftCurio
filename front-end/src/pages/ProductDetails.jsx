@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, Footer } from '../components/layout';
 import API_BASE_URL from '../config/api';
+import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import {
   StarRating,
   ProductImageGallery,
@@ -19,11 +21,14 @@ import {
 const ProductDetails = () => {
   const { type, id } = useParams(); // type can be 'artisan-product' or 'collectible'
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('reviews');
+  const [showAlert, setShowAlert] = useState(false);
 
   // Determine if this is a collectible or artisan product
   const isCollectible = type === 'collectible';
@@ -90,6 +95,13 @@ const ProductDetails = () => {
 
   // Handle like product
   const handleLike = async () => {
+    // Check if user is logged in
+    if (!isAuthenticated) {
+      alert('Please sign in to add items to your wishlist');
+      navigate('/sign-in');
+      return;
+    }
+
     try {
       const endpoint = isCollectible 
         ? `${API_BASE_URL}/api/collectibles/${id}/like`
@@ -112,6 +124,40 @@ const ProductDetails = () => {
     } catch (err) {
       console.error('Error liking product:', err);
     }
+  };
+
+  // Handle add to cart
+  const handleAddToCart = (quantity = 1) => {
+    if (!product) return;
+
+    // Check if user is logged in
+    if (!isAuthenticated) {
+      alert('Please sign in to add items to your cart');
+      navigate('/sign-in');
+      return;
+    }
+
+    const cartProduct = {
+      id: product._id || product.id,
+      name: product.title,
+      price: typeof product.price === 'string' 
+        ? parseFloat(product.price.replace(/[^0-9.]/g, '')) 
+        : product.price,
+      image: product.images?.[0] || product.image,
+      artisan: product.artisanInfo?.name || product.artisan || 'Artisan',
+      category: product.category,
+    };
+
+    // Add to cart with specified quantity
+    for (let i = 0; i < quantity; i++) {
+      addToCart(cartProduct);
+    }
+
+    // Show success alert
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3000);
   };
 
   // Loading state
@@ -163,6 +209,29 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen bg-stone-50">
       <Navbar />
+      
+      {/* Success Alert */}
+      {showAlert && (
+        <div className="fixed top-24 right-4 z-50 animate-slide-in-right">
+          <div className="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <p className="font-semibold">Added to cart!</p>
+              <p className="text-sm text-green-100">{product?.title}</p>
+            </div>
+            <button 
+              onClick={() => setShowAlert(false)}
+              className="ml-4 hover:bg-green-600 rounded p-1 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
       
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -220,6 +289,7 @@ const ProductDetails = () => {
                   availability={product.availability}
                   likes={product.likes || 0}
                   onLike={handleLike}
+                  onAddToCart={handleAddToCart}
                   isMobile={true}
                   isCollectible={isCollectible}
                 />
@@ -285,24 +355,16 @@ const ProductDetails = () => {
                   <ProductBadges product={product} />
                 )}
 
-                {/* Price and Action Buttons */}
-                <div>
-                  <div className="flex flex-col gap-4">
-                    <p className="text-5xl font-bold text-stone-800">₹{(product.price || 0).toLocaleString()}</p>
-                    <div className="flex items-center gap-4">
-                      {isCollectible && (
-                        <div className="flex items-center rounded-lg border border-stone-300">
-                          <button className="px-3 py-2 text-stone-600 hover:text-stone-900">-</button>
-                          <span className="px-3 py-2 text-stone-900 font-medium">1</span>
-                          <button className="px-3 py-2 text-stone-600 hover:text-stone-900">+</button>
-                        </div>
-                      )}
-                      <button className="flex-1 rounded-lg bg-orange-500 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-orange-600 transition-colors">
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                {/* Price and Action Buttons - Using ProductPriceCard component */}
+                <ProductPriceCard
+                  price={product.price || 0}
+                  availability={product.availability}
+                  likes={product.likes || 0}
+                  onLike={handleLike}
+                  onAddToCart={handleAddToCart}
+                  isMobile={false}
+                  isCollectible={isCollectible}
+                />
 
                 {/* Description for Collectibles */}
                 {isCollectible && product.description && (

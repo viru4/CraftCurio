@@ -1,77 +1,88 @@
 import mongoose from 'mongoose';
 
 const collectibleSchema = new mongoose.Schema({
-  id: { type: String, unique: true, sparse: true },  // Custom ID like "coll1", "coll2" (optional for backward compatibility)
   title: { type: String, required: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true },
-  category: { type: String, required: true },
+  price: { type: Number, required: true, min: 0 }, // Changed to Number for proper numeric sorting/calculations
+  category: { type: String, required: true, index: true }, // Indexed for query performance
   image: { type: String, required: true },
-  images: [{ type: String }],                              // Array of additional images
-  featured: { type: Boolean, default: false },
-  popular: { type: Boolean, default: false },
+  images: [{ type: String }], // Additional images array
+
+  featured: { type: Boolean, default: false, index: true },
+  popular: { type: Boolean, default: false, index: true },
   recent: { type: Boolean, default: false },
+
   targetSection: { type: String, default: 'filtered-items-section' },
   buttonText: { type: String, default: 'Explore Collection' },
-  views: { type: Number, default: 0 },
-  likes: { type: Number, default: 0 },
-  
+
+  views: { type: Number, default: 0, min: 0 },
+  likes: { type: Number, default: 0, min: 0 },
+
   // Historical and story information
-  history: { type: String },                               // Historical background of the collectible
-  provenance: { type: String },                            // Origin and ownership history
-  productStory: {                                          // Product story object
-    storyText: { type: String },                          // Detailed product story text
-    storyMediaUrls: [{ type: String }]                    // Array of media URLs (images/videos)
-  },
+  history: { type: String },
+  provenance: { type: String },
   
+  productStory: {
+    storyText: { type: String },
+    storyMediaUrls: [{ type: String }]
+  },
+
   // Additional details
-  specifications: {                                        // Technical specifications
+  specifications: {
     material: String,
     dimensions: {
-      height: Number,
-      width: Number,
-      depth: Number,
+      height: { type: Number, min: 0 },
+      width: { type: Number, min: 0 },
+      depth: { type: Number, min: 0 },
       unit: { type: String, default: 'cm' }
     },
-    weight: Number,
+    weight: { type: Number, min: 0 },
     condition: String,
     yearMade: String,
     origin: String
   },
-  
+
   // Collectible-specific details
-  manufacturer: { type: String },                          // Manufacturer name
-  serialNumber: { type: String },                          // Serial number
-  editionNumber: { type: String },                         // Edition number (e.g., #SN54-1887)
-  
+  manufacturer: { type: String },
+  serialNumber: { type: String },
+  editionNumber: { type: String },
+
   // Shipping information
   shippingInfo: {
     estimatedDeliveryDays: { type: String, default: '5-7' },
-    weight: Number,
+    weight: { type: Number, min: 0 },
     dimensions: {
-      height: Number,
-      width: Number,
-      depth: Number
+      height: { type: Number, min: 0 },
+      width: { type: Number, min: 0 },
+      depth: { type: Number, min: 0 },
+      unit: { type: String, default: 'cm' }  // Made explicit unit here for shipping dimensions
     },
-    freeShippingThreshold: { type: Number, default: 500 }
+    freeShippingThreshold: { type: Number, default: 500, min: 0 }
   },
-  
+
   // Rating and reviews
   rating: {
-    average: { type: Number, default: 0 },
-    count: { type: Number, default: 0 }
+    average: { type: Number, default: 0, min: 0, max: 5 },
+    count: { type: Number, default: 0, min: 0 }
   },
+
   reviews: [{
     userName: String,
-    userRating: Number,
+    userRating: { type: Number, min: 0, max: 5 },
     reviewTitle: String,
     reviewText: String,
-    reviewDate: Date
+    reviewDate: { type: Date, default: Date.now }
   }],
-  
-  availability: { type: Boolean, default: true },          // If collectible is available
-  authenticityCertificateUrl: { type: String },            // URL to authenticity certificate
-  tags: [{ type: String }]                                 // Search tags and keywords
+
+  availability: { type: Boolean, default: true },
+  authenticityCertificateUrl: { type: String },
+
+  tags: [{ type: String, index: true }] // Index tags for efficient search
 }, { timestamps: true });
+
+// Suggested indexes for better query performance
+// collectibleSchema.index({ category: 1 });
+// collectibleSchema.index({ tags: 1 });
+// collectibleSchema.index({ featured: 1, popular: 1 });
 
 export default mongoose.model('Collectible', collectibleSchema);

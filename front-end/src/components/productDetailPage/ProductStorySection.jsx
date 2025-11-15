@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * ProductStorySection Component
@@ -6,7 +7,16 @@ import React from 'react';
  * @param {Object} product - Product object with story details
  */
 const ProductStorySection = ({ product }) => {
+  const navigate = useNavigate();
+  
   if (!product) return null;
+
+  const handleArtisanClick = () => {
+    const artisanId = product.artisanInfo?.id;
+    if (artisanId) {
+      navigate(`/artisan-stories/${artisanId}`);
+    }
+  };
 
   const storyText = product.productStory?.storyText || product.craftingStory || product.history ||
     `This ${product.title.toLowerCase()} represents centuries of traditional craftsmanship passed down through generations. Each piece tells a story of cultural preservation and artistic excellence, embodying the rich heritage of ${product.provenance?.split(',')[1]?.trim() || product.specifications?.origin || 'traditional artisanship'}.`;
@@ -120,8 +130,8 @@ const ProductStorySection = ({ product }) => {
                 <span className="material-symbols-outlined text-orange-600">groups</span>
                 <h3 className="text-lg font-semibold text-stone-800">Artisan Legacy</h3>
               </div>
-              <div className="flex flex-col md:flex-row gap-4 items-start">
-                <div className="w-16 h-16 bg-orange-200 rounded-full overflow-hidden flex-shrink-0">
+              <div className="flex flex-col md:flex-row gap-4 items-start cursor-pointer group" onClick={handleArtisanClick}>
+                <div className="w-16 h-16 bg-orange-200 rounded-full overflow-hidden flex-shrink-0 border-2 border-orange-300 group-hover:border-orange-500 transition-colors">
                   <img
                     src={product.artisanInfo.profilePhotoUrl || '/placeholder-avatar.svg'}
                     alt={product.artisanInfo.name}
@@ -133,7 +143,7 @@ const ProductStorySection = ({ product }) => {
                 </div>
                 <div className="flex-1">
                   <p className="text-stone-700 leading-relaxed">
-                    <strong className="text-orange-600">{product.artisanInfo.name}</strong> continues a family tradition that spans generations. 
+                    <strong className="text-orange-600 group-hover:text-orange-700 transition-colors cursor-pointer">{product.artisanInfo.name}</strong> continues a family tradition that spans generations. 
                     Their dedication to preserving traditional methods while embracing innovation ensures that each piece maintains 
                     its authentic character while meeting contemporary standards of excellence.
                   </p>
@@ -143,6 +153,15 @@ const ProductStorySection = ({ product }) => {
                       <span className="text-sm font-medium">Verified Master Artisan</span>
                     </div>
                   )}
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleArtisanClick();
+                    }}
+                    className="text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors mt-2"
+                  >
+                    View Full Story →
+                  </button>
                 </div>
               </div>
             </div>

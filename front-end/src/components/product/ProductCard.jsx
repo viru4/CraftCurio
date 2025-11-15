@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/currency';
+import { ShoppingCart, Check } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * ProductCard - A reusable component for displaying product information
@@ -29,6 +32,10 @@ import { formatPrice } from '@/lib/currency';
  */
 const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
   const navigate = useNavigate();
+  const { addToCart, isInCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [showAddedMessage, setShowAddedMessage] = useState(false);
+  const itemInCart = isInCart(item.id || item._id);
 
   const handleClick = () => {
     if (onClick) {
@@ -45,6 +52,35 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
     // Navigate to product details page
     const type = item.type || productType;
     navigate(`/product/${type}/${item.id || item._id}`);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    
+    // Check if user is logged in
+    if (!isAuthenticated) {
+      alert('Please sign in to add items to your cart');
+      navigate('/sign-in');
+      return;
+    }
+    
+    // Prepare product data for cart
+    const cartProduct = {
+      id: item.id || item._id,
+      name: item.title,
+      price: typeof item.price === 'string' ? parseFloat(item.price.replace(/[^0-9.]/g, '')) : item.price,
+      image: item.image,
+      artisan: item.artisan || item.artisanName || 'Artisan',
+      category: item.category,
+    };
+
+    addToCart(cartProduct);
+    
+    // Show added message
+    setShowAddedMessage(true);
+    setTimeout(() => {
+      setShowAddedMessage(false);
+    }, 2000);
   };
 
   return (
@@ -90,16 +126,46 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
         <p className="text-stone-600 text-sm mb-4 line-clamp-2">
           {item.description}
         </p>
-        <div className="flex items-center justify-between">
-          <span className="text-xl sm:text-2xl font-bold text-amber-600">
-            {formatPrice(item.price, item.currency)}
-          </span>
-          <button 
-            onClick={handleViewDetails}
-            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm hover:shadow-md"
-          >
-            View Details
-          </button>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xl sm:text-2xl font-bold text-amber-600">
+              {formatPrice(item.price, item.currency)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleAddToCart}
+              disabled={showAddedMessage}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
+                itemInCart || showAddedMessage
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-amber-500 hover:bg-amber-600 text-white hover:shadow-md'
+              }`}
+            >
+              {showAddedMessage ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  Added!
+                </>
+              ) : itemInCart ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  In Cart
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  Add to Cart
+                </>
+              )}
+            </button>
+            <button 
+              onClick={handleViewDetails}
+              className="px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm border-2 border-amber-500 text-amber-600 hover:bg-amber-50"
+            >
+              View
+            </button>
+          </div>
         </div>
       </div>
     </div>

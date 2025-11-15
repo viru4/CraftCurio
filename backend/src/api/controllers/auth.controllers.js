@@ -1,4 +1,6 @@
 import User from '../../models/User.js';
+import Artisan from '../../models/Artisan.js';
+import Collector from '../../models/Collector.js';
 import bcrypt from 'bcryptjs';
 import genToken from '../../utils/token.js';
 
@@ -29,6 +31,10 @@ export const signUp = async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 8 characters long.' });
     }
 
+    // Validate role
+    const validRoles = ['buyer', 'artisan', 'collector'];
+    const userRole = role && validRoles.includes(role) ? role : 'buyer';
+
     const normalizedEmail = normalizeEmail(email);
     const existingUser = await User.findOne({ email: normalizedEmail });
 
@@ -42,8 +48,34 @@ export const signUp = async (req, res) => {
       name: fullName.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      role: role || undefined
+      role: userRole
     });
+
+    // Create role-specific profile
+    if (userRole === 'artisan') {
+      // Generate unique artisan ID
+      const artisanCount = await Artisan.countDocuments();
+      const artisanId = `artisan${artisanCount + 1}`;
+      
+      await Artisan.create({
+        id: artisanId,
+        userId: user._id,
+        name: fullName.trim(),
+        craftSpecialization: 'Not specified',
+        verified: false
+      });
+    } else if (userRole === 'collector') {
+      // Generate unique collector ID
+      const collectorCount = await Collector.countDocuments();
+      const collectorId = `collector${collectorCount + 1}`;
+      
+      await Collector.create({
+        id: collectorId,
+        userId: user._id,
+        name: fullName.trim(),
+        interests: []
+      });
+    }
 
     const token = genToken(user._id.toString());
     res.cookie('token', token, buildCookieOptions());
@@ -91,5 +123,131 @@ export const signIn = async (req, res) => {
   } catch (error) {
     console.error('signIn error:', error);
     return res.status(500).json({ message: 'An unexpected error occurred during sign in.' });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie('token', buildCookieOptions());
+    return res.status(200).json({ message: 'Logged out successfully.' });
+  } catch (error) {
+    console.error('logout error:', error);
+    return res.status(500).json({ message: 'An unexpected error occurred during logout.' });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    return res.status(200).json({
+      user: sanitizeUser(req.user)
+    });
+  } catch (error) {
+    console.error('getCurrentUser error:', error);
+    return res.status(500).json({ message: 'An unexpected error occurred.' });
+  }
+};
+
+// Get user profile
+export const getProfile = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const user = await User.findById(req.user._id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      user: sanitizeUser(user)
+    });
+  } catch (error) {
+    console.error('getProfile error:', error);
+    return res.status(500).json({ message: 'Failed to fetch profile' });
+  }
+};
+
+// Update user profile
+export const updateProfile = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const { name, phone, address, profileImage } = req.body;
+
+    const updateData = {};
+    if (name) updateData.name = name.trim();
+    if (phone !== undefined) updateData.phone = phone;
+    if (address) updateData.address = address;
+    if (profileImage !== undefined) updateData.profileImage = profileImage;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      message: 'Profile updated successfully',
+      user: sanitizeUser(user)
+    });
+  } catch (error) {
+    console.error('updateProfile error:', error);
+    return res.status(500).json({ message: 'Failed to update profile' });
+  }
+};
+
+// Change password
+export const changePassword = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current password and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash and update new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Password updated successfully'
+    });
+  } catch (error) {
+    console.error('changePassword error:', error);
+    return res.status(500).json({ message: 'Failed to change password' });
   }
 };
