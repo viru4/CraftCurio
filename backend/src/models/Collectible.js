@@ -76,6 +76,11 @@ const collectibleSchema = new mongoose.Schema({
 
   availability: { type: Boolean, default: true },
   authenticityCertificateUrl: { type: String },
+  status: { 
+    type: String, 
+    enum: ['pending', 'approved', 'rejected', 'active', 'inactive'], 
+    default: 'pending' 
+  },                                                        // Collectible approval status
 
   tags: [{ type: String, index: true }] // Index tags for efficient search
 }, { timestamps: true });

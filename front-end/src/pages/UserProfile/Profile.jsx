@@ -12,7 +12,7 @@ import {
 } from './components';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,12 +44,14 @@ const Profile = () => {
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       navigate('/sign-in');
       return;
     }
-    fetchProfile();
-  }, [user, navigate]);
+    if (user) {
+      fetchProfile();
+    }
+  }, [user, authLoading, navigate]);
 
   const fetchProfile = async () => {
     try {

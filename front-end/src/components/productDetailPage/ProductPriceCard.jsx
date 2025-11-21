@@ -5,17 +5,17 @@ import React from 'react';
  * Displays product price, availability, and action buttons
  * @param {number} price - Product price
  * @param {boolean} availability - Stock availability
- * @param {number} likes - Number of likes
- * @param {Function} onLike - Callback for like button
+ * @param {boolean} isInWishlist - Whether the product is in the wishlist
+ * @param {Function} onToggleWishlist - Callback for wishlist toggle button
  * @param {Function} onAddToCart - Callback for add to cart button
  * @param {boolean} isMobile - Whether to show mobile layout
  * @param {boolean} isCollectible - Whether this is a collectible (shows quantity selector)
  */
 const ProductPriceCard = ({ 
   price = 0, 
-  availability = true, 
-  likes = 0, 
-  onLike,
+  availability = true,
+  isInWishlist = false,
+  onToggleWishlist,
   onAddToCart,
   isMobile = false,
   isCollectible = false
@@ -107,13 +107,19 @@ const ProductPriceCard = ({
           
           {/* Wishlist Button - Always shown */}
           <button 
-            onClick={onLike}
-            className="w-full rounded-lg border border-stone-300 bg-white px-6 py-3 text-base font-bold text-stone-700 shadow-sm hover:bg-stone-50 transition-colors"
-            aria-label={`Add to wishlist (${likes} likes)`}
+            onClick={onToggleWishlist}
+            className={`w-full rounded-lg border px-6 py-3 text-base font-bold shadow-sm transition-colors ${
+              isInWishlist 
+                ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
+                : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
+            }`}
+            aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <span className="flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined">favorite_border</span>
-              <span>Wishlist ({likes})</span>
+              <span className="material-symbols-outlined" style={isInWishlist ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                {isInWishlist ? 'favorite' : 'favorite_border'}
+              </span>
+              <span>{isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}</span>
             </span>
           </button>
         </div>
@@ -182,12 +188,18 @@ const ProductPriceCard = ({
         )}
         
         <button 
-          onClick={onLike}
-          className="sm:col-span-2 flex items-center justify-center gap-2 rounded-md h-12 px-6 border border-stone-300 bg-white text-stone-700 text-base font-bold shadow-sm hover:bg-stone-50 transition-colors"
-          aria-label={`Add to wishlist (${likes} likes)`}
+          onClick={onToggleWishlist}
+          className={`sm:col-span-2 flex items-center justify-center gap-2 rounded-md h-12 px-6 border text-base font-bold shadow-sm transition-colors ${
+            isInWishlist 
+              ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
+              : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
+          }`}
+          aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <span className="material-symbols-outlined">favorite_border</span>
-          <span className="truncate">Add to Wishlist ({likes})</span>
+          <span className="material-symbols-outlined" style={isInWishlist ? { fontVariationSettings: "'FILL' 1" } : {}}>
+            {isInWishlist ? 'favorite' : 'favorite_border'}
+          </span>
+          <span className="truncate">{isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}</span>
         </button>
       </div>
     </div>

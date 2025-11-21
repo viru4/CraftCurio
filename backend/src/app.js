@@ -12,6 +12,10 @@ import collectorRoutes from './api/routes/collectors.js';
 import seedRoutes from './api/routes/seed.js';
 import authRouter from './api/routes/auth.routes.js';
 import orderRoutes from './api/routes/orders.js';
+import wishlistRoutes from './api/routes/wishlist.js';
+import cartRoutes from './api/routes/cart.js';
+import adminRouter from './api/routes/admin.routes.js';
+import messageRoutes from './api/routes/message.routes.js';
 
 
 
@@ -21,7 +25,7 @@ const app = express();
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
@@ -65,6 +69,10 @@ app.use('/api/collectors', collectorRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/auth', authRouter);
 app.use('/api/orders', orderRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/admin', adminRouter);
+app.use('/api/messages', messageRoutes);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {

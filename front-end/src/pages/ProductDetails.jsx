@@ -4,6 +4,7 @@ import { Navbar, Footer } from '../components/layout';
 import API_BASE_URL from '../config/api';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import {
   StarRating,
   ProductImageGallery,
@@ -22,6 +23,7 @@ const ProductDetails = () => {
   const { type, id } = useParams(); // type can be 'artisan-product' or 'collectible'
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -93,8 +95,8 @@ const ProductDetails = () => {
     }
   }, [id, type, isCollectible]);
 
-  // Handle like product
-  const handleLike = async () => {
+  // Handle toggle wishlist
+  const handleToggleWishlist = () => {
     // Check if user is logged in
     if (!isAuthenticated) {
       alert('Please sign in to add items to your wishlist');
@@ -102,28 +104,21 @@ const ProductDetails = () => {
       return;
     }
 
-    try {
-      const endpoint = isCollectible 
-        ? `${API_BASE_URL}/api/collectibles/${id}/like`
-        : `${API_BASE_URL}/api/artisan-products/${id}/like`;
-      
-      const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setProduct(prev => ({
-          ...prev,
-          likes: data.data.likes
-        }));
-      }
-    } catch (err) {
-      console.error('Error liking product:', err);
-    }
+    if (!product) return;
+
+    const wishlistProduct = {
+      id: product._id || product.id,
+      name: product.title,
+      price: typeof product.price === 'string' 
+        ? parseFloat(product.price.replace(/[^0-9.]/g, '')) 
+        : product.price,
+      image: product.images?.[0] || product.image,
+      artisan: product.artisanInfo?.name || product.artisan || 'Artisan',
+      category: product.category,
+      type: type,
+    };
+
+    toggleWishlist(wishlistProduct);
   };
 
   // Handle add to cart
@@ -287,8 +282,8 @@ const ProductDetails = () => {
                 <ProductPriceCard
                   price={product.price || 0}
                   availability={product.availability}
-                  likes={product.likes || 0}
-                  onLike={handleLike}
+                  isInWishlist={isInWishlist(product._id || product.id)}
+                  onToggleWishlist={handleToggleWishlist}
                   onAddToCart={handleAddToCart}
                   isMobile={true}
                   isCollectible={isCollectible}
@@ -359,8 +354,8 @@ const ProductDetails = () => {
                 <ProductPriceCard
                   price={product.price || 0}
                   availability={product.availability}
-                  likes={product.likes || 0}
-                  onLike={handleLike}
+                  isInWishlist={isInWishlist(product._id || product.id)}
+                  onToggleWishlist={handleToggleWishlist}
                   onAddToCart={handleAddToCart}
                   isMobile={false}
                   isCollectible={isCollectible}

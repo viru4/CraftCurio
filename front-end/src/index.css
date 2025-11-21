@@ -178,3 +178,33 @@
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
 }
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thumb-\[#ec6d13\]::-webkit-scrollbar-thumb {
+  background-color: #ec6d13;
+  border-radius: 4px;
+}
+
+.scrollbar-thumb-\[#ec6d13\]::-webkit-scrollbar-thumb:hover {
+  background-color: #d45f0f;
+}
+
+.scrollbar-track-\[#f8f7f6\]::-webkit-scrollbar-track {
+  background-color: #f8f7f6;
+  border-radius: 4px;
+}
+
+.dark .scrollbar-track-\[#221810\]::-webkit-scrollbar-track {
+  background-color: #221810;
+  border-radius: 4px;
+}
+

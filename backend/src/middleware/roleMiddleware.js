@@ -41,3 +41,8 @@ export const requireCollector = requireRole('collector');
  * Middleware to check if user is an artisan or collector (sellers)
  */
 export const requireSeller = requireRole('artisan', 'collector');
+
+/**
+ * Middleware to check if user is an admin
+ */
+export const requireAdmin = requireRole('admin');

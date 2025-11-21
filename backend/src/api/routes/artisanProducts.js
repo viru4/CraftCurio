@@ -6,6 +6,8 @@ import {
   getRecentArtisanProducts,
   getArtisanProductById,
   createArtisanProduct,
+  updateArtisanProduct,
+  deleteArtisanProduct,
   likeArtisanProduct
 } from '../controllers/artisanProductController.js';
 
@@ -28,6 +30,12 @@ router.get('/:id', getArtisanProductById);
 
 // POST /api/artisan-products - Create new artisan product
 router.post('/', createArtisanProduct);
+
+// PATCH /api/artisan-products/:id - Update artisan product
+router.patch('/:id', updateArtisanProduct);
+
+// DELETE /api/artisan-products/:id - Delete artisan product
+router.delete('/:id', deleteArtisanProduct);
 
 // PUT /api/artisan-products/:id/like - Like an artisan product
 router.put('/:id/like', likeArtisanProduct);

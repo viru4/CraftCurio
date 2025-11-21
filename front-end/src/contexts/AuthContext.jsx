@@ -15,17 +15,20 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
 
   const logout = async () => {
     try {
-      await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const currentToken = localStorage.getItem('token');
+      if (currentToken) {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`
+          }
+        });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -44,10 +47,12 @@ export const AuthProvider = ({ children }) => {
 
       if (storedToken && storedUser) {
         try {
+          // Set token and user from storage immediately
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
           
-          // Verify token is still valid
+          // Verify token is still valid in the background
           const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
             headers: {
               'Authorization': `Bearer ${storedToken}`
@@ -56,22 +61,30 @@ export const AuthProvider = ({ children }) => {
           });
 
           if (!response.ok) {
-            throw new Error('Token invalid');
+            // Only logout if we get an explicit auth error (401/403)
+            if (response.status === 401 || response.status === 403) {
+              console.warn('Token expired or invalid, logging out');
+              setUser(null);
+              setToken(null);
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+            }
+          } else {
+            // Update with fresh user data from server
+            const data = await response.json();
+            setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
           }
-
-          const data = await response.json();
-          setUser(data.user);
-          localStorage.setItem('user', JSON.stringify(data.user));
         } catch (error) {
           console.error('Auth initialization error:', error);
-          logout();
+          // Don't logout on network errors - keep the user logged in
+          // Only clear auth on explicit authentication failures
         }
       }
       setLoading(false);
     };
 
     initAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const login = (userData, authToken) => {

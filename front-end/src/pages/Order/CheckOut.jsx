@@ -9,19 +9,19 @@ import { Lock, ArrowRight } from 'lucide-react';
 const CheckOut = () => {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   
   const [currentStep] = useState(1); // 1: Shipping, 2: Payment, 3: Review
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Redirect to sign-in if not authenticated
+  // Redirect to sign-in if not authenticated (but wait for loading to finish)
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       alert('Please sign in to proceed with checkout');
       navigate('/sign-in');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, loading, navigate]);
   
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '',
@@ -124,6 +124,15 @@ const CheckOut = () => {
   };
 
   const progressPercentage = (currentStep / 3) * 100;
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary-color)]"></div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (

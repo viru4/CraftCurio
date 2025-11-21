@@ -3,19 +3,21 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const MyOrders = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       navigate('/sign-in');
       return;
     }
-    fetchOrders();
-  }, [user, navigate]);
+    if (user) {
+      fetchOrders();
+    }
+  }, [user, authLoading, navigate]);
 
   const fetchOrders = async () => {
     try {

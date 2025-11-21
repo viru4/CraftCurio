@@ -47,6 +47,11 @@ const artisanProductSchema = new mongoose.Schema({
   featured: { type: Boolean, default: false },            // Featured product flag
   popular: { type: Boolean, default: false },             // Popular product flag
   recent: { type: Boolean, default: false },              // Recent product flag
+  status: { 
+    type: String, 
+    enum: ['pending', 'approved', 'rejected', 'active', 'inactive'], 
+    default: 'pending' 
+  },                                                        // Product approval status
   views: { type: Number, default: 0 },                    // View count
   likes: { type: Number, default: 0 }                     // Like count
 }, { timestamps: true });

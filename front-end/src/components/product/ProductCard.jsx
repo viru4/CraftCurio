@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/currency';
-import { ShoppingCart, Check } from 'lucide-react';
+import { ShoppingCart, Check, Heart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 /**
  * ProductCard - A reusable component for displaying product information
@@ -33,9 +34,11 @@ import { useAuth } from '@/contexts/AuthContext';
 const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
   const navigate = useNavigate();
   const { addToCart, isInCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
   const [showAddedMessage, setShowAddedMessage] = useState(false);
   const itemInCart = isInCart(item.id || item._id);
+  const itemInWishlist = isInWishlist(item.id || item._id);
 
   const handleClick = () => {
     if (onClick) {
@@ -83,6 +86,30 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
     }, 2000);
   };
 
+  const handleToggleWishlist = (e) => {
+    e.stopPropagation();
+    
+    // Check if user is logged in
+    if (!isAuthenticated) {
+      alert('Please sign in to add items to your wishlist');
+      navigate('/sign-in');
+      return;
+    }
+    
+    // Prepare product data for wishlist
+    const wishlistProduct = {
+      id: item.id || item._id,
+      name: item.title,
+      price: typeof item.price === 'string' ? parseFloat(item.price.replace(/[^0-9.]/g, '')) : item.price,
+      image: item.image,
+      artisan: item.artisan || item.artisanName || 'Artisan',
+      category: item.category,
+      type: item.type || productType,
+    };
+
+    toggleWishlist(wishlistProduct);
+  };
+
   return (
     <div 
       className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-stone-200 hover:border-amber-300 cursor-pointer"
@@ -95,13 +122,28 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
           className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
+        {/* Category Badge */}
         <div className="absolute top-3 right-3">
           <span className="bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
             {item.category.split(' ')[0]}
           </span>
         </div>
+        {/* Wishlist Heart Button */}
+        <button
+          onClick={handleToggleWishlist}
+          className="absolute top-3 left-3 flex items-center justify-center w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md z-10"
+          aria-label={itemInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart 
+            className={`w-5 h-5 transition-all ${
+              itemInWishlist 
+                ? 'fill-red-500 text-red-500' 
+                : 'text-stone-600 hover:text-red-500'
+            }`} 
+          />
+        </button>
         {/* Featured/Popular/Recent badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1">
+        <div className="absolute top-12 left-3 flex flex-col gap-1">
           {item.featured && (
             <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
               Featured

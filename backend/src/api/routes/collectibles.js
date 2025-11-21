@@ -71,6 +71,64 @@ router.get('/:id', getCollectibleById);
 // POST /api/collectibles - Create new collectible
 router.post('/', createCollectibles);
 
+// PATCH /api/collectibles/:id - Update collectible
+router.patch('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Find collectible by MongoDB _id or custom id field
+    let collectible = await Collectible.findById(id);
+    if (!collectible) {
+      collectible = await Collectible.findOne({ id });
+    }
+
+    if (!collectible) {
+      return res.status(404).json({ error: 'Collectible not found' });
+    }
+
+    // Update fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined) {
+        collectible[key] = updateData[key];
+      }
+    });
+
+    const updatedCollectible = await collectible.save();
+
+    res.status(200).json({
+      message: 'Collectible updated successfully',
+      data: updatedCollectible
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// DELETE /api/collectibles/:id - Delete collectible
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete collectible by MongoDB _id or custom id field
+    let collectible = await Collectible.findByIdAndDelete(id);
+    if (!collectible) {
+      collectible = await Collectible.findOneAndDelete({ id });
+    }
+
+    if (!collectible) {
+      return res.status(404).json({ error: 'Collectible not found' });
+    }
+
+    res.status(200).json({
+      message: 'Collectible deleted successfully',
+      data: collectible
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // PUT /api/collectibles/:id/like - Like a collectible
 router.put('/:id/like', async (req, res) => {
   try {

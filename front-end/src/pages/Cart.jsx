@@ -9,15 +9,15 @@ import { useAuth } from '@/contexts/AuthContext';
 const Cart = () => {
   const navigate = useNavigate();
   const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  // Redirect to sign-in if not authenticated
+  // Redirect to sign-in if not authenticated (but wait for loading to finish)
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       alert('Please sign in to view your cart');
       navigate('/sign-in');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, loading, navigate]);
 
   const shippingCost = cartItems.length > 0 ? 5.00 : 0;
 
@@ -39,6 +39,15 @@ const Cart = () => {
     const quantity = parseInt(value) || 1;
     updateQuantity(id, Math.max(1, quantity));
   };
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f7f6] dark:bg-[#221810]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f8f7f6] dark:bg-[#221810]">

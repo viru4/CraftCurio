@@ -18,7 +18,9 @@ export const getArtisanProducts = async (req, res) => {
       featured, 
       popular, 
       recent, 
-      search, 
+      search,
+      status,
+      artisan,
       limit = 50, 
       page = 1,
       sort = 'createdAt',
@@ -28,8 +30,23 @@ export const getArtisanProducts = async (req, res) => {
     // Build filter object
     const filter = {};
     
+    // Filter by artisan if provided
+    if (artisan) {
+      console.log('🔍 Filtering by artisan ID:', artisan);
+      filter['artisanInfo.id'] = artisan;
+    }
+    
     if (category) {
-      filter.category = { $regex: category, $options: 'i' };
+      // Check if category is an ObjectId or string name
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        filter.category = category;
+      } else {
+        filter.category = { $regex: category, $options: 'i' };
+      }
+    }
+    
+    if (status) {
+      filter.status = status;
     }
     
     if (featured === 'true') {
@@ -62,6 +79,9 @@ export const getArtisanProducts = async (req, res) => {
     const sortObj = {};
     sortObj[sort] = order === 'desc' ? -1 : 1;
     
+    console.log('📋 Query filter:', JSON.stringify(filter, null, 2));
+    console.log('🔢 Pagination - Page:', pageNum, 'Limit:', limitNum, 'Skip:', skip);
+    
     // Execute query with pagination
     const [artisanProducts, totalCount] = await Promise.all([
       ArtisanProduct.find(filter)
@@ -71,6 +91,8 @@ export const getArtisanProducts = async (req, res) => {
         .lean(),
       ArtisanProduct.countDocuments(filter)
     ]);
+    
+    console.log('✅ Found', artisanProducts.length, 'products out of', totalCount, 'total');
 
     // Map `images` array to a top-level `image` field so frontend components
     // that expect `item.image` (singular) work with our DB documents which
@@ -289,6 +311,64 @@ export const likeArtisanProduct = async (req, res) => {
     
     res.status(200).json({
       message: 'Artisan product liked successfully',
+      data: artisanProduct
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// PATCH /api/artisan-products/:id - Update artisan product
+export const updateArtisanProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Find product by MongoDB _id or custom id field
+    let artisanProduct = await ArtisanProduct.findById(id);
+    if (!artisanProduct) {
+      artisanProduct = await ArtisanProduct.findOne({ id });
+    }
+
+    if (!artisanProduct) {
+      return res.status(404).json({ error: 'Artisan product not found' });
+    }
+
+    // Update fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined) {
+        artisanProduct[key] = updateData[key];
+      }
+    });
+
+    const updatedProduct = await artisanProduct.save();
+
+    res.status(200).json({
+      message: 'Artisan product updated successfully',
+      data: updatedProduct
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// DELETE /api/artisan-products/:id - Delete artisan product
+export const deleteArtisanProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete product by MongoDB _id or custom id field
+    let artisanProduct = await ArtisanProduct.findByIdAndDelete(id);
+    if (!artisanProduct) {
+      artisanProduct = await ArtisanProduct.findOneAndDelete({ id });
+    }
+
+    if (!artisanProduct) {
+      return res.status(404).json({ error: 'Artisan product not found' });
+    }
+
+    res.status(200).json({
+      message: 'Artisan product deleted successfully',
       data: artisanProduct
     });
   } catch (error) {

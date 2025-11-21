@@ -2,18 +2,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogOut, Settings, ShoppingCart, Heart } from "lucide-react";
+import { Menu, User, LogOut, Settings, ShoppingCart, Heart, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isArtisan, logout } = useAuth();
   const { getCartCount } = useCart();
+  const { getWishlistCount } = useWishlist();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
   
   const cartCount = getCartCount();
+  const wishlistCount = getWishlistCount();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -79,6 +82,11 @@ const Navbar = () => {
                 aria-label="Wishlist"
               >
                 <Heart className="h-6 w-6 text-stone-700" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
               </Link>
               
               {/* Profile Dropdown */}
@@ -99,6 +107,18 @@ const Navbar = () => {
                     <p className="text-xs text-stone-500">{user?.email}</p>
                     <p className="text-xs text-[var(--primary-color)] mt-1 capitalize">{user?.role}</p>
                   </div>
+                  {isArtisan && (
+                    <button
+                      onClick={() => {
+                        navigate('/artisan/dashboard');
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Dashboard</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       navigate('/cart');
@@ -209,9 +229,22 @@ const Navbar = () => {
                       <Link to="/wishlist" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
                         <Heart className="h-5 w-5" />
                         <span>Wishlist</span>
+                        {wishlistCount > 0 && (
+                          <span className="ml-auto bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {wishlistCount > 9 ? '9+' : wishlistCount}
+                          </span>
+                        )}
                       </Link>
                       
                       <div className="h-px bg-gray-200 my-3" />
+                      
+                      {/* Dashboard for Artisans */}
+                      {isArtisan && (
+                        <Link to="/artisan/dashboard" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                          <LayoutDashboard className="h-5 w-5" />
+                          <span>Dashboard</span>
+                        </Link>
+                      )}
                       
                       {/* Profile & Settings */}
                       <Link to="/profile" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">

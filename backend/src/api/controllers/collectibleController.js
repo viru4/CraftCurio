@@ -39,14 +39,22 @@ export const createCollectibles = async (req, res) => {
 
 export const getCollectibles = async (req, res) => {
   try {
-    const { category, featured, popular, recent, search } = req.query;
+    const { category, featured, popular, recent, search, status } = req.query;
     const limit = Math.min(toPositiveInt(req.query.limit, 20), 100);
     const page = toPositiveInt(req.query.page, 1);
     
     const query = {};
     
     // Add filters
-    if (category) query.category = category;
+    if (category) {
+      // Check if category is an ObjectId or string name
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        query.category = category;
+      } else {
+        query.category = { $regex: category, $options: 'i' };
+      }
+    }
+    if (status) query.status = status;
     if (featured === 'true') query.featured = true;
     if (popular === 'true') query.popular = true;
     if (recent === 'true') query.recent = true;
