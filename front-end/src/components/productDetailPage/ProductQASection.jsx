@@ -227,7 +227,7 @@ const ProductQASection = ({ product }) => {
       ) : (
         <div className="text-center py-8 px-4 bg-[#f8f7f6] rounded-lg border border-[#e8d5c4]">
           <p className="text-[#6b5d54]">
-            Please <a href="/auth/login" className="text-[#ec6d13] hover:underline">sign in</a> to ask a question
+            Please <a href="/sign-in" className="text-[#ec6d13] hover:underline">sign in</a> to ask a question
           </p>
         </div>
       )}

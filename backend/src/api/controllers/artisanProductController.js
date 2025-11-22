@@ -32,7 +32,6 @@ export const getArtisanProducts = async (req, res) => {
     
     // Filter by artisan if provided
     if (artisan) {
-      console.log('🔍 Filtering by artisan ID:', artisan);
       filter['artisanInfo.id'] = artisan;
     }
     
@@ -79,9 +78,6 @@ export const getArtisanProducts = async (req, res) => {
     const sortObj = {};
     sortObj[sort] = order === 'desc' ? -1 : 1;
     
-    console.log('📋 Query filter:', JSON.stringify(filter, null, 2));
-    console.log('🔢 Pagination - Page:', pageNum, 'Limit:', limitNum, 'Skip:', skip);
-    
     // Execute query with pagination
     const [artisanProducts, totalCount] = await Promise.all([
       ArtisanProduct.find(filter)
@@ -91,8 +87,6 @@ export const getArtisanProducts = async (req, res) => {
         .lean(),
       ArtisanProduct.countDocuments(filter)
     ]);
-    
-    console.log('✅ Found', artisanProducts.length, 'products out of', totalCount, 'total');
 
     // Map `images` array to a top-level `image` field so frontend components
     // that expect `item.image` (singular) work with our DB documents which
@@ -189,9 +183,6 @@ export const getRecentArtisanProducts = async (req, res) => {
 // GET /api/artisan-products/:id - Get single artisan product
 export const getArtisanProductById = async (req, res) => {
   try {
-    console.log('Requested product ID:', req.params.id);
-    console.log('ID type:', typeof req.params.id);
-    
     const { id } = req.params;
     let artisanProduct = null;
     
@@ -217,15 +208,15 @@ export const getArtisanProductById = async (req, res) => {
         .populate('reviews.user', 'name email');
     }
     
-    console.log('Found product:', artisanProduct ? 'Yes' : 'No');
-    
     if (!artisanProduct) {
       return res.status(404).json({ error: 'Artisan product not found' });
     }
 
-    // Increment view count
-    artisanProduct.views += 1;
-    await artisanProduct.save();
+    // Increment view count atomically to prevent race conditions
+    await ArtisanProduct.updateOne(
+      { _id: artisanProduct._id },
+      { $inc: { views: 1 } }
+    );
 
     // Convert to plain object and add top-level `image` for frontend
     const productObj = artisanProduct.toObject ? artisanProduct.toObject() : artisanProduct;
@@ -306,12 +297,18 @@ export const likeArtisanProduct = async (req, res) => {
       return res.status(404).json({ error: 'Artisan product not found' });
     }
     
-    artisanProduct.likes += 1;
-    await artisanProduct.save();
+    // Increment likes atomically to prevent race conditions
+    await ArtisanProduct.updateOne(
+      { _id: artisanProduct._id },
+      { $inc: { likes: 1 } }
+    );
+    
+    // Fetch updated product
+    const updatedProduct = await ArtisanProduct.findById(artisanProduct._id);
     
     res.status(200).json({
       message: 'Artisan product liked successfully',
-      data: artisanProduct
+      data: updatedProduct
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

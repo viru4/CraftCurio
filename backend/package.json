@@ -14,7 +14,8 @@
     "clear": "node -e \"import('./scripts/seeders/utils.js').then(m => m.clearDatabase().then(() => process.exit(0)))\"",
     "stats": "node -e \"import('./scripts/seeders/utils.js').then(m => m.getDatabaseStats().then(s => console.log(JSON.stringify(s, null, 2)) || process.exit(0)))\"",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "check-email": "node scripts/checkEmailConfig.js"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
+    "nodemailer": "^6.10.1",
     "nodemon": "^3.1.10"
   },
   "devDependencies": {

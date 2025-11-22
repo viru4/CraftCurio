@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/currency';
 import { ShoppingCart, Check, Heart } from 'lucide-react';
@@ -40,7 +40,7 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
   const itemInCart = isInCart(item.id);
   const itemInWishlist = isInWishlist(item.id);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (onClick) {
       onClick(item);
     } else {
@@ -48,16 +48,16 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
       const type = item.type || productType;
       navigate(`/product/${type}/${item.id || item._id}`);
     }
-  };
+  }, [onClick, item, productType, navigate]);
 
-  const handleViewDetails = (e) => {
+  const handleViewDetails = useCallback((e) => {
     e.stopPropagation();
     // Navigate to product details page
     const type = item.type || productType;
     navigate(`/product/${type}/${item.id || item._id}`);
-  };
+  }, [item, productType, navigate]);
 
-  const handleAddToCart = async (e) => {
+  const handleAddToCart = useCallback(async (e) => {
     e.stopPropagation();
     
     // Check if user is logged in
@@ -90,9 +90,9 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
       console.error('Failed to add to cart:', error);
       alert(error.message || 'Failed to add item to cart');
     }
-  };
+  }, [isAuthenticated, navigate, item, productType, addToCart]);
 
-  const handleToggleWishlist = (e) => {
+  const handleToggleWishlist = useCallback((e) => {
     e.stopPropagation();
     
     // Check if user is logged in
@@ -114,7 +114,7 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
     };
 
     toggleWishlist(wishlistProduct);
-  };
+  }, [isAuthenticated, navigate, item, productType, toggleWishlist]);
 
   return (
     <div 
@@ -220,4 +220,15 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
   );
 };
 
-export default ProductCard;
+// Memoize component to prevent unnecessary re-renders
+export default memo(ProductCard, (prevProps, nextProps) => {
+  // Only re-render if item data or callbacks change
+  return (
+    prevProps.item?.id === nextProps.item?.id &&
+    prevProps.item?.title === nextProps.item?.title &&
+    prevProps.item?.price === nextProps.item?.price &&
+    prevProps.item?.image === nextProps.item?.image &&
+    prevProps.productType === nextProps.productType &&
+    prevProps.onClick === nextProps.onClick
+  );
+});

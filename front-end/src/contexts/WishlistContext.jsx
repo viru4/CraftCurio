@@ -51,7 +51,7 @@ export const WishlistProvider = ({ children }) => {
     }
 
     return response.json();
-  }, []);
+  }, []); // Empty dependency array - getAuthToken is stable
 
   // Fetch wishlist from backend on mount
   useEffect(() => {
@@ -78,7 +78,8 @@ export const WishlistProvider = ({ children }) => {
     };
 
     fetchWishlist();
-  }, [makeAuthRequest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   // Sync with localStorage as backup (offline support)
   useEffect(() => {

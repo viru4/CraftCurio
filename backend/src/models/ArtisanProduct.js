@@ -56,4 +56,14 @@ const artisanProductSchema = new mongoose.Schema({
   likes: { type: Number, default: 0 }                     // Like count
 }, { timestamps: true });
 
+// Indexes for better query performance
+// Note: id field already has unique: true which creates an index, so we don't need to index it again
+artisanProductSchema.index({ category: 1 });
+artisanProductSchema.index({ 'artisanInfo.id': 1 });
+artisanProductSchema.index({ status: 1 });
+artisanProductSchema.index({ featured: 1, popular: 1, recent: 1 });
+artisanProductSchema.index({ createdAt: -1 });
+artisanProductSchema.index({ views: -1, likes: -1 });
+artisanProductSchema.index({ title: 'text', description: 'text', tags: 'text' }); // Text search index
+
 export default mongoose.model('ArtisanProduct', artisanProductSchema);

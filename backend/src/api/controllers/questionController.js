@@ -2,6 +2,11 @@ import Question from '../../models/Question.js';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
 import mongoose from 'mongoose';
 
+// Helper function to convert string ID to ObjectId if valid
+const toObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
+};
+
 // Get public questions for a product
 export const getProductQuestions = async (req, res) => {
   try {
@@ -35,12 +40,35 @@ export const getProductQuestions = async (req, res) => {
       Question.countDocuments(query)
     ]);
 
-    // Get stats
+    // Get stats efficiently using a single aggregation query
+    const productObjectId = toObjectId(productId);
+    const statsAggregation = await Question.aggregate([
+      { 
+        $match: { 
+          product: productObjectId,
+          isPublic: true 
+        } 
+      },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Initialize stats object
     const stats = {
-      total: await Question.countDocuments({ product: productId, isPublic: true }),
-      answered: await Question.countDocuments({ product: productId, isPublic: true, status: 'answered' }),
-      pending: await Question.countDocuments({ product: productId, isPublic: true, status: 'pending' })
+      total: total, // Use the total from the paginated query
+      answered: 0,
+      pending: 0
     };
+
+    // Populate stats from aggregation results
+    statsAggregation.forEach(item => {
+      if (item._id === 'answered') stats.answered = item.count;
+      else if (item._id === 'pending') stats.pending = item.count;
+    });
 
     res.status(200).json({
       success: true,
@@ -196,14 +224,32 @@ export const getArtisanQuestions = async (req, res) => {
       Question.countDocuments(query)
     ]);
 
-    // Calculate stats
-    const allQuestions = await Question.find({ product: { $in: productIds } });
+    // Calculate stats efficiently using aggregation instead of fetching all documents
+    const objectIdProductIds = productIds.map(id => toObjectId(id));
+    const statsAggregation = await Question.aggregate([
+      { $match: { product: { $in: objectIdProductIds } } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Initialize stats object
     const stats = {
-      total: allQuestions.length,
-      pending: allQuestions.filter(q => q.status === 'pending').length,
-      answered: allQuestions.filter(q => q.status === 'answered').length,
-      archived: allQuestions.filter(q => q.status === 'archived').length
+      total: total, // Use the total from the paginated query
+      pending: 0,
+      answered: 0,
+      archived: 0
     };
+
+    // Populate stats from aggregation results
+    statsAggregation.forEach(item => {
+      if (item._id === 'pending') stats.pending = item.count;
+      else if (item._id === 'answered') stats.answered = item.count;
+      else if (item._id === 'archived') stats.archived = item.count;
+    });
 
     res.status(200).json({
       success: true,

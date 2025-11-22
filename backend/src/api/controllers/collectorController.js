@@ -40,16 +40,11 @@ export const getCollectors = async (req, res) => {
 export const getCollectorById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    console.log(`Requested collector ID: ${id}`);
-    console.log(`ID type: ${typeof id}`);
 
     const collector = await Collector.findOne({ id: id })
       .populate('userId')
       .populate('wishlist.productId')
       .populate('purchaseHistory.productId');
-    
-    console.log(`Found collector: ${collector ? 'Yes' : 'No'}`);
 
     if (!collector) {
       return res.status(404).json({

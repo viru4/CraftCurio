@@ -28,7 +28,7 @@ const Admin = () => {
         // Fetch multiple data sources in parallel
         const [dbStatsRes, ordersRes, productsRes, collectiblesRes, usersRes] = await Promise.all([
           fetch(`${API_ENDPOINTS.seed}/stats`),
-          fetch(`${API_ENDPOINTS.orders}`, {
+          fetch(`${API_ENDPOINTS.orders}/all`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }

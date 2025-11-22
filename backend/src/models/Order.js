@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const orderItemSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  productType: { type: String, enum: ['artisan', 'collectible'], required: true },
+  productId: { type: String, required: true }, // Store as string to handle both custom IDs and ObjectIds
+  productType: { type: String, enum: ['artisan', 'artisan-product', 'collectible'], required: true },
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, default: 1 },
@@ -28,7 +28,6 @@ const orderSchema = new mongoose.Schema({
   },
   orderNumber: { 
     type: String, 
-    required: true, 
     unique: true 
   },
   items: [orderItemSchema],
@@ -91,5 +90,12 @@ orderSchema.pre('save', async function(next) {
   }
   next();
 });
+
+// Indexes for better query performance
+// Note: orderNumber already has unique: true which creates an index, so we don't need to index it again
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ createdAt: -1 });
 
 export default mongoose.model('Order', orderSchema);

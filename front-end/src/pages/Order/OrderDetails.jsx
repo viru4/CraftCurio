@@ -22,7 +22,7 @@ const OrderDetails = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8000/api/orders/${orderId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -33,7 +33,8 @@ const OrderDetails = () => {
       }
 
       const data = await response.json();
-      setOrder(data.data);
+      // Handle both response formats: { data: order } or { order: order }
+      setOrder(data.data || data.order);
     } catch (error) {
       console.error('Error fetching order details:', error);
     } finally {
@@ -241,13 +242,13 @@ const OrderDetails = () => {
                       <div className="flex justify-between">
                         <span className="text-stone-600 dark:text-stone-400">Subtotal</span>
                         <span className="text-stone-800 dark:text-stone-200">
-                          {formatPrice(order.totalAmount - (order.shippingCost || 0) - (order.tax || 0))}
+                          {formatPrice(order.subtotal || (order.total - (order.shipping || 0) - (order.tax || 0)))}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-stone-600 dark:text-stone-400">Shipping</span>
                         <span className="text-stone-800 dark:text-stone-200">
-                          {formatPrice(order.shippingCost || 0)}
+                          {formatPrice(order.shipping || order.shippingCost || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -260,7 +261,7 @@ const OrderDetails = () => {
                       <div className="flex justify-between font-bold text-base">
                         <span className="text-stone-800 dark:text-stone-200">Order Total</span>
                         <span className="text-stone-800 dark:text-stone-200">
-                          {formatPrice(order.totalAmount)}
+                          {formatPrice(order.total || order.totalAmount)}
                         </span>
                       </div>
                     </div>
@@ -301,23 +302,24 @@ const OrderDetails = () => {
               <div className="bg-white dark:bg-stone-800 p-6 rounded-lg border border-stone-200 dark:border-stone-700">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold text-stone-800 dark:text-stone-200">Order Status</h3>
-                  <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-medium capitalize ${getStatusColor(order.status)}`}>
-                    {order.status}
+                  <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-medium capitalize ${getStatusColor(order.orderStatus || order.status)}`}>
+                    {order.orderStatus || order.status}
                   </span>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="relative w-full mb-12">
+                  <div className="relative w-full mb-12">
                   <div className="h-2 w-full rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-amber-500 transition-all duration-500"
-                      style={{ width: `${getStatusProgress(order.status)}%` }}
+                      style={{ width: `${getStatusProgress(order.orderStatus || order.status)}%` }}
                     ></div>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-between px-1">
                     {['pending', 'processing', 'shipped', 'delivered'].map((status, index) => {
-                      const isActive = ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status) >= index;
-                      const isCurrent = order.status === status;
+                      const currentStatus = order.orderStatus || order.status;
+                      const isActive = ['pending', 'processing', 'shipped', 'delivered'].indexOf(currentStatus) >= index;
+                      const isCurrent = currentStatus === status;
                       return (
                         <div key={status} className="relative">
                           <div
@@ -343,11 +345,11 @@ const OrderDetails = () => {
                 </div>
 
                 <p className="text-stone-600 dark:text-stone-400 text-sm">
-                  {order.status === 'pending' && 'Your order has been received and is awaiting confirmation.'}
-                  {order.status === 'processing' && 'Your order is being prepared by the artisans and will be shipped soon.'}
-                  {order.status === 'shipped' && 'Your order has been shipped and is on its way to you.'}
-                  {order.status === 'delivered' && 'Your order has been delivered. Enjoy your handcrafted items!'}
-                  {order.status === 'cancelled' && 'This order has been cancelled.'}
+                  {(order.orderStatus || order.status) === 'pending' && 'Your order has been received and is awaiting confirmation.'}
+                  {(order.orderStatus || order.status) === 'processing' && 'Your order is being prepared by the artisans and will be shipped soon.'}
+                  {(order.orderStatus || order.status) === 'shipped' && 'Your order has been shipped and is on its way to you.'}
+                  {(order.orderStatus || order.status) === 'delivered' && 'Your order has been delivered. Enjoy your handcrafted items!'}
+                  {(order.orderStatus || order.status) === 'cancelled' && 'This order has been cancelled.'}
                 </p>
               </div>
 

@@ -6,6 +6,7 @@ import Cart from '@/pages/Cart'
 import Wishlist from '@/pages/Wishlist'
 import CheckOut from '@/pages/Order/CheckOut'
 import OrderConfirmation from '@/pages/Order/OrderConfirmation'
+import OrderDetails from '@/pages/Order/OrderDetails'
 import MyOrders from '@/pages/Order/MyOrders'
 import SignInPage from '@/pages/auth/SignIn'
 import SignUpPage from '@/pages/auth/SignUp'
@@ -29,6 +30,7 @@ import EditProduct from '@/pages/admin/EditProduct'
 import Users from '@/pages/admin/Users/Users'
 import AdminContent from '@/pages/admin/content&stories/AdminContent'
 import VerificationManagement from '@/pages/admin/Users/components/VerificationManagement'
+import AdminOrders from '@/pages/admin/Orders/AdminOrders'
 
 export default function AppRoutes() {
   return (
@@ -39,6 +41,8 @@ export default function AppRoutes() {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/checkout" element={<CheckOut />} />
       <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+      <Route path="/order-details/:orderId" element={<OrderDetails />} />
+      <Route path="/my-orders" element={<MyOrders />} />
       <Route path="/orders" element={<MyOrders />} />
       <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/sign-up" element={<SignUpPage />} />
@@ -60,6 +64,7 @@ export default function AppRoutes() {
       <Route path="/admin/products" element={<Products />} />
       <Route path="/admin/products/edit/:id" element={<EditProduct />} />
       <Route path="/admin/users" element={<Users />} />
+      <Route path="/admin/orders" element={<AdminOrders />} />
       <Route path="/admin/verifications" element={<VerificationManagement />} />
       <Route path="/admin/content" element={<AdminContent />} />
       <Route path="/admin/*" element={<Admin />} />

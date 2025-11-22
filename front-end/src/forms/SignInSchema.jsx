@@ -15,4 +15,16 @@ export const signInDefaultValues = {
   password: '',
 }
 
+// OTP-based sign-in schema (email only)
+export const otpSignInSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email('Enter a valid email address.'),
+})
+
+export const otpSignInDefaultValues = {
+  email: '',
+}
+
 

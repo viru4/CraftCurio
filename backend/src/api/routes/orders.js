@@ -7,23 +7,27 @@ import {
   updatePaymentStatus,
   cancelOrder,
   getAllOrders,
-  getArtisanOrders
+  getArtisanOrders,
+  bulkUpdateOrders
 } from '../controllers/orderController.js';
 import { authenticate } from '../../middleware/authMiddleware.js';
 import { requireRole } from '../../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// Protected routes (require authentication)
+// Specific routes first (before dynamic :id routes)
 router.post('/', authenticate, createOrder);
 router.get('/my-orders', authenticate, getUserOrders);
 router.get('/artisan/my-orders', authenticate, requireRole('artisan'), getArtisanOrders);
-router.get('/:id', authenticate, getOrderById);
-router.patch('/:id/cancel', authenticate, cancelOrder);
+router.post('/bulk-update', authenticate, requireRole('admin'), bulkUpdateOrders);
 
-// Admin routes (you can add admin middleware later)
-router.get('/', authenticate, getAllOrders);
-router.patch('/:id/status', authenticate, updateOrderStatus);
-router.patch('/:id/payment', authenticate, updatePaymentStatus);
+// Admin-only route for all orders (with query params support)
+router.get('/all', authenticate, requireRole('admin'), getAllOrders);
+
+// Dynamic routes last
+router.get('/:id', authenticate, getOrderById);
+router.patch('/:id/status', authenticate, requireRole('admin'), updateOrderStatus);
+router.patch('/:id/payment', authenticate, requireRole('admin'), updatePaymentStatus);
+router.patch('/:id/cancel', authenticate, cancelOrder);
 
 export default router;

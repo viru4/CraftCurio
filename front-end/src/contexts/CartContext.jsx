@@ -43,7 +43,7 @@ export const CartProvider = ({ children }) => {
     }
 
     return response.json();
-  }, []);
+  }, []); // Empty dependency array - getAuthToken is stable
 
   // Fetch cart from backend on mount
   useEffect(() => {
@@ -70,7 +70,8 @@ export const CartProvider = ({ children }) => {
     };
 
     fetchCart();
-  }, [makeAuthRequest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   // Sync with localStorage as backup (offline support)
   useEffect(() => {

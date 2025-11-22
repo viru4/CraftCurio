@@ -5,12 +5,12 @@ const collectibleSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true, min: 0 }, // Changed to Number for proper numeric sorting/calculations
-  category: { type: String, required: true, index: true }, // Indexed for query performance
+  category: { type: String, required: true }, // Indexed via schema.index() below
   image: { type: String, required: true },
   images: [{ type: String }], // Additional images array
 
-  featured: { type: Boolean, default: false, index: true },
-  popular: { type: Boolean, default: false, index: true },
+  featured: { type: Boolean, default: false }, // Indexed via schema.index() below
+  popular: { type: Boolean, default: false }, // Indexed via schema.index() below
   recent: { type: Boolean, default: false },
 
   targetSection: { type: String, default: 'filtered-items-section' },
@@ -83,12 +83,16 @@ const collectibleSchema = new mongoose.Schema({
     default: 'pending' 
   },                                                        // Collectible approval status
 
-  tags: [{ type: String, index: true }] // Index tags for efficient search
+  tags: [{ type: String }] // Indexed via schema.index() below
 }, { timestamps: true });
 
-// Suggested indexes for better query performance
-// collectibleSchema.index({ category: 1 });
-// collectibleSchema.index({ tags: 1 });
-// collectibleSchema.index({ featured: 1, popular: 1 });
+// Indexes for better query performance
+// Note: id field already has unique: true which creates an index, so we don't need to index it again
+collectibleSchema.index({ category: 1 });
+collectibleSchema.index({ tags: 1 });
+collectibleSchema.index({ featured: 1, popular: 1 });
+collectibleSchema.index({ status: 1 });
+collectibleSchema.index({ createdAt: -1 });
+collectibleSchema.index({ title: 'text', description: 'text', tags: 'text' }); // Text search index (fixed: name -> title)
 
 export default mongoose.model('Collectible', collectibleSchema);

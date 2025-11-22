@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, Footer } from '../components/layout';
 import API_BASE_URL from '../config/api';
@@ -41,8 +41,6 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        console.log(`Fetching ${type} with ID:`, id);
-        
         // Determine API endpoint based on type
         const endpoint = isCollectible 
           ? `${API_BASE_URL}/api/collectibles/${id}`
@@ -50,17 +48,12 @@ const ProductDetails = () => {
         
         const response = await fetch(endpoint);
         
-        console.log('Response status:', response.status);
-        console.log('Response OK:', response.ok);
-        
         if (!response.ok) {
           const errorText = await response.text();
-          console.log('Error response:', errorText);
           throw new Error(`Product not found (${response.status}): ${errorText}`);
         }
         
         const data = await response.json();
-        console.log('Product data received:', data);
         
         // Normalize data structure for collectibles
         let normalizedProduct = data.data;
@@ -97,7 +90,7 @@ const ProductDetails = () => {
   }, [id, type, isCollectible]);
 
   // Handle toggle wishlist
-  const handleToggleWishlist = () => {
+  const handleToggleWishlist = useCallback(() => {
     // Check if user is logged in
     if (!isAuthenticated) {
       alert('Please sign in to add items to your wishlist');
@@ -120,10 +113,10 @@ const ProductDetails = () => {
     };
 
     toggleWishlist(wishlistProduct);
-  };
+  }, [isAuthenticated, navigate, product, type, toggleWishlist]);
 
   // Handle add to cart
-  const handleAddToCart = (quantity = 1) => {
+  const handleAddToCart = useCallback((quantity = 1) => {
     if (!product) return;
 
     // Check if user is logged in
@@ -154,7 +147,7 @@ const ProductDetails = () => {
     setTimeout(() => {
       setShowAlert(false);
     }, 3000);
-  };
+  }, [isAuthenticated, navigate, product, addToCart]);
 
   // Loading state
   if (loading) {

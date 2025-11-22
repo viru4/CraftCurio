@@ -8,7 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 
 const Navbar = () => {
-  const { user, isAuthenticated, isArtisan, logout } = useAuth();
+  const { user, isAuthenticated, isArtisan, isAdmin, logout } = useAuth();
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
   const navigate = useNavigate();
@@ -125,7 +125,19 @@ const Navbar = () => {
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      <span>Dashboard</span>
+                      <span>Artisan Dashboard</span>
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        navigate('/admin/dashboard');
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Admin Dashboard</span>
                     </button>
                   )}
                   <button
@@ -251,7 +263,15 @@ const Navbar = () => {
                       {isArtisan && (
                         <Link to="/artisan/dashboard" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
                           <LayoutDashboard className="h-5 w-5" />
-                          <span>Dashboard</span>
+                          <span>Artisan Dashboard</span>
+                        </Link>
+                      )}
+                      
+                      {/* Dashboard for Admin */}
+                      {isAdmin && (
+                        <Link to="/admin/dashboard" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                          <LayoutDashboard className="h-5 w-5" />
+                          <span>Admin Dashboard</span>
                         </Link>
                       )}
                       

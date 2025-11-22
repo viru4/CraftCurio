@@ -206,7 +206,7 @@ const MyOrders = () => {
                       <p>{order.shippingAddress.state} {order.shippingAddress.zipCode}, {order.shippingAddress.country}</p>
                     </div>
                     <button
-                      onClick={() => navigate(`/order-confirmation/${order._id}`)}
+                      onClick={() => navigate(`/order-details/${order._id}`)}
                       className="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                     >
                       View Details

@@ -15,6 +15,16 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Shipping address is required' });
     }
 
+    // Validate shipping address fields
+    const requiredAddressFields = ['fullName', 'address', 'city', 'state', 'zipCode', 'country'];
+    for (const field of requiredAddressFields) {
+      if (!shippingAddress[field]) {
+        return res.status(400).json({ 
+          message: `Shipping address is missing required field: ${field}` 
+        });
+      }
+    }
+
     // Create order
     const order = new Order({
       user: req.user._id,
@@ -228,17 +238,116 @@ export const cancelOrder = async (req, res) => {
   }
 };
 
-// Get all orders (admin only)
+// Get all orders (admin only) with filters, stats, and pagination
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
-      .sort({ createdAt: -1 })
+    const { 
+      status, 
+      paymentStatus, 
+      search, 
+      dateFrom, 
+      dateTo, 
+      page = 1, 
+      limit = 20,
+      sortBy = 'createdAt',
+      order = 'desc'
+    } = req.query;
+
+    // Build query
+    const query = {};
+
+    // Add status filter
+    if (status && status !== 'all') {
+      query.orderStatus = status;
+    }
+
+    // Add payment status filter
+    if (paymentStatus && paymentStatus !== 'all') {
+      query.paymentStatus = paymentStatus;
+    }
+
+    // Add search filter (order number, customer name, email)
+    if (search) {
+      query.$or = [
+        { orderNumber: { $regex: search, $options: 'i' } },
+        { 'shippingAddress.fullName': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Add date range filter
+    if (dateFrom || dateTo) {
+      query.createdAt = {};
+      if (dateFrom) query.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) {
+        const endDate = new Date(dateTo);
+        endDate.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = endDate;
+      }
+    }
+
+    // Count total matching orders
+    const total = await Order.countDocuments(query);
+
+    // Build sort config
+    const sortConfig = {};
+    sortConfig[sortBy] = order === 'desc' ? -1 : 1;
+
+    // Fetch paginated orders
+    const orders = await Order.find(query)
+      .sort(sortConfig)
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .limit(parseInt(limit))
       .populate('user', 'name email phone');
+
+    // Calculate stats
+    const stats = await Order.aggregate([
+      {
+        $facet: {
+          statusCounts: [
+            { $group: { _id: '$orderStatus', count: { $sum: 1 } } }
+          ],
+          paymentCounts: [
+            { $group: { _id: '$paymentStatus', count: { $sum: 1 } } }
+          ],
+          totalRevenue: [
+            { $match: { paymentStatus: 'paid' } },
+            { $group: { _id: null, total: { $sum: '$total' } } }
+          ],
+          recentOrders: [
+            { $match: { createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } },
+            { $count: 'count' }
+          ]
+        }
+      }
+    ]);
+
+    // Format stats
+    const formattedStats = {
+      total: total,
+      byStatus: stats[0].statusCounts.reduce((acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      }, {}),
+      byPayment: stats[0].paymentCounts.reduce((acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      }, {}),
+      totalRevenue: stats[0].totalRevenue[0]?.total || 0,
+      last30Days: stats[0].recentOrders[0]?.count || 0
+    };
 
     res.status(200).json({
       success: true,
-      count: orders.length,
-      orders
+      data: {
+        orders,
+        stats: formattedStats,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(total / parseInt(limit))
+        }
+      }
     });
   } catch (error) {
     console.error('Get all orders error:', error);
@@ -324,6 +433,45 @@ export const getArtisanOrders = async (req, res) => {
       success: false,
       message: 'Failed to fetch orders',
       error: error.message 
+    });
+  }
+};
+
+// Bulk update order status (admin only)
+export const bulkUpdateOrders = async (req, res) => {
+  try {
+    const { orderIds, updates } = req.body;
+
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order IDs array is required'
+      });
+    }
+
+    if (!updates || Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Updates object is required'
+      });
+    }
+
+    const result = await Order.updateMany(
+      { _id: { $in: orderIds } },
+      { $set: updates }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `${result.modifiedCount} orders updated successfully`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('Bulk update orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update orders',
+      error: error.message
     });
   }
 };
