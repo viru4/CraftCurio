@@ -20,11 +20,15 @@ import ArtisanProductsManagement from '@/pages/artisans/artisanDashboard/Product
 import AddProduct from '@/pages/artisans/artisanDashboard/Products/AddProduct'
 import Content from '@/pages/artisans/artisanDashboard/ContentManagement/Content'
 import Message from '@/pages/artisans/artisanDashboard/messaging/Message'
+import Orders from '@/pages/artisans/artisanDashboard/Orders/Orders'
+import Reviews from '@/pages/artisans/artisanDashboard/Reviews/Reviews'
 import Profile from '@/pages/UserProfile/Profile'
 import Admin from '@/pages/admin/Admin'
 import Products from '@/pages/admin/Products'
 import EditProduct from '@/pages/admin/EditProduct'
 import Users from '@/pages/admin/Users/Users'
+import AdminContent from '@/pages/admin/content&stories/AdminContent'
+import VerificationManagement from '@/pages/admin/Users/components/VerificationManagement'
 
 export default function AppRoutes() {
   return (
@@ -49,11 +53,15 @@ export default function AppRoutes() {
       <Route path="/artisan/products/add" element={<AddProduct />} />
       <Route path="/artisan/story" element={<Content />} />
       <Route path="/artisan/messages" element={<Message />} />
+      <Route path="/artisan/orders" element={<Orders />} />
+      <Route path="/artisan/reviews" element={<Reviews />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/products" element={<Products />} />
       <Route path="/admin/products/edit/:id" element={<EditProduct />} />
       <Route path="/admin/users" element={<Users />} />
+      <Route path="/admin/verifications" element={<VerificationManagement />} />
+      <Route path="/admin/content" element={<AdminContent />} />
       <Route path="/admin/*" element={<Admin />} />
     </Routes>
   )

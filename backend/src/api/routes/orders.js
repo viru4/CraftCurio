@@ -6,15 +6,18 @@ import {
   updateOrderStatus,
   updatePaymentStatus,
   cancelOrder,
-  getAllOrders
+  getAllOrders,
+  getArtisanOrders
 } from '../controllers/orderController.js';
 import { authenticate } from '../../middleware/authMiddleware.js';
+import { requireRole } from '../../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
 // Protected routes (require authentication)
 router.post('/', authenticate, createOrder);
 router.get('/my-orders', authenticate, getUserOrders);
+router.get('/artisan/my-orders', authenticate, requireRole('artisan'), getArtisanOrders);
 router.get('/:id', authenticate, getOrderById);
 router.patch('/:id/cancel', authenticate, cancelOrder);
 

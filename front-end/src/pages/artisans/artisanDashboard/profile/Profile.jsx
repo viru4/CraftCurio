@@ -9,6 +9,7 @@ import ProfileTabs from './components/ProfileTabs';
 import ProfileDetailsForm from './components/ProfileDetailsForm';
 import PortfolioSection from './components/PortfolioSection';
 import VerificationSection from './components/VerificationSection';
+import API_BASE_URL from '@/config/api';
 
 const Profile = () => {
   const { user, isArtisan } = useAuth();
@@ -16,12 +17,15 @@ const Profile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [loading, setLoading] = useState(false);
+  const [artisanId, setArtisanId] = useState(null);
   const [profileData, setProfileData] = useState({
     displayName: '',
     location: '',
     publicEmail: '',
     bio: '',
+    fullBio: '',
     specializations: [],
+    experienceYears: 0,
     profileImage: '',
     portfolio: [],
     socialLinks: {
@@ -38,13 +42,81 @@ const Profile = () => {
   const loadProfileData = async () => {
     try {
       setLoading(true);
-      // Initialize with user data
-      const initialData = {
+      const token = localStorage.getItem('token');
+      
+      // Try to fetch existing artisan profile linked to this user
+      const response = await fetch(`${API_BASE_URL}/api/artisans`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.data)) {
+        // Find artisan linked to current user
+        const userArtisan = data.data.find(artisan => 
+          artisan.userId?._id === user?._id || artisan.userId === user?._id
+        );
+        
+        if (userArtisan) {
+          setArtisanId(userArtisan.id);
+          // Map backend data to frontend state
+          setProfileData({
+            displayName: userArtisan.name || '',
+            location: userArtisan.location || '',
+            publicEmail: user?.email || '',
+            bio: userArtisan.briefBio || '',
+            fullBio: userArtisan.fullBio || '',
+            specializations: userArtisan.craftSpecialization ? [userArtisan.craftSpecialization] : [],
+            experienceYears: userArtisan.experienceYears || 0,
+            profileImage: userArtisan.profilePhotoUrl || '',
+            portfolio: [],
+            socialLinks: {
+              website: userArtisan.socialLinks?.website || '',
+              instagram: userArtisan.socialLinks?.instagram || '',
+              facebook: userArtisan.socialLinks?.facebook || '',
+              twitter: userArtisan.socialLinks?.twitter || ''
+            },
+            verified: userArtisan.verified || false,
+            awards: userArtisan.awards || [],
+            certifications: userArtisan.certifications || []
+          });
+        } else {
+          // No artisan profile exists - initialize with user data
+          setProfileData({
+            displayName: user?.name || '',
+            location: '',
+            publicEmail: user?.email || '',
+            bio: '',
+            fullBio: '',
+            specializations: [],
+            experienceYears: 0,
+            profileImage: user?.avatar || '',
+            portfolio: [],
+            socialLinks: {
+              website: '',
+              instagram: '',
+              facebook: '',
+              twitter: ''
+            },
+            verified: false,
+            awards: [],
+            certifications: []
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading profile data:', error);
+      // Initialize with user data on error
+      setProfileData({
         displayName: user?.name || '',
         location: '',
         publicEmail: user?.email || '',
         bio: '',
+        fullBio: '',
         specializations: [],
+        experienceYears: 0,
         profileImage: user?.avatar || '',
         portfolio: [],
         socialLinks: {
@@ -56,10 +128,7 @@ const Profile = () => {
         verified: false,
         awards: [],
         certifications: []
-      };
-      setProfileData(initialData);
-    } catch (error) {
-      console.error('Error loading profile data:', error);
+      });
     } finally {
       setLoading(false);
     }
@@ -102,13 +171,72 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      // TODO: Implement API call to save profile data
-      console.log('Saving profile data:', profileData);
-      // Show success message
-      alert('Profile updated successfully!');
+      const token = localStorage.getItem('token');
+      
+      // Map frontend data to backend schema
+      const artisanData = {
+        name: profileData.displayName,
+        briefBio: profileData.bio,
+        fullBio: profileData.fullBio,
+        craftSpecialization: profileData.specializations[0] || '', // Take first specialization
+        experienceYears: profileData.experienceYears,
+        location: profileData.location,
+        profilePhotoUrl: profileData.profileImage,
+        socialLinks: {
+          website: profileData.socialLinks.website,
+          instagram: profileData.socialLinks.instagram,
+          facebook: profileData.socialLinks.facebook,
+          twitter: profileData.socialLinks.twitter
+        },
+        awards: profileData.awards,
+        certifications: profileData.certifications,
+        userId: user._id
+      };
+
+      let response;
+      
+      if (artisanId) {
+        // Update existing artisan profile
+        response = await fetch(`${API_BASE_URL}/api/artisans/${artisanId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(artisanData)
+        });
+      } else {
+        // Create new artisan profile - generate ID
+        const timestamp = Date.now();
+        const randomNum = Math.floor(Math.random() * 1000);
+        const newArtisanId = `artisan-${timestamp}-${randomNum}`;
+        
+        response = await fetch(`${API_BASE_URL}/api/artisans`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            ...artisanData,
+            id: newArtisanId
+          })
+        });
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        if (!artisanId && result.data?.id) {
+          setArtisanId(result.data.id);
+        }
+        alert('Profile updated successfully! Your changes will appear on your artisan story page.');
+      } else {
+        throw new Error(result.message || 'Failed to save profile');
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile. Please try again.');
+      alert(error.message || 'Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -194,6 +322,7 @@ const Profile = () => {
                 <VerificationSection 
                   profileData={profileData}
                   onInputChange={handleInputChange}
+                  onVerificationUpdate={loadProfileData}
                 />
               )}
             </div>

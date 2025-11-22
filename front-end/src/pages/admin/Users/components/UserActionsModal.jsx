@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { X, Edit, Trash2, Ban, CheckCircle, UserCog } from 'lucide-react';
+import { X, Edit, Trash2, Ban, CheckCircle, UserCog, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const UserActionsModal = ({ user, onClose, onUpdate, onDelete }) => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user.name,
@@ -29,6 +31,12 @@ const UserActionsModal = ({ user, onClose, onUpdate, onDelete }) => {
 
   const handleToggleVerification = async () => {
     await onUpdate(user._id, { isVerified: !user.isVerified });
+  };
+
+  const handleViewVerificationRequest = () => {
+    // Navigate to verification management and filter by this user
+    navigate(`/admin/verifications?userId=${user._id}`);
+    onClose();
   };
 
   if (isEditing) {
@@ -190,12 +198,25 @@ const UserActionsModal = ({ user, onClose, onUpdate, onDelete }) => {
             <span>Edit User Details</span>
           </button>
 
+          {user.role === 'artisan' && (
+            <button
+              onClick={handleViewVerificationRequest}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-300 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5" />
+                <span>View Verification Request</span>
+              </div>
+              <ExternalLink className="h-4 w-4" />
+            </button>
+          )}
+
           <button
             onClick={handleToggleVerification}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#f8f7f6] dark:hover:bg-[#221810] text-[#1b130d] dark:text-[#f3ece7] transition-colors"
           >
             <CheckCircle className="h-5 w-5" />
-            <span>{user.isVerified ? 'Revoke Verification' : 'Verify User'}</span>
+            <span>{user.isVerified ? 'Revoke Verification' : 'Mark as Verified'}</span>
           </button>
 
           <button

@@ -307,7 +307,7 @@ function FeaturedProducts() {
         // Add collectibles (limit to 4)
         if (collectiblesData.data && Array.isArray(collectiblesData.data)) {
           const collectibles = collectiblesData.data.slice(0, 4).map(item => ({
-            id: item.id || item._id, // Use simple ID (coll1, coll2, etc.)
+            id: item.id, // Use custom ID
             title: item.title || 'Untitled Collectible',
             subtitle: item.description || 'No description available',
             image: item.image,
@@ -320,8 +320,8 @@ function FeaturedProducts() {
         // Add artisan products (limit to 4)
         if (artisanProductsData.data && Array.isArray(artisanProductsData.data)) {
           const artisanProducts = artisanProductsData.data.slice(0, 4).map(item => ({
-            id: item.id || item._id, // Use simple ID (art1, art2, etc.)
-            title: item.title || 'Untitled Artisan Product',
+            id: item.id, // Use custom ID
+            title: item.title || 'Untisan Artisan Product',
             subtitle: item.description || 'No description available',
             image: item.image, // This comes from the backend transformation
             price: item.price ? `₹${item.price}` : 'Price on request',

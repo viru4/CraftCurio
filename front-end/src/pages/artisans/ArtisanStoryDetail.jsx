@@ -13,6 +13,13 @@ const ArtisanStoryDetail = () => {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
 
+  // Update likes count when artisan data loads
+  useEffect(() => {
+    if (artisan?.likes) {
+      setLikesCount(artisan.likes);
+    }
+  }, [artisan]);
+
   useEffect(() => {
     const fetchArtisanData = async () => {
       try {
@@ -39,7 +46,7 @@ const ArtisanStoryDetail = () => {
           setLikesCount(artisanDataObj.likes || artisanDataObj.story?.likes || Math.floor(Math.random() * 100) + 20);
           
           // Filter products by artisan ID (use the artisan ID from the fetched data)
-          const artisanId = artisanDataObj.id || artisanDataObj._id || id;
+          const artisanId = artisanDataObj.id || id;
           const productsArray = productsData?.data || productsData || [];
           
           if (Array.isArray(productsArray)) {
@@ -98,83 +105,59 @@ const ArtisanStoryDetail = () => {
     }
   };
 
-  // Get story data from database, fallback to mock data if not available
+  // Get story data from database
   const getPhotos = () => {
     if (artisan?.story?.photos && artisan.story.photos.length > 0) {
       return artisan.story.photos;
     }
-    // Fallback to mock data
-    return [
-      artisan?.profilePhotoUrl || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800',
-      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800',
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
-      'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=800'
-    ];
+    // Return profile photo as single item if no gallery photos
+    if (artisan?.profilePhotoUrl) {
+      return [artisan.profilePhotoUrl];
+    }
+    return [];
   };
 
   const getVideos = () => {
     if (artisan?.story?.videos && artisan.story.videos.length > 0) {
       return artisan.story.videos;
     }
-    // Fallback to mock data
-    return [
-      { url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', title: 'Crafting Process' },
-      { url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', title: 'Workshop Tour' }
-    ];
+    return [];
   };
 
   const getHandwrittenNotes = () => {
     if (artisan?.story?.handwrittenNotes && artisan.story.handwrittenNotes.length > 0) {
       return artisan.story.handwrittenNotes;
     }
-    // Fallback to mock data
-    return [
-      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400',
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400'
-    ];
+    return [];
   };
 
   const getQuotes = () => {
     if (artisan?.story?.quotes && artisan.story.quotes.length > 0) {
       return artisan.story.quotes;
     }
-    // Fallback to mock data
-    return [
-      artisan?.fullBio?.substring(0, 150) + '...' || 'Every piece I create carries a piece of my soul and the traditions of my ancestors.',
-      'Craftsmanship is not just about making things; it\'s about preserving culture and telling stories through our hands.'
-    ];
+    // Use first part of fullBio as a quote if no quotes available
+    if (artisan?.fullBio && artisan.fullBio.length > 100) {
+      return [artisan.fullBio.substring(0, 150) + '...'];
+    }
+    return [];
   };
 
   const getCulturalContext = () => {
-    if (artisan?.story?.culturalContext) {
-      return artisan.story.culturalContext;
-    }
-    // Fallback to fullBio or default
-    return artisan?.fullBio || 'This artisan\'s work is deeply rooted in traditional techniques passed down through generations, representing a rich cultural heritage that connects the past with the present.';
+    return artisan?.story?.culturalContext || artisan?.fullBio || '';
   };
 
   const getChallenges = () => {
     if (artisan?.story?.challenges && artisan.story.challenges.length > 0) {
       return artisan.story.challenges;
     }
-    // Fallback to mock data
-    return [
-      'Preserving traditional techniques in a modern world',
-      'Finding sustainable materials and resources',
-      'Balancing authenticity with contemporary market demands'
-    ];
+    return [];
   };
 
   const getTriumphs = () => {
     if (artisan?.story?.triumphs && artisan.story.triumphs.length > 0) {
       return artisan.story.triumphs;
     }
-    // Fallback to mock data
-    return [
-      'Featured in international craft exhibitions',
-      'Mentored over 50 aspiring artisans',
-      'Received recognition for cultural preservation efforts'
-    ];
+    return [];
   };
 
   if (loading) {
@@ -448,63 +431,71 @@ const ArtisanStoryDetail = () => {
       )}
 
       {/* Cultural Context */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-6 sm:mb-8">Cultural Heritage</h2>
-          <div className="bg-amber-50 rounded-2xl p-6 sm:p-8 border-l-4 border-amber-500">
-            <p className="text-lg sm:text-xl text-stone-700 leading-relaxed">
-              {culturalContext}
-            </p>
+      {culturalContext && (
+        <section className="py-12 sm:py-16 lg:py-20 bg-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-6 sm:mb-8">Cultural Heritage</h2>
+            <div className="bg-amber-50 rounded-2xl p-6 sm:p-8 border-l-4 border-amber-500">
+              <p className="text-lg sm:text-xl text-stone-700 leading-relaxed">
+                {culturalContext}
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Challenges & Triumphs */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-stone-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-            {/* Challenges */}
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-6 sm:mb-8 flex items-center gap-3">
-                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Challenges
-              </h2>
-              <ul className="space-y-4">
-                {challenges.map((challenge, idx) => (
-                  <li key={idx} className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-md">
-                    <svg className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      {(challenges.length > 0 || triumphs.length > 0) && (
+        <section className="py-12 sm:py-16 lg:py-20 bg-stone-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+              {/* Challenges */}
+              {challenges.length > 0 && (
+                <div>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-6 sm:mb-8 flex items-center gap-3">
+                    <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span className="text-stone-700 text-lg">{challenge}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    Challenges
+                  </h2>
+                  <ul className="space-y-4">
+                    {challenges.map((challenge, idx) => (
+                      <li key={idx} className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-md">
+                        <svg className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-stone-700 text-lg">{challenge}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-            {/* Triumphs */}
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-6 sm:mb-8 flex items-center gap-3">
-                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-                Triumphs
-              </h2>
-              <ul className="space-y-4">
-                {triumphs.map((triumph, idx) => (
-                  <li key={idx} className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-md">
-                    <svg className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              {/* Triumphs */}
+              {triumphs.length > 0 && (
+                <div>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-6 sm:mb-8 flex items-center gap-3">
+                    <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                     </svg>
-                    <span className="text-stone-700 text-lg">{triumph}</span>
-                  </li>
-                ))}
-              </ul>
+                    Triumphs
+                  </h2>
+                  <ul className="space-y-4">
+                    {triumphs.map((triumph, idx) => (
+                      <li key={idx} className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-md">
+                        <svg className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-stone-700 text-lg">{triumph}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Handwritten Notes/Sketches */}
       {handwrittenNotes.length > 0 && (
@@ -578,8 +569,8 @@ const ArtisanStoryDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {artisanProducts.map((product) => (
                 <div
-                  key={product.id || product._id}
-                  onClick={() => navigate(`/product/artisan-product/${product.id || product._id}`)}
+                  key={product.id}
+                  onClick={() => navigate(`/product/artisan-product/${product.id}`)}
                   className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-stone-200 hover:border-amber-300 cursor-pointer"
                 >
                   <div className="relative overflow-hidden">

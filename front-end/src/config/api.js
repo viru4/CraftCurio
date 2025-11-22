@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
   seed: `${API_BASE_URL}/api/seed`,
   admin: `${API_BASE_URL}/api/admin`,
   messages: `${API_BASE_URL}/api/messages`,
+  reviews: `${API_BASE_URL}/api/reviews`,
+  questions: `${API_BASE_URL}/api/questions`,
 };
 
 export default API_BASE_URL;

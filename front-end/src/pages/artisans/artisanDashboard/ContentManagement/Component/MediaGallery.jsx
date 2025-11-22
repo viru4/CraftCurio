@@ -1,7 +1,13 @@
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useState } from 'react';
 
-const MediaGallery = ({ images = [], onUpload, onDelete }) => {
+const MediaGallery = ({ 
+  images = [], 
+  onUpload, 
+  onDelete,
+  title = "Media Gallery",
+  description = "Upload images and videos that showcase your workspace, process, and artistry."
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null);
 
@@ -56,10 +62,10 @@ const MediaGallery = ({ images = [], onUpload, onDelete }) => {
     <section className="space-y-4">
       <div>
         <h2 className="text-lg sm:text-xl font-bold text-[#1b130d] dark:text-[#f3ece7]">
-          Media Gallery
+          {title}
         </h2>
         <p className="text-sm sm:text-base text-[#9a6c4c] dark:text-[#9a6c4c] mt-1">
-          Upload images and videos that showcase your workspace, process, and artistry.
+          {description}
         </p>
       </div>
 

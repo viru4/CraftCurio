@@ -1,22 +1,78 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Menu } from 'lucide-react';
+import API_BASE_URL from '@/config/api';
 import ArtisanSidebar from '../components/ArtisanSidebar';
 import ContentHeader from './Component/ContentHeader';
 import ContentTabs from './Component/ContentTabs';
 import StoryEditor from './Component/StoryEditor';
 import MediaGallery from './Component/MediaGallery';
+import AdditionalStoryFields from './Component/AdditionalStoryFields';
 
 const Content = () => {
   const { user, isArtisan, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('story');
+  const [loading, setLoading] = useState(true);
+  
+  // Story content states
   const [storyContent, setStoryContent] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]);
+  const [photos, setPhotos] = useState([]);
+  const [handwrittenNotes, setHandwrittenNotes] = useState([]);
+  const [quotes, setQuotes] = useState([]);
+  const [culturalContext, setCulturalContext] = useState('');
+  const [challenges, setChallenges] = useState([]);
+  const [triumphs, setTriumphs] = useState([]);
+  const [videos, setVideos] = useState([]);
+  
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch existing artisan data
+  useEffect(() => {
+    const fetchArtisanData = async () => {
+      if (!user?.artisanId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/api/artisans/${user.artisanId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const artisan = data.data;
+
+          // Populate fields with existing data
+          if (artisan.fullBio) setStoryContent(artisan.fullBio);
+          if (artisan.story) {
+            if (artisan.story.photos) setPhotos(artisan.story.photos.map(url => ({ url, type: 'image' })));
+            if (artisan.story.handwrittenNotes) setHandwrittenNotes(artisan.story.handwrittenNotes.map(url => ({ url, type: 'image' })));
+            if (artisan.story.quotes) setQuotes(artisan.story.quotes);
+            if (artisan.story.culturalContext) setCulturalContext(artisan.story.culturalContext);
+            if (artisan.story.challenges) setChallenges(artisan.story.challenges);
+            if (artisan.story.triumphs) setTriumphs(artisan.story.triumphs);
+            if (artisan.story.videos) setVideos(artisan.story.videos);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch artisan data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user && isArtisan) {
+      fetchArtisanData();
+    }
+  }, [user, isArtisan]);
 
   // Auth check
   useEffect(() => {
@@ -30,60 +86,85 @@ const Content = () => {
     }
   }, [user, isArtisan, navigate, authLoading]);
 
-  const handleAutoSave = async () => {
+  const handleAutoSave = useCallback(async () => {
+    if (!user?.artisanId) return;
+    
     setIsSaving(true);
     
     try {
-      // TODO: Replace with actual API call
-      // await fetch('/api/artisan/story', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ content: storyContent, media: mediaFiles })
-      // });
+      const token = localStorage.getItem('token');
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
+      // Prepare story data
+      const storyData = {
+        fullBio: storyContent,
+        story: {
+          photos: photos.filter(p => p.url && !p.url.startsWith('blob:')).map(p => p.url),
+          handwrittenNotes: handwrittenNotes.filter(n => n.url && !n.url.startsWith('blob:')).map(n => n.url),
+          quotes: quotes.filter(q => q.trim() !== ''),
+          culturalContext,
+          challenges: challenges.filter(c => c.trim() !== ''),
+          triumphs: triumphs.filter(t => t.trim() !== ''),
+          videos: videos.filter(v => v.url && v.title)
+        }
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/artisans/${user.artisanId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(storyData)
       });
-      setLastSaved(timeString);
+
+      if (response.ok) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        setLastSaved(timeString);
+      } else {
+        throw new Error('Failed to save');
+      }
     } catch (error) {
       console.error('Failed to auto-save:', error);
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [user, storyContent, photos, handwrittenNotes, quotes, culturalContext, challenges, triumphs, videos]);
 
   // Auto-save functionality
   useEffect(() => {
-    if (storyContent || mediaFiles.length > 0) {
+    const hasContent = storyContent || photos.length > 0 || handwrittenNotes.length > 0 || 
+                       quotes.length > 0 || culturalContext || challenges.length > 0 || 
+                       triumphs.length > 0 || videos.length > 0;
+    
+    if (hasContent && !loading) {
       const timer = setTimeout(() => {
         handleAutoSave();
-      }, 2000); // Auto-save after 2 seconds of inactivity
+      }, 3000); // Auto-save after 3 seconds of inactivity
 
       return () => clearTimeout(timer);
     }
-  }, [storyContent, mediaFiles]);
+  }, [storyContent, photos, handwrittenNotes, quotes, culturalContext, challenges, triumphs, videos, loading, handleAutoSave]);
 
   const handlePreview = () => {
-    // TODO: Implement preview modal
-    console.log('Preview clicked', { storyContent, mediaFiles });
+    // Navigate to artisan story page
+    if (user?.artisanId) {
+      window.open(`/artisan-stories/${user.artisanId}`, '_blank');
+    }
   };
 
   const handlePublish = async () => {
+    if (!user?.artisanId) return;
+    
     try {
-      // TODO: Replace with actual API call
-      // await fetch('/api/artisan/story/publish', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ content: storyContent, media: mediaFiles })
-      // });
+      // Save before publishing
+      await handleAutoSave();
       
-      alert('Story published successfully!');
+      alert('Story published successfully! Your story is now live on the Artisan Stories page.');
     } catch (error) {
       console.error('Failed to publish:', error);
       alert('Failed to publish story. Please try again.');
@@ -94,31 +175,69 @@ const Content = () => {
     setStoryContent(newContent);
   };
 
-  const handleMediaUpload = (files) => {
-    // Convert File objects to URLs for display
-    const newMediaFiles = files.map(file => ({
-      url: URL.createObjectURL(file),
-      type: file.type,
-      name: file.name,
-      file: file
-    }));
+  const handleMediaUpload = async (files, type = 'photos') => {
+    // For demo: Create temporary URLs
+    // In production: Upload to cloud storage and get URLs
+    const newMediaFiles = await Promise.all(
+      files.map(async (file) => {
+        // TODO: Upload to cloud storage (AWS S3, Cloudinary, etc.)
+        // For now, create object URL for preview
+        return {
+          url: URL.createObjectURL(file),
+          type: file.type,
+          name: file.name,
+          file: file
+        };
+      })
+    );
     
-    setMediaFiles(prev => [...prev, ...newMediaFiles]);
+    if (type === 'photos') {
+      setPhotos(prev => [...prev, ...newMediaFiles]);
+    } else {
+      setHandwrittenNotes(prev => [...prev, ...newMediaFiles]);
+    }
   };
 
-  const handleMediaDelete = (index) => {
-    setMediaFiles(prev => {
-      const newFiles = [...prev];
-      // Revoke object URL to free memory
-      URL.revokeObjectURL(newFiles[index].url);
-      newFiles.splice(index, 1);
-      return newFiles;
-    });
+  const handleMediaDelete = (index, type = 'photos') => {
+    if (type === 'photos') {
+      setPhotos(prev => {
+        const newFiles = [...prev];
+        if (newFiles[index].url.startsWith('blob:')) {
+          URL.revokeObjectURL(newFiles[index].url);
+        }
+        newFiles.splice(index, 1);
+        return newFiles;
+      });
+    } else {
+      setHandwrittenNotes(prev => {
+        const newFiles = [...prev];
+        if (newFiles[index].url.startsWith('blob:')) {
+          URL.revokeObjectURL(newFiles[index].url);
+        }
+        newFiles.splice(index, 1);
+        return newFiles;
+      });
+    }
   };
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
   };
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex min-h-screen bg-stone-50 items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+          <p className="text-stone-600 text-lg">Loading your content...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !isArtisan) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen bg-stone-50">
@@ -166,9 +285,32 @@ const Content = () => {
                   />
                   
                   <MediaGallery 
-                    images={mediaFiles}
-                    onUpload={handleMediaUpload}
-                    onDelete={handleMediaDelete}
+                    title="Gallery Photos"
+                    description="Upload images that showcase your workspace, process, and artistry"
+                    images={photos}
+                    onUpload={(files) => handleMediaUpload(files, 'photos')}
+                    onDelete={(index) => handleMediaDelete(index, 'photos')}
+                  />
+
+                  <MediaGallery 
+                    title="Design Sketches & Handwritten Notes"
+                    description="Share your design process, sketches, and personal notes"
+                    images={handwrittenNotes}
+                    onUpload={(files) => handleMediaUpload(files, 'notes')}
+                    onDelete={(index) => handleMediaDelete(index, 'notes')}
+                  />
+
+                  <AdditionalStoryFields 
+                    quotes={quotes}
+                    onQuotesChange={setQuotes}
+                    culturalContext={culturalContext}
+                    onCulturalContextChange={setCulturalContext}
+                    challenges={challenges}
+                    onChallengesChange={setChallenges}
+                    triumphs={triumphs}
+                    onTriumphsChange={setTriumphs}
+                    videos={videos}
+                    onVideosChange={setVideos}
                   />
                 </>
               )}

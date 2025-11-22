@@ -87,9 +87,13 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
             <p className="text-stone-500 text-sm sm:text-base">
               {profileData.specializations[0] || 'Craft Specialization'}
             </p>
-            <div className="mt-1 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs sm:text-sm font-medium text-green-800 w-fit">
+            <div className={`mt-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs sm:text-sm font-medium w-fit ${
+              profileData.verified 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
               <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>{profileData.verificationStatus === 'verified' ? 'Verified' : 'Pending Verification'}</span>
+              <span>{profileData.verified ? 'Verified Artisan' : 'Pending Verification'}</span>
             </div>
           </div>
         </div>

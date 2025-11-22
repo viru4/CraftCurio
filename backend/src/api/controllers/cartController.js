@@ -62,12 +62,21 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // Verify product exists
+    // Verify product exists (using id field which can be string or ObjectId)
     let productExists = false;
-    if (productType === 'artisan-product') {
-      productExists = await ArtisanProduct.exists({ _id: productId });
-    } else if (productType === 'collectible') {
-      productExists = await Collectible.exists({ _id: productId });
+    try {
+      if (productType === 'artisan-product') {
+        productExists = await ArtisanProduct.exists({ $or: [{ _id: productId }, { id: productId }] });
+      } else if (productType === 'collectible') {
+        productExists = await Collectible.exists({ $or: [{ _id: productId }, { id: productId }] });
+      }
+    } catch (error) {
+      // If the productId is not a valid ObjectId, just check by id field
+      if (productType === 'artisan-product') {
+        productExists = await ArtisanProduct.exists({ id: productId });
+      } else if (productType === 'collectible') {
+        productExists = await Collectible.exists({ id: productId });
+      }
     }
 
     if (!productExists) {
@@ -97,7 +106,7 @@ export const addToCart = async (req, res) => {
     } else {
       // Check if item already exists
       const existingItemIndex = cart.items.findIndex(
-        item => item.productId.toString() === productId && item.productType === productType
+        item => String(item.productId) === String(productId) && item.productType === productType
       );
 
       if (existingItemIndex !== -1) {
@@ -166,7 +175,7 @@ export const updateCartItem = async (req, res) => {
     }
 
     const itemIndex = cart.items.findIndex(
-      item => item.productId.toString() === productId
+      item => String(item.productId) === String(productId)
     );
 
     if (itemIndex === -1) {
@@ -217,7 +226,7 @@ export const removeFromCart = async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-      item => item.productId.toString() !== productId
+      item => String(item.productId) !== String(productId)
     );
 
     await cart.save();

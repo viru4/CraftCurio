@@ -125,7 +125,7 @@ const Cart = () => {
                               by {item.artisan || item.artisanName || 'Artisan'}
                             </p>
                             <p className="sm:hidden text-sm font-medium text-[#1b130d] dark:text-white mt-1">
-                              ${item.price.toFixed(2)}
+                              ₹{item.price.toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -159,7 +159,7 @@ const Cart = () => {
 
                         {/* Total Price */}
                         <p className="text-left sm:text-right font-medium text-[#1b130d] dark:text-white">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₹{(item.price * item.quantity).toFixed(2)}
                         </p>
 
                         {/* Delete Button */}
@@ -200,21 +200,21 @@ const Cart = () => {
                     <div className="flex justify-between">
                       <span className="text-[#9a6c4c] dark:text-gray-400">Subtotal</span>
                       <span className="font-medium text-[#1b130d] dark:text-white">
-                        ${subtotal.toFixed(2)}
+                        ₹{subtotal.toFixed(2)}
                       </span>
                     </div>
                     
                     <div className="flex justify-between">
                       <span className="text-[#9a6c4c] dark:text-gray-400">Shipping</span>
                       <span className="font-medium text-[#1b130d] dark:text-white">
-                        ${shippingCost.toFixed(2)}
+                        ₹{shippingCost.toFixed(2)}
                       </span>
                     </div>
                     
                     <div className="flex justify-between border-t border-[#f3ece7] dark:border-gray-700 pt-4 text-base font-bold">
                       <span className="text-[#1b130d] dark:text-white">Total</span>
                       <span className="text-[#1b130d] dark:text-white">
-                        ${total.toFixed(2)}
+                        ₹{total.toFixed(2)}
                       </span>
                     </div>
                   </div>

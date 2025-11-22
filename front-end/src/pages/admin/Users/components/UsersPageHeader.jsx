@@ -1,4 +1,5 @@
-import { Plus } from 'lucide-react';
+import { Plus, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const UsersPageHeader = ({ onAddUser }) => {
   return (
@@ -12,14 +13,24 @@ const UsersPageHeader = ({ onAddUser }) => {
             Manage all platform users, roles, and permissions.
           </p>
         </div>
-        <button
-          onClick={onAddUser}
-          className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-[#ec6d13] text-white text-sm font-medium hover:bg-[#d55a0a] transition-colors whitespace-nowrap flex-shrink-0"
-        >
-          <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className="hidden xs:inline">Add New User</span>
-          <span className="xs:hidden">Add User</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/admin/verifications"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden xs:inline">Verifications</span>
+            <span className="xs:hidden">Verify</span>
+          </Link>
+          <button
+            onClick={onAddUser}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-[#ec6d13] text-white text-sm font-medium hover:bg-[#d55a0a] transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden xs:inline">Add New User</span>
+            <span className="xs:hidden">Add User</span>
+          </button>
+        </div>
       </div>
     </div>
   );

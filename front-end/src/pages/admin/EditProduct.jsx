@@ -85,7 +85,7 @@ const EditProduct = () => {
 
         // Populate form with product data
         setFormData({
-          id: product.id || product._id || '',
+          id: product.id || '',
           title: product.title || product.name || '',
           description: product.description || '',
           category: typeof product.category === 'object' ? product.category._id : product.category || '',

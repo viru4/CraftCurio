@@ -358,7 +358,7 @@ const CheckOut = () => {
                           <p className="text-sm text-[#9a6c4c]">Qty: {item.quantity}</p>
                         </div>
                         <p className="font-semibold text-[#1b130d] flex-shrink-0">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₹{(item.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     ))}
@@ -370,15 +370,15 @@ const CheckOut = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <p className="text-[#9a6c4c]">Subtotal</p>
-                      <p className="font-medium text-[#1b130d]">${subtotal.toFixed(2)}</p>
+                      <p className="font-medium text-[#1b130d]">₹{subtotal.toFixed(2)}</p>
                     </div>
                     <div className="flex justify-between">
                       <p className="text-[#9a6c4c]">Shipping</p>
-                      <p className="font-medium text-[#1b130d]">${shipping.toFixed(2)}</p>
+                      <p className="font-medium text-[#1b130d]">₹{shipping.toFixed(2)}</p>
                     </div>
                     <div className="flex justify-between">
                       <p className="text-[#9a6c4c]">Taxes (8%)</p>
-                      <p className="font-medium text-[#1b130d]">${taxes.toFixed(2)}</p>
+                      <p className="font-medium text-[#1b130d]">₹{taxes.toFixed(2)}</p>
                     </div>
                   </div>
 
@@ -387,7 +387,7 @@ const CheckOut = () => {
                   {/* Total */}
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-bold text-[#1b130d]">Total</p>
-                    <p className="text-xl font-black text-[#1b130d]">${total.toFixed(2)}</p>
+                    <p className="text-xl font-black text-[#1b130d]">₹{total.toFixed(2)}</p>
                   </div>
 
                   {/* Security Badge */}

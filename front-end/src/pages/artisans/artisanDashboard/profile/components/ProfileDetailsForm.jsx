@@ -71,14 +71,52 @@ const ProfileDetailsForm = ({
       <div className="md:col-span-2">
         <label className="flex flex-col">
           <span className="text-stone-800 text-base font-medium leading-normal pb-2">
-            Bio / About Me
+            Brief Bio (for preview cards)
           </span>
           <textarea
             value={profileData.bio}
             onChange={(e) => onInputChange('bio', e.target.value)}
-            className="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-xl text-stone-900 focus:outline-0 focus:ring-2 focus:ring-[#ec6d13]/50 border border-stone-300 bg-white min-h-36 placeholder:text-stone-500 p-[15px] text-base font-normal leading-normal"
-            placeholder="Tell us about your craft, inspiration, and journey as an artisan..."
-            rows={6}
+            className="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-xl text-stone-900 focus:outline-0 focus:ring-2 focus:ring-[#ec6d13]/50 border border-stone-300 bg-white min-h-24 placeholder:text-stone-500 p-[15px] text-base font-normal leading-normal"
+            placeholder="A short summary about your craft (2-3 sentences)..."
+            rows={3}
+            maxLength={200}
+          />
+          <p className="text-stone-500 text-sm mt-1">
+            {profileData.bio?.length || 0}/200 characters
+          </p>
+        </label>
+      </div>
+
+      {/* Full Bio / Story */}
+      <div className="md:col-span-2">
+        <label className="flex flex-col">
+          <span className="text-stone-800 text-base font-medium leading-normal pb-2">
+            Full Story (for your artisan story page)
+          </span>
+          <textarea
+            value={profileData.fullBio}
+            onChange={(e) => onInputChange('fullBio', e.target.value)}
+            className="form-textarea flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-xl text-stone-900 focus:outline-0 focus:ring-2 focus:ring-[#ec6d13]/50 border border-stone-300 bg-white min-h-40 placeholder:text-stone-500 p-[15px] text-base font-normal leading-normal"
+            placeholder="Tell your complete story - your journey, inspiration, techniques, and what makes your craft special..."
+            rows={8}
+          />
+        </label>
+      </div>
+
+      {/* Experience Years */}
+      <div className="md:col-span-1">
+        <label className="flex flex-col">
+          <span className="text-stone-800 text-base font-medium leading-normal pb-2">
+            Years of Experience
+          </span>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={profileData.experienceYears}
+            onChange={(e) => onInputChange('experienceYears', parseInt(e.target.value) || 0)}
+            className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-stone-900 focus:outline-0 focus:ring-2 focus:ring-[#ec6d13]/50 border border-stone-300 bg-white h-14 placeholder:text-stone-500 p-[15px] text-base font-normal leading-normal"
+            placeholder="e.g., 10"
           />
         </label>
       </div>

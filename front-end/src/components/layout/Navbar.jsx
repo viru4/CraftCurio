@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, LogOut, Settings, ShoppingCart, Heart, LayoutDashboard } from "lucide-react";
@@ -12,11 +12,20 @@ const Navbar = () => {
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
   
   const cartCount = getCartCount();
   const wishlistCount = getWishlistCount();
+
+  // Helper function to check if a path is active
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -51,10 +60,10 @@ const Navbar = () => {
             <h2 className="text-2xl font-bold tracking-tight">CraftCurio</h2>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Home</Link>
-            <Link to="/collectibles" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Collectibles</Link>
-            <Link to="/artisans" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Products</Link>
-            <Link to="/artisan-stories" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">Artisan Stories</Link>
+            <Link to="/" className={`text-base font-medium transition-colors ${isActive('/') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Home</Link>
+            <Link to="/collectibles" className={`text-base font-medium transition-colors ${isActive('/collectibles') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Collectibles</Link>
+            <Link to="/artisans" className={`text-base font-medium transition-colors ${isActive('/artisans') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Artisan Products</Link>
+            <Link to="/artisan-stories" className={`text-base font-medium transition-colors ${isActive('/artisan-stories') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Artisan Stories</Link>
             <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
           </nav>
         </div>
@@ -198,10 +207,10 @@ const Navbar = () => {
 
                 {/* Navigation Links */}
                 <nav className="flex-1 px-6 py-4 space-y-1">
-                  <Link to="/" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Home</Link>
-                  <Link to="/collectibles" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Collectibles</Link>
-                  <Link to="/artisans" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Artisan Products</Link>
-                  <Link to="/artisan-stories" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">Artisan Stories</Link>
+                  <Link to="/" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Home</Link>
+                  <Link to="/collectibles" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/collectibles') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Collectibles</Link>
+                  <Link to="/artisans" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/artisans') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Artisan Products</Link>
+                  <Link to="/artisan-stories" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/artisan-stories') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Artisan Stories</Link>
                   <a href="#" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">About Us</a>
                 </nav>
 

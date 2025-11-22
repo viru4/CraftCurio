@@ -52,7 +52,7 @@ const FilteredItemsSection = ({
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {displayedItems.map((item) => (
-                <ProductCard key={item.id || item._id} item={item} onClick={onProductClick} productType={productType} />
+                <ProductCard key={item.id} item={item} onClick={onProductClick} productType={productType} />
               ))}
             </div>
             

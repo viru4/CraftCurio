@@ -37,8 +37,8 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
   const [showAddedMessage, setShowAddedMessage] = useState(false);
-  const itemInCart = isInCart(item.id || item._id);
-  const itemInWishlist = isInWishlist(item.id || item._id);
+  const itemInCart = isInCart(item.id);
+  const itemInWishlist = isInWishlist(item.id);
 
   const handleClick = () => {
     if (onClick) {
@@ -57,7 +57,7 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
     navigate(`/product/${type}/${item.id || item._id}`);
   };
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.stopPropagation();
     
     // Check if user is logged in
@@ -75,15 +75,21 @@ const ProductCard = ({ item, onClick, productType = 'artisan-product' }) => {
       image: item.image,
       artisan: item.artisan || item.artisanName || 'Artisan',
       category: item.category,
+      type: item.type || productType,
     };
 
-    addToCart(cartProduct);
-    
-    // Show added message
-    setShowAddedMessage(true);
-    setTimeout(() => {
-      setShowAddedMessage(false);
-    }, 2000);
+    try {
+      await addToCart(cartProduct);
+      
+      // Show added message
+      setShowAddedMessage(true);
+      setTimeout(() => {
+        setShowAddedMessage(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      alert(error.message || 'Failed to add item to cart');
+    }
   };
 
   const handleToggleWishlist = (e) => {

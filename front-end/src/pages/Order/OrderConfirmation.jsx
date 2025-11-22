@@ -127,7 +127,7 @@ const OrderConfirmation = () => {
                     )}
                   </div>
                   <p className="font-semibold text-[#1b130d] flex-shrink-0">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -137,19 +137,19 @@ const OrderConfirmation = () => {
             <div className="border-t border-[#e7d9cf] pt-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-[#9a6c4c]">Subtotal</span>
-                <span className="font-medium text-[#1b130d]">${order.subtotal.toFixed(2)}</span>
+                <span className="font-medium text-[#1b130d]">₹{order.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[#9a6c4c]">Shipping</span>
-                <span className="font-medium text-[#1b130d]">${order.shipping.toFixed(2)}</span>
+                <span className="font-medium text-[#1b130d]">₹{order.shipping.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[#9a6c4c]">Tax</span>
-                <span className="font-medium text-[#1b130d]">${order.tax.toFixed(2)}</span>
+                <span className="font-medium text-[#1b130d]">₹{order.tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-[#e7d9cf]">
                 <span className="text-[#1b130d]">Total</span>
-                <span className="text-[#1b130d]">${order.total.toFixed(2)}</span>
+                <span className="text-[#1b130d]">₹{order.total.toFixed(2)}</span>
               </div>
             </div>
           </div>

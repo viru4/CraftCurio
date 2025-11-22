@@ -1,4 +1,5 @@
 import Order from '../../models/Order.js';
+import ArtisanProduct from '../../models/ArtisanProduct.js';
 
 // Create new order
 export const createOrder = async (req, res) => {
@@ -241,6 +242,84 @@ export const getAllOrders = async (req, res) => {
     });
   } catch (error) {
     console.error('Get all orders error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch orders',
+      error: error.message 
+    });
+  }
+};
+
+// Get artisan's orders (orders containing artisan's products)
+export const getArtisanOrders = async (req, res) => {
+  try {
+    const { status, search, dateFrom, dateTo, page = 1, limit = 10 } = req.query;
+
+    // Find all products belonging to this artisan
+    const artisanProducts = await ArtisanProduct.find({ artisan: req.user.id }).select('_id');
+    const artisanProductIds = artisanProducts.map(p => p._id.toString());
+
+    if (artisanProductIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        orders: [],
+        total: 0,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: 0
+      });
+    }
+
+    // Build query to find orders containing artisan's products
+    const query = {
+      'items.productId': { $in: artisanProductIds },
+      'items.productType': 'artisan'
+    };
+
+    // Add status filter
+    if (status && status !== 'all') {
+      query.orderStatus = status;
+    }
+
+    // Add search filter (order number or customer name)
+    if (search) {
+      query.$or = [
+        { orderNumber: { $regex: search, $options: 'i' } },
+        { 'shippingAddress.fullName': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Add date range filter
+    if (dateFrom || dateTo) {
+      query.createdAt = {};
+      if (dateFrom) query.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) {
+        const endDate = new Date(dateTo);
+        endDate.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = endDate;
+      }
+    }
+
+    // Count total matching orders
+    const total = await Order.countDocuments(query);
+
+    // Fetch paginated orders
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate('user', 'name email phone');
+
+    res.status(200).json({
+      success: true,
+      orders,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit)
+    });
+  } catch (error) {
+    console.error('Get artisan orders error:', error);
     res.status(500).json({ 
       success: false,
       message: 'Failed to fetch orders',

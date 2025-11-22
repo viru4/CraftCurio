@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const collectibleSchema = new mongoose.Schema({
+  id: { type: String, unique: true, sparse: true }, // Custom ID like "coll-001", "coll-002" (sparse allows existing docs without id)
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true, min: 0 }, // Changed to Number for proper numeric sorting/calculations

@@ -1,7 +1,404 @@
-import React, { useState } from 'react';
-import { Award, Shield, CheckCircle, Plus, Trash2, Upload, FileText, X, Image, ExternalLink } from 'lucide-react';
+import { Award, Shield, CheckCircle, Plus, Trash2, Upload, FileText, X, Image, ExternalLink, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import API_BASE_URL from '@/config/api';
 
-const VerificationSection = ({ profileData, onInputChange }) => {
+// Verification Form Component
+const VerificationForm = ({ verified, onVerificationUpdate }) => {
+  const [verificationData, setVerificationData] = useState({
+    fullName: '',
+    idType: 'passport',
+    idNumber: '',
+    idDocument: null,
+    idDocumentUrl: '',
+    craftProof: null,
+    craftProofUrl: '',
+    businessRegistration: null,
+    businessRegistrationUrl: '',
+    additionalInfo: ''
+  });
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [existingRequest, setExistingRequest] = useState(null);
+
+  // Fetch existing verification request on mount and periodically
+  useEffect(() => {
+    const fetchVerificationStatus = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/api/verification/my-request`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setExistingRequest(data.data);
+            const newStatus = data.data.status;
+            
+            // If status changed to approved, refresh profile data
+            if (newStatus === 'approved' && verificationStatus !== 'approved') {
+              if (onVerificationUpdate) {
+                onVerificationUpdate();
+              }
+            }
+            
+            setVerificationStatus(newStatus);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching verification status:', error);
+      }
+    };
+
+    fetchVerificationStatus();
+    
+    // Poll every 30 seconds to check for status updates
+    const interval = setInterval(fetchVerificationStatus, 30000);
+    
+    return () => clearInterval(interval);
+  }, [verificationStatus, onVerificationUpdate]);
+
+  const handleFileChange = (field, file) => {
+    if (file) {
+      setVerificationData(prev => ({
+        ...prev,
+        [field]: file,
+        [`${field}Url`]: URL.createObjectURL(file)
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      // In production, upload files to cloud storage first
+      // For now, we'll send the data
+      const formData = {
+        fullName: verificationData.fullName,
+        idType: verificationData.idType,
+        idNumber: verificationData.idNumber,
+        idDocumentUrl: verificationData.idDocumentUrl,
+        craftProofUrl: verificationData.craftProofUrl,
+        businessRegistrationUrl: verificationData.businessRegistrationUrl,
+        additionalInfo: verificationData.additionalInfo
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/verification/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setVerificationStatus('pending');
+        setExistingRequest(result.data);
+        alert('Verification request submitted successfully! We will review your application and get back to you soon.');
+      } else {
+        throw new Error(result.message || 'Failed to submit verification request');
+      }
+    } catch (error) {
+      console.error('Error submitting verification:', error);
+      alert(error.message || 'Failed to submit verification request. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (verified) {
+    return (
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-green-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-green-900 mb-2">
+              ✓ Verified Artisan
+            </h3>
+            <p className="text-sm text-green-800">
+              Your profile has been verified! This badge shows customers that you are a trusted artisan on CraftCurio.
+            </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium">
+              <Shield className="w-5 h-5" />
+              <span>Verified Badge Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (existingRequest && verificationStatus === 'pending') {
+    return (
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+            <Shield className="w-8 h-8 text-blue-600 animate-pulse" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-blue-900 mb-2">
+              Verification Under Review
+            </h3>
+            <p className="text-sm text-blue-800 mb-4">
+              Your verification request is being reviewed by our team. We'll notify you once the review is complete.
+            </p>
+            <div className="bg-white/50 rounded-lg p-4 space-y-2">
+              <p className="text-xs font-semibold text-blue-900">Submitted Information:</p>
+              <p className="text-xs text-blue-800">Full Name: {existingRequest.fullName}</p>
+              <p className="text-xs text-blue-800">ID Type: {existingRequest.idType}</p>
+              <p className="text-xs text-blue-800">Submitted: {new Date(existingRequest.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (existingRequest && verificationStatus === 'rejected') {
+    return (
+      <div className="space-y-4">
+        <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-900 mb-2">
+                Verification Request Rejected
+              </h3>
+              <p className="text-sm text-red-800 mb-4">
+                Your verification request was reviewed and requires improvements before approval.
+              </p>
+              {existingRequest.adminComments && (
+                <div className="bg-white rounded-lg p-4 mb-4">
+                  <p className="text-xs font-semibold text-stone-900 mb-2">Admin Feedback:</p>
+                  <p className="text-sm text-stone-700">{existingRequest.adminComments}</p>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setExistingRequest(null);
+                  setVerificationStatus(null);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+              >
+                Submit New Request
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-white border border-stone-200 rounded-lg p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Shield className="w-6 h-6 text-[#ec6d13]" />
+          <h3 className="text-lg font-bold text-stone-900">Apply for Verification</h3>
+        </div>
+
+        <p className="text-sm text-stone-600 mb-6">
+          Complete this form to get your verified badge. This helps build trust with customers and shows that you're a legitimate artisan.
+        </p>
+
+        <div className="space-y-5">
+          {/* Full Name */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Full Legal Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={verificationData.fullName}
+              onChange={(e) => setVerificationData(prev => ({ ...prev, fullName: e.target.value }))}
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
+              placeholder="As shown on your ID"
+            />
+          </div>
+
+          {/* ID Type */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Government ID Type <span className="text-red-500">*</span>
+            </label>
+            <select
+              required
+              value={verificationData.idType}
+              onChange={(e) => setVerificationData(prev => ({ ...prev, idType: e.target.value }))}
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
+            >
+              <option value="passport">Passport</option>
+              <option value="drivers_license">Driver's License</option>
+              <option value="national_id">National ID Card</option>
+              <option value="aadhaar">Aadhaar Card</option>
+            </select>
+          </div>
+
+          {/* ID Number */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              ID Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={verificationData.idNumber}
+              onChange={(e) => setVerificationData(prev => ({ ...prev, idNumber: e.target.value }))}
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
+              placeholder="Enter your ID number"
+            />
+          </div>
+
+          {/* ID Document Upload */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Government ID Document <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
+              <div className="space-y-1 text-center">
+                <Upload className="mx-auto h-12 w-12 text-stone-400" />
+                <div className="flex text-sm text-stone-600">
+                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
+                    <span>Upload a file</span>
+                    <input
+                      type="file"
+                      required={!verificationData.idDocument}
+                      accept="image/*,.pdf"
+                      onChange={(e) => handleFileChange('idDocument', e.target.files[0])}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
+              </div>
+            </div>
+            {verificationData.idDocumentUrl && (
+              <p className="mt-2 text-sm text-green-600">✓ File uploaded</p>
+            )}
+          </div>
+
+          {/* Craft Proof Upload */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Proof of Craft Expertise <span className="text-red-500">*</span>
+            </label>
+            <p className="text-xs text-stone-500 mb-2">
+              Upload certificates, awards, workshop photos, or portfolio images
+            </p>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
+              <div className="space-y-1 text-center">
+                <FileText className="mx-auto h-12 w-12 text-stone-400" />
+                <div className="flex text-sm text-stone-600">
+                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
+                    <span>Upload a file</span>
+                    <input
+                      type="file"
+                      required={!verificationData.craftProof}
+                      accept="image/*,.pdf"
+                      onChange={(e) => handleFileChange('craftProof', e.target.files[0])}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
+              </div>
+            </div>
+            {verificationData.craftProofUrl && (
+              <p className="mt-2 text-sm text-green-600">✓ File uploaded</p>
+            )}
+          </div>
+
+          {/* Business Registration (Optional) */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Business Registration (Optional)
+            </label>
+            <p className="text-xs text-stone-500 mb-2">
+              GST certificate, business license, or registration document if applicable
+            </p>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
+              <div className="space-y-1 text-center">
+                <FileText className="mx-auto h-12 w-12 text-stone-400" />
+                <div className="flex text-sm text-stone-600">
+                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
+                    <span>Upload a file</span>
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(e) => handleFileChange('businessRegistration', e.target.files[0])}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
+                <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
+              </div>
+            </div>
+            {verificationData.businessRegistrationUrl && (
+              <p className="mt-2 text-sm text-green-600">✓ File uploaded</p>
+            )}
+          </div>
+
+          {/* Additional Information */}
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-2">
+              Additional Information
+            </label>
+            <textarea
+              value={verificationData.additionalInfo}
+              onChange={(e) => setVerificationData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+              rows={4}
+              className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent resize-none"
+              placeholder="Tell us more about your craft, experience, or anything else that helps verify your expertise..."
+            />
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <div className="mt-6 flex items-center justify-between pt-6 border-t border-stone-200">
+          <p className="text-xs text-stone-500">
+            Your information will be reviewed within 2-3 business days
+          </p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-3 bg-[#ec6d13] text-white rounded-lg font-medium hover:bg-[#d65d0f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Submitting...</span>
+              </>
+            ) : (
+              <>
+                <Shield className="w-5 h-5" />
+                <span>Submit Verification Request</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+};
+
+const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate }) => {
   const [newAward, setNewAward] = useState({ name: '', imageUrl: '' });
   const [newCertification, setNewCertification] = useState({ name: '', imageUrl: '' });
   const [activeSection, setActiveSection] = useState('verification');
@@ -47,11 +444,6 @@ const VerificationSection = ({ profileData, onInputChange }) => {
   const handleRemoveCertification = (index) => {
     const updatedCertifications = certifications.filter((_, i) => i !== index);
     onInputChange('certifications', updatedCertifications);
-  };
-
-  // Handle verification toggle
-  const handleVerificationToggle = () => {
-    onInputChange('verified', !verified);
   };
 
   return (
@@ -101,85 +493,12 @@ const VerificationSection = ({ profileData, onInputChange }) => {
 
       {/* Verification Status Section */}
       {activeSection === 'verification' && (
-        <div className="bg-white border border-stone-200 rounded-lg p-4 sm:p-6">
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className={`
-              flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center
-              ${verified ? 'bg-green-100' : 'bg-orange-100'}
-            `}>
-              {verified ? (
-                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
-              ) : (
-                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
-              )}
-            </div>
-            
-            <div className="flex-1 space-y-3 sm:space-y-4">
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-1 sm:mb-2">
-                  {verified ? 'Verified Artisan' : 'Verification Pending'}
-                </h3>
-                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                  {verified 
-                    ? 'Your profile has been verified. This badge shows customers that you are a trusted artisan on CraftCurio.'
-                    : 'Complete your profile and submit verification documents to get your verified badge. This helps build trust with customers.'
-                  }
-                </p>
-              </div>
-
-              {/* Verification Toggle (for demo purposes) */}
-              <div className="flex items-center gap-2 sm:gap-3 pt-2">
-                <button
-                  onClick={handleVerificationToggle}
-                  className={`
-                    relative inline-flex h-6 w-11 sm:h-7 sm:w-14 items-center rounded-full transition-colors
-                    ${verified ? 'bg-green-500' : 'bg-stone-300'}
-                  `}
-                >
-                  <span
-                    className={`
-                      inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white transition-transform
-                      ${verified ? 'translate-x-6 sm:translate-x-8' : 'translate-x-1'}
-                    `}
-                  />
-                </button>
-                <span className="text-xs sm:text-sm font-medium text-stone-700">
-                  {verified ? 'Verified' : 'Not Verified'}
-                </span>
-              </div>
-
-              {!verified && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 sm:p-4 mt-3 sm:mt-4">
-                  <h4 className="text-xs sm:text-sm font-semibold text-orange-900 mb-2">
-                    Verification Requirements:
-                  </h4>
-                  <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-orange-800">
-                    <li className="flex items-start gap-2">
-                      <span className="text-orange-500 mt-0.5">•</span>
-                      <span>Complete all profile information</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-orange-500 mt-0.5">•</span>
-                      <span>Upload valid government ID</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-orange-500 mt-0.5">•</span>
-                      <span>Provide proof of craft expertise</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-orange-500 mt-0.5">•</span>
-                      <span>Submit at least 3 product listings</span>
-                    </li>
-                  </ul>
-                  <button className="mt-3 sm:mt-4 w-full sm:w-auto px-4 py-2 bg-orange-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-orange-700 transition-colors flex items-center justify-center gap-2">
-                    <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
-                    Submit Verification Documents
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <VerificationForm 
+          verified={verified}
+          profileData={profileData}
+          onInputChange={onInputChange}
+          onVerificationUpdate={onVerificationUpdate}
+        />
       )}
 
       {/* Awards Section */}

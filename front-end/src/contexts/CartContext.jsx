@@ -87,23 +87,10 @@ export const CartProvider = ({ children }) => {
         throw new Error('Please sign in to add items to your cart');
       }
 
-      // Optimistically update UI
-      setCartItems((prevItems) => {
-        const existingItem = prevItems.find((item) => item.id === product.id);
-        
-        if (existingItem) {
-          return prevItems.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-        } else {
-          return [...prevItems, { ...product, quantity: 1 }];
-        }
-      });
+      console.log('Adding to cart:', product);
 
-      // Make API call
-      await makeAuthRequest(API_ENDPOINTS.cart, {
+      // Make API call first to ensure backend succeeds
+      const response = await makeAuthRequest(API_ENDPOINTS.cart, {
         method: 'POST',
         body: JSON.stringify({
           productId: product.id,
@@ -116,15 +103,15 @@ export const CartProvider = ({ children }) => {
           quantity: 1,
         }),
       });
+
+      console.log('Cart API response:', response);
+
+      // After successful API call, fetch the updated cart
+      const cartData = await makeAuthRequest(API_ENDPOINTS.cart);
+      setCartItems(cartData.data.items || []);
+      
     } catch (error) {
       console.error('Error adding to cart:', error);
-      // Revert on error - re-fetch cart
-      try {
-        const data = await makeAuthRequest(API_ENDPOINTS.cart);
-        setCartItems(data.data.items || []);
-      } catch (fetchError) {
-        console.error('Error re-fetching cart:', fetchError);
-      }
       throw error;
     }
   };
@@ -216,7 +203,7 @@ export const CartProvider = ({ children }) => {
 
   // Check if item is in cart
   const isInCart = (productId) => {
-    return cartItems.some((item) => item.id === productId);
+    return cartItems.some((item) => item.id === productId || item.id === productId.toString());
   };
 
   // Get cart item count

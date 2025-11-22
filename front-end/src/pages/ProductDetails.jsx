@@ -13,11 +13,12 @@ import {
   ProductSpecifications,
   ArtisanProfileCard,
   ProductStorySection,
-  ReviewsList,
   TabNavigation,
   ProductBadges,
   ShippingReturnsSection
 } from '../components/productDetailPage';
+import ProductReviewsSection from '../components/productDetailPage/ProductReviewsSection';
+import ProductQASection from '../components/productDetailPage/ProductQASection';
 
 const ProductDetails = () => {
   const { type, id } = useParams(); // type can be 'artisan-product' or 'collectible'
@@ -107,7 +108,7 @@ const ProductDetails = () => {
     if (!product) return;
 
     const wishlistProduct = {
-      id: product._id || product.id,
+      id: product.id,
       name: product.title,
       price: typeof product.price === 'string' 
         ? parseFloat(product.price.replace(/[^0-9.]/g, '')) 
@@ -133,7 +134,7 @@ const ProductDetails = () => {
     }
 
     const cartProduct = {
-      id: product._id || product.id,
+      id: product.id,
       name: product.title,
       price: typeof product.price === 'string' 
         ? parseFloat(product.price.replace(/[^0-9.]/g, '')) 
@@ -282,7 +283,7 @@ const ProductDetails = () => {
                 <ProductPriceCard
                   price={product.price || 0}
                   availability={product.availability}
-                  isInWishlist={isInWishlist(product._id || product.id)}
+                  isInWishlist={isInWishlist(product.id)}
                   onToggleWishlist={handleToggleWishlist}
                   onAddToCart={handleAddToCart}
                   isMobile={true}
@@ -354,7 +355,7 @@ const ProductDetails = () => {
                 <ProductPriceCard
                   price={product.price || 0}
                   availability={product.availability}
-                  isInWishlist={isInWishlist(product._id || product.id)}
+                  isInWishlist={isInWishlist(product.id)}
                   onToggleWishlist={handleToggleWishlist}
                   onAddToCart={handleAddToCart}
                   isMobile={false}
@@ -451,8 +452,8 @@ const ProductDetails = () => {
             </div>
           )}
 
-          {/* Reviews Section - Only show for artisan products with reviews */}
-          {!isCollectible && product.reviews && product.reviews.length > 0 && (
+          {/* Reviews & Q&A Section - Only show for artisan products */}
+          {!isCollectible && (
             <div className="mt-12 lg:mt-16">
               <TabNavigation
                 activeTab={activeTab}
@@ -461,14 +462,12 @@ const ProductDetails = () => {
 
               {/* Reviews Content */}
               {activeTab === 'reviews' && (
-                <ReviewsList reviews={product.reviews} />
+                <ProductReviewsSection product={product} />
               )}
 
               {/* Q&A Content */}
               {activeTab === 'qa' && (
-                <div className="py-12 text-center">
-                  <p className="text-stone-500">Q&A section coming soon!</p>
-                </div>
+                <ProductQASection product={product} />
               )}
             </div>
           )}
