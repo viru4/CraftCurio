@@ -9,7 +9,8 @@ import {
   Shield, 
   Headset, 
   Settings, 
-  LogOut 
+  LogOut,
+  Info
 } from 'lucide-react';
 
 const AdminSidebar = () => {
@@ -21,6 +22,7 @@ const AdminSidebar = () => {
     { icon: Package, label: 'Products', path: '/admin/products' },
     { icon: Receipt, label: 'Orders', path: '/admin/orders' },
     { icon: FileText, label: 'Content', path: '/admin/content' },
+    { icon: Info, label: 'About Us', path: '/admin/about-us' },
     { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
     { icon: Shield, label: 'Security', path: '/admin/security' },
     { icon: Headset, label: 'Support', path: '/admin/support' },

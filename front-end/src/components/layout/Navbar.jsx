@@ -64,7 +64,7 @@ const Navbar = () => {
             <Link to="/collectibles" className={`text-base font-medium transition-colors ${isActive('/collectibles') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Collectibles</Link>
             <Link to="/artisans" className={`text-base font-medium transition-colors ${isActive('/artisans') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Artisan Products</Link>
             <Link to="/artisan-stories" className={`text-base font-medium transition-colors ${isActive('/artisan-stories') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Artisan Stories</Link>
-            <a href="#" className="text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] transition-colors">About Us</a>
+            <Link to="/about-us" className={`text-base font-medium transition-colors ${isActive('/about-us') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>About Us</Link>
           </nav>
         </div>
         <div className="hidden md:flex items-center gap-4">
@@ -223,7 +223,7 @@ const Navbar = () => {
                   <Link to="/collectibles" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/collectibles') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Collectibles</Link>
                   <Link to="/artisans" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/artisans') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Artisan Products</Link>
                   <Link to="/artisan-stories" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/artisan-stories') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Artisan Stories</Link>
-                  <a href="#" className="block py-3 text-[var(--text-primary)] text-base font-medium hover:text-[var(--primary-color)] hover:bg-stone-50 rounded-lg px-3 transition-colors">About Us</a>
+                  <Link to="/about-us" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/about-us') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>About Us</Link>
                 </nav>
 
                 {/* User Section */}

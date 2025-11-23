@@ -23,6 +23,7 @@ import messageRoutes from './api/routes/message.routes.js';
 import verificationRoutes from './api/routes/verification.routes.js';
 import reviewRoutes from './api/routes/reviews.js';
 import questionRoutes from './api/routes/questions.js';
+import aboutUsRoutes from './api/routes/aboutUsRoutes.js';
 
 const app = express();
 
@@ -91,6 +92,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/questions', questionRoutes);
+app.use('/api/about-us', aboutUsRoutes);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {

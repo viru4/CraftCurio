@@ -15,6 +15,7 @@ import Collectibles from '@/pages/Collectibles/Collectibles'
 import ArtisansProducts from '@/pages/artisans/ArtisansProducts'
 import ArtisanStories from '@/pages/artisans/ArtisanStories'
 import ArtisanStoryDetail from '@/pages/artisans/ArtisanStoryDetail'
+import AboutUs from '@/pages/AboutUs'
 import ArtisanDashboard from '@/pages/artisans/artisanDashboard/ArtisanDashboard'
 import ArtisanProfile from '@/pages/artisans/artisanDashboard/profile/Profile'
 import ArtisanProductsManagement from '@/pages/artisans/artisanDashboard/Products/ArtisanProducts'
@@ -32,6 +33,7 @@ import AdminContent from '@/pages/admin/content&stories/AdminContent'
 import VerificationManagement from '@/pages/admin/Users/components/VerificationManagement'
 import AdminOrders from '@/pages/admin/Orders/AdminOrders'
 import AdminLogin from '@/pages/admin/auth/AdminLogin'
+import AboutUsManagement from '@/pages/admin/aboutusManagement/AboutUsManagement'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import ProtectedAdminRoute from '@/components/ProtectedAdminRoute'
 
@@ -55,6 +57,7 @@ export default function AppRoutes() {
       <Route path="/artisans" element={<ArtisansProducts />} />
       <Route path="/artisan-stories" element={<ArtisanStories />} />
       <Route path="/artisan-stories/:id" element={<ArtisanStoryDetail />} />
+      <Route path="/about-us" element={<AboutUs />} />
       <Route path="/artisan/dashboard" element={<ArtisanDashboard />} />
       <Route path="/artisan/profile" element={<ArtisanProfile />} />
       <Route path="/artisan/products" element={<ArtisanProductsManagement />} />
@@ -71,6 +74,7 @@ export default function AppRoutes() {
       <Route path="/admin/orders" element={<ProtectedAdminRoute><AdminOrders /></ProtectedAdminRoute>} />
       <Route path="/admin/verifications" element={<ProtectedAdminRoute><VerificationManagement /></ProtectedAdminRoute>} />
       <Route path="/admin/content" element={<ProtectedAdminRoute><AdminContent /></ProtectedAdminRoute>} />
+      <Route path="/admin/about-us" element={<ProtectedAdminRoute><AboutUsManagement /></ProtectedAdminRoute>} />
       <Route path="/admin/*" element={<Admin />} />
     </Routes>
   )
