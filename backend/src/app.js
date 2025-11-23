@@ -1,8 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+
 // Load environment variables
 dotenv.config();
+
 // Import routes
 import categoryRoutes from './api/routes/categories.js';
 import collectibleRoutes from './api/routes/collectibles.js';
@@ -20,9 +24,18 @@ import verificationRoutes from './api/routes/verification.routes.js';
 import reviewRoutes from './api/routes/reviews.js';
 import questionRoutes from './api/routes/questions.js';
 
-
-
 const app = express();
+
+// Security Middleware
+app.use(helmet());
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/auth/', limiter);
 
 // Middleware
 app.use(cors({
@@ -42,13 +55,10 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-
-
-
 // Basic routes
 app.get('/', (req, res) => {
-    res.json({ 
-        message: 'CraftCurio Backend Server is running!', 
+    res.json({
+        message: 'CraftCurio Backend Server is running!',
         status: 'success',
         port: process.env.PORT || 8000,
         database: 'Connected to MongoDB'
@@ -56,8 +66,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'healthy', 
+    res.json({
+        status: 'healthy',
         timestamp: new Date().toISOString(),
         server: 'CraftCurio Backend',
         database: 'MongoDB Connected'

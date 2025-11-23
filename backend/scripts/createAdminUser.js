@@ -12,7 +12,7 @@ const createAdminUser = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const adminEmail = 'admin@craftcurio.com';
+    const adminEmail = 'craftcuriodev@gmail.com';
     const adminPassword = 'admin123'; // Change this to a secure password
 
     // Check if admin already exists

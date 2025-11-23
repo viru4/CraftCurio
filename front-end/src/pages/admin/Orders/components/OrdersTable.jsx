@@ -62,13 +62,13 @@ const OrdersTable = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-[#e8d5c4] overflow-hidden">
+    <div className="bg-white rounded-lg border border-[#e8d5c4] shadow-sm">
       {/* Desktop Table */}
       <div className="hidden lg:block overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[1000px]">
           <thead className="bg-[#f8f7f6] border-b border-[#e8d5c4]">
             <tr>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-4 text-left w-12">
                 <input
                   type="checkbox"
                   checked={selectedOrders.length === orders.length}
@@ -76,20 +76,20 @@ const OrdersTable = ({
                   className="w-4 h-4 text-[#ec6d13] border-[#e8d5c4] rounded focus:ring-[#ec6d13]"
                 />
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Order #</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Customer</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Date</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Items</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Total</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Status</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Payment</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-[#1b130d]">Actions</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[150px]">Order #</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[200px]">Customer</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[120px]">Date</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[80px]">Items</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[100px]">Total</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[120px]">Status</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[120px]">Payment</th>
+              <th className="px-4 py-4 text-left text-sm font-semibold text-[#1b130d] whitespace-nowrap min-w-[80px]">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e8d5c4]">
             {orders.map((order) => (
               <tr key={order._id} className="hover:bg-[#f8f7f6] transition-colors">
-                <td className="px-6 py-4">
+                <td className="px-4 py-4 w-12">
                   <input
                     type="checkbox"
                     checked={selectedOrders.includes(order._id)}
@@ -97,31 +97,31 @@ const OrdersTable = ({
                     className="w-4 h-4 text-[#ec6d13] border-[#e8d5c4] rounded focus:ring-[#ec6d13]"
                   />
                 </td>
-                <td className="px-6 py-4">
-                  <span className="font-mono text-sm text-[#1b130d]">{order.orderNumber}</span>
+                <td className="px-4 py-4 min-w-[150px]">
+                  <span className="font-mono text-sm text-[#1b130d] whitespace-nowrap">{order.orderNumber}</span>
                 </td>
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="font-medium text-[#1b130d]">{order.shippingAddress.fullName}</p>
-                    <p className="text-sm text-[#6b5d54]">{order.user?.email}</p>
+                <td className="px-4 py-4 min-w-[200px]">
+                  <div className="max-w-[200px]">
+                    <p className="font-medium text-[#1b130d] whitespace-nowrap overflow-hidden text-ellipsis">{order.shippingAddress.fullName}</p>
+                    <p className="text-sm text-[#6b5d54] whitespace-nowrap overflow-hidden text-ellipsis">{order.user?.email}</p>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-[#6b5d54]">
+                <td className="px-4 py-4 text-sm text-[#6b5d54] whitespace-nowrap min-w-[120px]">
                   {format(new Date(order.createdAt), 'MMM dd, yyyy')}
                 </td>
-                <td className="px-6 py-4 text-sm text-[#6b5d54]">
+                <td className="px-4 py-4 text-sm text-[#6b5d54] whitespace-nowrap min-w-[80px]">
                   {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                 </td>
-                <td className="px-6 py-4 font-medium text-[#1b130d]">
+                <td className="px-4 py-4 font-medium text-[#1b130d] whitespace-nowrap min-w-[100px]">
                   ${order.total.toFixed(2)}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-4 min-w-[120px]">
                   {getStatusBadge(order.orderStatus)}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-4 min-w-[120px]">
                   {getPaymentBadge(order.paymentStatus)}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-4 min-w-[80px]">
                   <button
                     onClick={() => onViewDetails(order)}
                     className="p-2 text-[#ec6d13] hover:bg-[#ec6d13] hover:text-white rounded-lg transition-colors"
@@ -139,34 +139,34 @@ const OrdersTable = ({
       {/* Mobile Cards */}
       <div className="lg:hidden divide-y divide-[#e8d5c4]">
         {orders.map((order) => (
-          <div key={order._id} className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-start gap-3">
+          <div key={order._id} className="p-3 sm:p-4">
+            <div className="flex items-start justify-between mb-3 gap-2">
+              <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
                 <input
                   type="checkbox"
                   checked={selectedOrders.includes(order._id)}
                   onChange={() => onSelectOrder(order._id)}
-                  className="mt-1 w-4 h-4 text-[#ec6d13] border-[#e8d5c4] rounded focus:ring-[#ec6d13]"
+                  className="mt-1 w-4 h-4 text-[#ec6d13] border-[#e8d5c4] rounded focus:ring-[#ec6d13] flex-shrink-0"
                 />
-                <div>
-                  <p className="font-mono text-sm font-medium text-[#1b130d]">{order.orderNumber}</p>
-                  <p className="text-sm text-[#6b5d54]">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-xs sm:text-sm font-medium text-[#1b130d] truncate">{order.orderNumber}</p>
+                  <p className="text-xs sm:text-sm text-[#6b5d54] truncate">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</p>
                 </div>
               </div>
               <button
                 onClick={() => onViewDetails(order)}
-                className="p-2 text-[#ec6d13] hover:bg-[#f8f7f6] rounded-lg transition-colors"
+                className="p-2 text-[#ec6d13] hover:bg-[#f8f7f6] rounded-lg transition-colors flex-shrink-0"
               >
-                <Eye size={18} />
+                <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
             
-            <div className="space-y-2 mb-3">
+            <div className="space-y-2">
               <div>
-                <p className="font-medium text-[#1b130d]">{order.shippingAddress.fullName}</p>
-                <p className="text-sm text-[#6b5d54]">{order.items.length} items • ${order.total.toFixed(2)}</p>
+                <p className="text-sm sm:text-base font-medium text-[#1b130d] truncate">{order.shippingAddress.fullName}</p>
+                <p className="text-xs sm:text-sm text-[#6b5d54]">{order.items.length} items • ${order.total.toFixed(2)}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {getStatusBadge(order.orderStatus)}
                 {getPaymentBadge(order.paymentStatus)}
               </div>
@@ -177,9 +177,9 @@ const OrdersTable = ({
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="border-t border-[#e8d5c4] px-6 py-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#6b5d54]">
+        <div className="border-t border-[#e8d5c4] px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+            <p className="text-xs sm:text-sm text-[#6b5d54] text-center sm:text-left">
               Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
               {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
               {pagination.total} orders
@@ -190,10 +190,10 @@ const OrdersTable = ({
                 disabled={pagination.page === 1}
                 className="p-2 border border-[#e8d5c4] rounded-lg hover:bg-[#f8f7f6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
-              <div className="flex items-center px-4 py-2 border border-[#e8d5c4] rounded-lg bg-[#f8f7f6]">
-                <span className="text-sm font-medium text-[#1b130d]">
+              <div className="flex items-center px-3 sm:px-4 py-2 border border-[#e8d5c4] rounded-lg bg-[#f8f7f6]">
+                <span className="text-xs sm:text-sm font-medium text-[#1b130d] whitespace-nowrap">
                   {pagination.page} / {pagination.totalPages}
                 </span>
               </div>
@@ -202,7 +202,7 @@ const OrdersTable = ({
                 disabled={pagination.page === pagination.totalPages}
                 className="p-2 border border-[#e8d5c4] rounded-lg hover:bg-[#f8f7f6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <ChevronRight size={18} />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>

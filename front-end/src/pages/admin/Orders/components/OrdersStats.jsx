@@ -33,19 +33,19 @@ const OrdersStats = ({ stats }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
       {statCards.map((stat, index) => (
         <div
           key={index}
-          className={`bg-white rounded-lg p-6 border ${stat.borderColor} shadow-sm hover:shadow-md transition-shadow`}
+          className={`bg-white rounded-lg p-4 sm:p-5 md:p-6 border ${stat.borderColor} shadow-sm hover:shadow-md transition-shadow`}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-[#6b5d54] mb-1">{stat.title}</p>
-              <p className="text-2xl font-bold text-[#1b130d]">{stat.value}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-[#6b5d54] mb-1 truncate">{stat.title}</p>
+              <p className="text-xl sm:text-2xl font-bold text-[#1b130d] truncate">{stat.value}</p>
             </div>
-            <div className={`p-3 rounded-lg ${stat.color}`}>
-              <stat.icon size={24} />
+            <div className={`p-2 sm:p-3 rounded-lg ${stat.color} flex-shrink-0 ml-2`}>
+              <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
           </div>
         </div>

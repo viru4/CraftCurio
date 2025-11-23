@@ -15,7 +15,8 @@
     "stats": "node -e \"import('./scripts/seeders/utils.js').then(m => m.getDatabaseStats().then(s => console.log(JSON.stringify(s, null, 2)) || process.exit(0)))\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "check-email": "node scripts/checkEmailConfig.js"
+    "check-email": "node scripts/checkEmailConfig.js",
+    "create-admin": "node scripts/createAdminUser.js"
   },
   "author": "",
   "license": "ISC",
@@ -25,10 +26,13 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
     "nodemailer": "^6.10.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

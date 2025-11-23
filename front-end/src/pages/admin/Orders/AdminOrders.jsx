@@ -3,6 +3,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import MobileSidebar from '../components/MobileSidebar';
+import AdminHeader from '../components/AdminHeader';
 import OrdersStats from './components/OrdersStats';
 import OrdersFilters from './components/OrdersFilters';
 import OrdersTable from './components/OrdersTable';
@@ -201,57 +202,69 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f6]">
-      {/* Desktop Sidebar */}
-      <AdminSidebar />
-      
-      {/* Mobile Sidebar */}
-      <MobileSidebar />
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+      <div className="flex flex-row min-h-screen">
+        {/* Desktop Sidebar */}
+        <AdminSidebar />
+        
+        {/* Mobile Sidebar */}
+        <MobileSidebar />
 
-      {/* Main Content */}
-      <div className="lg:ml-64 min-h-screen">
-        <div className="p-4 lg:p-8">
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <Package size={32} className="text-[#ec6d13]" />
-              <h1 className="text-3xl font-bold text-[#1b130d]">Order Management</h1>
-            </div>
-            <p className="text-[#6b5d54]">Manage and track all customer orders</p>
-          </div>
+          <AdminHeader />
 
-          {/* Stats */}
-          {stats && <OrdersStats stats={stats} />}
+          {/* Orders Content */}
+          <div className="flex-1 p-3 sm:p-4 md:p-6 lg:p-10 overflow-auto">
+            <div className="min-w-fit w-full">
+              {/* Page Header */}
+              <div className="mb-4 sm:mb-6 md:mb-8">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <Package className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#ec6d13] flex-shrink-0" />
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">
+                    Order Management
+                  </h1>
+                </div>
+                <p className="text-[#9a6c4c] dark:text-[#a88e79] text-sm sm:text-base font-normal leading-normal">
+                  Manage and track all customer orders
+                </p>
+              </div>
 
-          {/* Filters */}
-          <OrdersFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onExport={handleExport}
-          />
+            {/* Stats */}
+            {stats && <OrdersStats stats={stats} />}
 
-          {/* Bulk Actions */}
-          {selectedOrders.length > 0 && (
-            <BulkActionsBar
-              selectedCount={selectedOrders.length}
-              onBulkUpdate={handleBulkUpdate}
-              onClear={() => setSelectedOrders([])}
+            {/* Filters */}
+            <OrdersFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onExport={handleExport}
             />
-          )}
 
-          {/* Orders Table */}
-          <OrdersTable
-            orders={orders}
-            loading={loading}
-            selectedOrders={selectedOrders}
-            onSelectOrder={handleSelectOrder}
-            onSelectAll={handleSelectAll}
-            onViewDetails={handleViewDetails}
-            onUpdateStatus={handleUpdateStatus}
-            pagination={pagination}
-            onPageChange={(page) => handleFilterChange('page', page)}
-          />
-        </div>
+            {/* Bulk Actions */}
+            {selectedOrders.length > 0 && (
+              <BulkActionsBar
+                selectedCount={selectedOrders.length}
+                onBulkUpdate={handleBulkUpdate}
+                onClear={() => setSelectedOrders([])}
+              />
+            )}
+
+            {/* Orders Table */}
+            <OrdersTable
+              orders={orders}
+              loading={loading}
+              selectedOrders={selectedOrders}
+              onSelectOrder={handleSelectOrder}
+              onSelectAll={handleSelectAll}
+              onViewDetails={handleViewDetails}
+              onUpdateStatus={handleUpdateStatus}
+              pagination={pagination}
+              onPageChange={(page) => handleFilterChange('page', page)}
+            />
+          </div>
+          </div>
+        </main>
       </div>
 
       {/* Order Details Modal */}

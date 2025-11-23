@@ -31,6 +31,9 @@ import Users from '@/pages/admin/Users/Users'
 import AdminContent from '@/pages/admin/content&stories/AdminContent'
 import VerificationManagement from '@/pages/admin/Users/components/VerificationManagement'
 import AdminOrders from '@/pages/admin/Orders/AdminOrders'
+import AdminLogin from '@/pages/admin/auth/AdminLogin'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import ProtectedAdminRoute from '@/components/ProtectedAdminRoute'
 
 export default function AppRoutes() {
   return (
@@ -46,6 +49,7 @@ export default function AppRoutes() {
       <Route path="/orders" element={<MyOrders />} />
       <Route path="/sign-in" element={<SignInPage />} />
       <Route path="/sign-up" element={<SignUpPage />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/become-seller" element={<SellerRegistration />} />
       <Route path="/collectibles" element={<Collectibles />} />
       <Route path="/artisans" element={<ArtisansProducts />} />
@@ -60,13 +64,13 @@ export default function AppRoutes() {
       <Route path="/artisan/orders" element={<Orders />} />
       <Route path="/artisan/reviews" element={<Reviews />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/admin/products" element={<Products />} />
-      <Route path="/admin/products/edit/:id" element={<EditProduct />} />
-      <Route path="/admin/users" element={<Users />} />
-      <Route path="/admin/orders" element={<AdminOrders />} />
-      <Route path="/admin/verifications" element={<VerificationManagement />} />
-      <Route path="/admin/content" element={<AdminContent />} />
+      <Route path="/admin" element={<ProtectedAdminRoute><Admin /></ProtectedAdminRoute>} />
+      <Route path="/admin/products" element={<ProtectedAdminRoute><Products /></ProtectedAdminRoute>} />
+      <Route path="/admin/products/edit/:id" element={<ProtectedAdminRoute><EditProduct /></ProtectedAdminRoute>} />
+      <Route path="/admin/users" element={<ProtectedAdminRoute><Users /></ProtectedAdminRoute>} />
+      <Route path="/admin/orders" element={<ProtectedAdminRoute><AdminOrders /></ProtectedAdminRoute>} />
+      <Route path="/admin/verifications" element={<ProtectedAdminRoute><VerificationManagement /></ProtectedAdminRoute>} />
+      <Route path="/admin/content" element={<ProtectedAdminRoute><AdminContent /></ProtectedAdminRoute>} />
       <Route path="/admin/*" element={<Admin />} />
     </Routes>
   )

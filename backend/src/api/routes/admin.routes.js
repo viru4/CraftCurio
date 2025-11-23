@@ -7,18 +7,17 @@ import {
   deleteUser 
 } from '../controllers/admin.controllers.js';
 import { authenticate } from '../../middleware/authMiddleware.js';
+import { requireAdmin } from '../../middleware/roleMiddleware.js';
 
 const adminRouter = express.Router();
 
-// User management routes - require authentication
-// Note: For production, you should add role-based access control
-// import { requireAdmin } from '../../middleware/roleMiddleware.js';
-// Then add requireAdmin middleware to routes that should be admin-only
+// User management routes - require admin authentication
+// All routes are protected with authenticate + requireAdmin middleware
 
-adminRouter.get('/users', authenticate, getAllUsers);
-adminRouter.get('/users/:id', authenticate, getUserById);
-adminRouter.post('/users', authenticate, createUser);
-adminRouter.patch('/users/:id', authenticate, updateUser);
-adminRouter.delete('/users/:id', authenticate, deleteUser);
+adminRouter.get('/users', authenticate, requireAdmin, getAllUsers);
+adminRouter.get('/users/:id', authenticate, requireAdmin, getUserById);
+adminRouter.post('/users', authenticate, requireAdmin, createUser);
+adminRouter.patch('/users/:id', authenticate, requireAdmin, updateUser);
+adminRouter.delete('/users/:id', authenticate, requireAdmin, deleteUser);
 
 export default adminRouter;
