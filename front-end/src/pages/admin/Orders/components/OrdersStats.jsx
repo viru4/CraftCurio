@@ -18,7 +18,7 @@ const OrdersStats = ({ stats }) => {
     },
     {
       title: 'Total Revenue',
-      value: `$${(stats.totalRevenue || 0).toFixed(2)}`,
+      value: `₹${(stats.totalRevenue || 0).toFixed(2)}`,
       icon: DollarSign,
       color: 'bg-green-50 text-green-600',
       borderColor: 'border-green-200'

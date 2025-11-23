@@ -113,7 +113,7 @@ const OrdersTable = ({
                   {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                 </td>
                 <td className="px-4 py-4 font-medium text-[#1b130d] whitespace-nowrap min-w-[100px]">
-                  ${order.total.toFixed(2)}
+                  ₹{order.total.toFixed(2)}
                 </td>
                 <td className="px-4 py-4 min-w-[120px]">
                   {getStatusBadge(order.orderStatus)}
@@ -164,7 +164,7 @@ const OrdersTable = ({
             <div className="space-y-2">
               <div>
                 <p className="text-sm sm:text-base font-medium text-[#1b130d] truncate">{order.shippingAddress.fullName}</p>
-                <p className="text-xs sm:text-sm text-[#6b5d54]">{order.items.length} items • ${order.total.toFixed(2)}</p>
+                <p className="text-xs sm:text-sm text-[#6b5d54]">{order.items.length} items • ₹{order.total.toFixed(2)}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {getStatusBadge(order.orderStatus)}

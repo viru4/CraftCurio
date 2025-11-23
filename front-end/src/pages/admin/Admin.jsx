@@ -10,7 +10,7 @@ import { API_ENDPOINTS } from '../../config/api';
 
 const Admin = () => {
   const [stats, setStats] = useState({
-    totalSales: { value: '$0', change: '+0%', isPositive: true },
+    totalSales: { value: '₹0', change: '+0%', isPositive: true },
     newUsers: { value: '0', change: '+0%', isPositive: true },
     pendingApprovals: { value: '0', change: '0%', isPositive: true },
     openTickets: { value: '0', change: '+0%', isPositive: true }

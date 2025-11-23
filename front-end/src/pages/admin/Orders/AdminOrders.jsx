@@ -175,7 +175,7 @@ const AdminOrders = () => {
       order.orderNumber,
       order.shippingAddress.fullName,
       new Date(order.createdAt).toLocaleDateString(),
-      `$${order.total.toFixed(2)}`,
+      `₹${order.total.toFixed(2)}`,
       order.orderStatus,
       order.paymentStatus
     ]);

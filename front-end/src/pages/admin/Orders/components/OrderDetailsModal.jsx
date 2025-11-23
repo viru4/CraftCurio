@@ -225,9 +225,9 @@ const OrderDetailsModal = ({ order, onClose, onUpdateStatus, onRefresh }) => {
                     <p className="text-sm text-[#6b5d54]">Qty: {item.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-[#1b130d]">${item.price.toFixed(2)}</p>
+                    <p className="font-medium text-[#1b130d]">₹{item.price.toFixed(2)}</p>
                     <p className="text-sm text-[#6b5d54]">
-                      Total: ${(item.price * item.quantity).toFixed(2)}
+                      Total: ₹{(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -244,20 +244,20 @@ const OrderDetailsModal = ({ order, onClose, onUpdateStatus, onRefresh }) => {
             <div className="space-y-2">
               <div className="flex justify-between text-[#6b5d54]">
                 <span>Subtotal</span>
-                <span>${order.subtotal.toFixed(2)}</span>
+                <span>₹{order.subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-[#6b5d54]">
                 <span>Shipping</span>
-                <span>${order.shipping.toFixed(2)}</span>
+                <span>₹{order.shipping.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-[#6b5d54]">
                 <span>Tax</span>
-                <span>${order.tax.toFixed(2)}</span>
+                <span>₹{order.tax.toFixed(2)}</span>
               </div>
               <div className="pt-2 border-t border-[#e8d5c4]">
                 <div className="flex justify-between font-bold text-[#1b130d] text-lg">
                   <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>₹{order.total.toFixed(2)}</span>
                 </div>
               </div>
               <div className="pt-2">
