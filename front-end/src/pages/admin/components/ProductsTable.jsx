@@ -218,7 +218,7 @@ const ProductsTable = ({
                           )}
                           <button
                             onClick={() => {
-                              onDelete(product.id);
+                              onDelete(product._id || product.id);
                               setOpenMenuId(null);
                             }}
                             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-[#f3ece7] dark:hover:bg-[#3a2a1d]"

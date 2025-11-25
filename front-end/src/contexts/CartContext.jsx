@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_BASE_URL, API_ENDPOINTS } from '@/utils/api';
 
 const CartContext = createContext(null);
 
@@ -27,7 +27,12 @@ export const CartProvider = ({ children }) => {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch(url, {
+    const isAbsolute = /^https?:\/\//i.test(url);
+    const requestUrl = isAbsolute
+      ? url
+      : `${API_BASE_URL}/api${url.startsWith('/') ? url : `/${url}`}`;
+
+    const response = await fetch(requestUrl, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -204,7 +209,9 @@ export const CartProvider = ({ children }) => {
 
   // Check if item is in cart
   const isInCart = (productId) => {
-    return cartItems.some((item) => item.id === productId || item.id === productId.toString());
+    if (!productId) return false;
+    const idString = productId.toString();
+    return cartItems.some((item) => item.id === productId || item.id === idString);
   };
 
   // Get cart item count

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 import { MessageCircle, Clock, CheckCircle, Archive } from 'lucide-react';
 import QuestionsFilters from './QuestionsFilters';
 import QuestionsList from './QuestionsList';

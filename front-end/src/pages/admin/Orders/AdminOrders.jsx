@@ -9,7 +9,7 @@ import OrdersFilters from './components/OrdersFilters';
 import OrdersTable from './components/OrdersTable';
 import OrderDetailsModal from './components/OrderDetailsModal';
 import BulkActionsBar from './components/BulkActionsBar';
-import API_BASE_URL from '../../../config/api';
+import { API_BASE_URL } from '../../../utils/api';
 import { Package } from 'lucide-react';
 
 const AdminOrders = () => {

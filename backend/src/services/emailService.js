@@ -229,5 +229,63 @@ export const sendOTPEmail = async (email, otp, purpose = 'signin') => {
   }
 };
 
-export default { sendOTPEmail };
+/**
+ * Send a generic email
+ * @param {Object} options - Email options
+ * @param {string} options.to - Recipient email
+ * @param {string} options.subject - Email subject
+ * @param {string} options.html - HTML content
+ * @param {string} options.text - Plain text content (optional)
+ * @returns {Promise<Object>} Email send result
+ */
+export const sendEmail = async ({ to, subject, html, text }) => {
+  // Always log email details for development/debugging
+  console.log('\n📧 ========== EMAIL SENDING ==========');
+  console.log(`To: ${to}`);
+  console.log(`Subject: ${subject}`);
+  console.log('=====================================\n');
 
+  try {
+    const emailUser = process.env.EMAIL_USER?.trim();
+    const emailPassword = (process.env.EMAIL_PASSWORD || process.env.EMAIL_APP_PASSWORD)?.trim().replace(/\s+/g, '');
+
+    // If email service is not configured, just log and return
+    if (!emailUser || !emailPassword) {
+      console.log('⚠️  Email service not configured. Email details logged above.');
+      return { success: true, message: 'Email logged to console (email service not configured)' };
+    }
+
+    const transporter = createTransporter();
+    
+    if (!transporter) {
+      console.log('⚠️  Email transporter could not be created.');
+      return { success: true, message: 'Email logged to console (email service not configured)' };
+    }
+
+    const mailOptions = {
+      from: `"CraftCurio" <${emailUser}>`,
+      to,
+      subject,
+      html,
+      text: text || html.replace(/<[^>]*>/g, '') // Strip HTML if no text provided
+    };
+
+    console.log('📤 Sending email...');
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully!');
+    console.log(`   Message ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Email sending error:', error.message);
+    console.log('💡 Email details are logged above.');
+    
+    // Don't throw error - return success so operation can continue
+    return { 
+      success: true, 
+      message: 'Email logged to console (email sending failed)',
+      error: error.message 
+    };
+  }
+};
+
+export default { sendOTPEmail, sendEmail };

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Menu } from 'lucide-react';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 import ArtisanSidebar from '../components/ArtisanSidebar';
 import ContentHeader from './Component/ContentHeader';
 import ContentTabs from './Component/ContentTabs';
@@ -33,14 +33,36 @@ const Content = () => {
   // Fetch existing artisan data
   useEffect(() => {
     const fetchArtisanData = async () => {
-      if (!user?.artisanId) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/api/artisans/${user.artisanId}`, {
+        
+        // First, try to find artisan by userId if artisanId is not available
+        let artisanId = user?.artisanId;
+        
+        if (!artisanId && user?._id) {
+          // Fetch all artisans and find the one with matching userId
+          const listResponse = await fetch(`${API_BASE_URL}/api/artisans?limit=1000`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (listResponse.ok) {
+            const listData = await listResponse.json();
+            const artisan = listData.data?.find(a => a.userId === user._id || a.userId?._id === user._id);
+            if (artisan) {
+              artisanId = artisan._id;
+            }
+          }
+        }
+
+        if (!artisanId) {
+          console.error('No artisan profile found for this user');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/artisans/${artisanId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -87,12 +109,35 @@ const Content = () => {
   }, [user, isArtisan, navigate, authLoading]);
 
   const handleAutoSave = useCallback(async () => {
-    if (!user?.artisanId) return;
-    
-    setIsSaving(true);
-    
     try {
       const token = localStorage.getItem('token');
+      
+      // Get artisan ID
+      let artisanId = user?.artisanId;
+      
+      if (!artisanId && user?._id) {
+        // Fetch all artisans and find the one with matching userId
+        const listResponse = await fetch(`${API_BASE_URL}/api/artisans?limit=1000`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (listResponse.ok) {
+          const listData = await listResponse.json();
+          const artisan = listData.data?.find(a => a.userId === user._id || a.userId?._id === user._id);
+          if (artisan) {
+            artisanId = artisan._id;
+          }
+        }
+      }
+      
+      if (!artisanId) {
+        console.error('Cannot save: No artisan profile found');
+        return;
+      }
+    
+      setIsSaving(true);
       
       // Prepare story data
       const storyData = {
@@ -108,7 +153,7 @@ const Content = () => {
         }
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/artisans/${user.artisanId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/artisans/${artisanId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -150,16 +195,43 @@ const Content = () => {
     }
   }, [storyContent, photos, handwrittenNotes, quotes, culturalContext, challenges, triumphs, videos, loading, handleAutoSave]);
 
-  const handlePreview = () => {
-    // Navigate to artisan story page
-    if (user?.artisanId) {
-      window.open(`/artisan-stories/${user.artisanId}`, '_blank');
+  const handlePreview = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Get artisan profile ID (custom ID like "artisan1")
+      let artisanProfileId = user?.artisanProfileId;
+      
+      if (!artisanProfileId && user?._id) {
+        // Fetch all artisans and find the one with matching userId
+        const listResponse = await fetch(`${API_BASE_URL}/api/artisans?limit=1000`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (listResponse.ok) {
+          const listData = await listResponse.json();
+          const artisan = listData.data?.find(a => a.userId === user._id || a.userId?._id === user._id);
+          if (artisan) {
+            artisanProfileId = artisan.id; // Custom ID like "artisan1"
+          }
+        }
+      }
+      
+      // Navigate to artisan story page
+      if (artisanProfileId) {
+        window.open(`/artisan-stories/${artisanProfileId}`, '_blank');
+      } else {
+        alert('Could not find artisan profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to preview:', error);
+      alert('Failed to open preview. Please try again.');
     }
   };
 
   const handlePublish = async () => {
-    if (!user?.artisanId) return;
-    
     try {
       // Save before publishing
       await handleAutoSave();

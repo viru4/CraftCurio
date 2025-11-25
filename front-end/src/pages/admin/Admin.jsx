@@ -6,7 +6,7 @@ import StatsCard from './components/StatsCard';
 import SalesChart from './components/SalesChart';
 import UserSignupsChart from './components/UserSignupsChart';
 import RecentActivityTable from './components/RecentActivityTable';
-import { API_ENDPOINTS } from '../../config/api';
+import { API_ENDPOINTS } from '../../utils/api';
 
 const Admin = () => {
   const [stats, setStats] = useState({

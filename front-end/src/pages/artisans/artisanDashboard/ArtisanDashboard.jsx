@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Plus, DollarSign, RefreshCw } from 'lucide-react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 import {
   ArtisanSidebar,
   ArtisanHeader,
@@ -91,7 +91,7 @@ const ArtisanDashboard = () => {
         statsRes
       ] = await Promise.all([
         fetch(`${API_ENDPOINTS.artisanProducts}?artisan=${user._id}`, { headers }),
-        fetch(`${API_ENDPOINTS.orders}`, { headers }), // Get all orders, filter client-side
+        fetch(`${API_ENDPOINTS.orders}/artisan/my-orders`, { headers }),
         fetch(`${API_ENDPOINTS.seed}/stats`, { headers })
       ]);
 
@@ -101,12 +101,7 @@ const ArtisanDashboard = () => {
 
       // Filter orders that contain artisan's products
       const orders = {
-        orders: allOrders.orders?.filter(order => 
-          order.items?.some(item => 
-            item.productId?.artisan === user._id || 
-            item.productId?.artisanId === user._id
-          )
-        ) || []
+        orders: allOrders.orders || allOrders.data || allOrders || []
       };
 
       // Calculate total sales from orders
@@ -233,9 +228,9 @@ const ArtisanDashboard = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0
     }).format(amount);
   };

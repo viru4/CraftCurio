@@ -10,6 +10,7 @@ dotenv.config();
 // Import routes
 import categoryRoutes from './api/routes/categories.js';
 import collectibleRoutes from './api/routes/collectibles.js';
+import auctionRoutes from './api/routes/auction.js';
 import artisanProductRoutes from './api/routes/artisanProducts.js';
 import artisanRoutes from './api/routes/artisans.js';
 import collectorRoutes from './api/routes/collectors.js';
@@ -79,6 +80,7 @@ app.get('/api/health', (req, res) => {
 // Use routes
 app.use('/api/categories', categoryRoutes);
 app.use('/api/collectibles', collectibleRoutes);
+app.use('/api/auction', auctionRoutes);
 app.use('/api/artisan-products', artisanProductRoutes);
 app.use('/api/artisans', artisanRoutes);
 app.use('/api/collectors', collectorRoutes);

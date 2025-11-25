@@ -1,11 +1,31 @@
 import dotenv from 'dotenv';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import connectDB from './src/config/dbConfig.js';
 import app from './src/app.js';
+import { initializeAuctionSockets } from './src/sockets/auctionSocket.js';
 
 // Load environment variables
 dotenv.config();
 
 const port = process.env.PORT || 8000;
+
+// Create HTTP server
+const httpServer = createServer(app);
+
+// Initialize Socket.io with CORS
+const io = new Server(httpServer, {
+  cors: {
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    methods: ['GET', 'POST'],
+    credentials: true
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000
+});
+
+// Initialize auction socket handlers
+initializeAuctionSockets(io);
 
 // Connect to database first, then start server
 const startServer = async () => {
@@ -14,10 +34,12 @@ const startServer = async () => {
     await connectDB();
     
     // Start server only after successful DB connection
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`🚀 Server is running on port ${port}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`📊 Database: MongoDB`);
+      console.log(`📊 Database: MongoDB Connected`);
+      console.log(`⚡ Socket.io: Real-time features enabled`);
+      console.log(`🔨 Auction System: Active`);
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);

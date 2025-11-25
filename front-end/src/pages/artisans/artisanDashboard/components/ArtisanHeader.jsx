@@ -32,9 +32,9 @@ const ArtisanHeader = ({ todaysSales = 0, newOrders = 0, onMenuClick }) => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       minimumFractionDigits: 0
     }).format(amount);
   };

@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronDown, Tag, Sparkles, X, Loader2 } from "lucide-react";
-import API_BASE_URL from "@/config/api";
+import { API_BASE_URL } from "@/utils/api";
 
 // Category icons mapping - moved outside component to avoid dependency issues
 const categoryIcons = {

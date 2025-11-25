@@ -5,7 +5,7 @@ import { ProductSection } from '@/components/product';
 import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 const ArtisansProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);

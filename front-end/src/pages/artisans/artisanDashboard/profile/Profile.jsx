@@ -9,7 +9,7 @@ import ProfileTabs from './components/ProfileTabs';
 import ProfileDetailsForm from './components/ProfileDetailsForm';
 import PortfolioSection from './components/PortfolioSection';
 import VerificationSection from './components/VerificationSection';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 const Profile = () => {
   const { user, isArtisan } = useAuth();

@@ -6,7 +6,7 @@ import { SearchBar, FilteredItemsSection } from '@/components/search';
 import { CategoryGrid, CategoryDropdown } from '@/components/category';
 import { ScrollManager, SearchManager } from '@/components/managers';
 import axios from 'axios';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 const Collectibles = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -14,23 +14,33 @@ const Collectibles = () => {
   const [collectibleItems, setCollectibleItems] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [itemsLoading, setItemsLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Initialize managers
-  const {
-    delayedScrollToSection,
-    scrollToFilteredItems,
-    handleCarouselItemClick,
-    handleCategorySelectWithScroll
-  } = ScrollManager();
+  // Initialize managers with error handling
+  let scrollManagerResult, searchManagerResult;
+  try {
+    scrollManagerResult = ScrollManager();
+    searchManagerResult = SearchManager();
+  } catch (err) {
+    console.error('Manager initialization error:', err);
+    setError(err.message);
+  }
 
   const {
-    searchQuery,
-    handleSearchSubmit,
-    handlePopularTagClick,
-    getTrimmedQuery,
-    getSearchBarProps,
-    createUrlParamHandler
-  } = SearchManager();
+    delayedScrollToSection = () => {},
+    scrollToFilteredItems = () => {},
+    handleCarouselItemClick = () => {},
+    handleCategorySelectWithScroll = () => {}
+  } = scrollManagerResult || {};
+
+  const {
+    searchQuery = '',
+    handleSearchSubmit = () => {},
+    handlePopularTagClick = () => {},
+    getTrimmedQuery = () => '',
+    getSearchBarProps = () => ({}),
+    createUrlParamHandler = () => () => {}
+  } = searchManagerResult || {};
 
   // Fetch collectible categories from API
   useEffect(() => {
@@ -160,6 +170,14 @@ const Collectibles = () => {
   return (
     <div className="bg-stone-50 min-h-screen overflow-x-hidden">
       <Navbar />
+      
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-20" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       
       {/* Hero Section with Carousel */}
       <section className="relative pt-20 pb-8 sm:pb-12 bg-gradient-to-br from-amber-50 to-orange-50">

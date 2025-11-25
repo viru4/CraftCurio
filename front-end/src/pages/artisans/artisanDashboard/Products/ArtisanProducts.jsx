@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ArtisanSidebar from '../components/ArtisanSidebar';
 import { Menu, Plus, Search, Filter } from 'lucide-react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 import ProductsHeader from './components/ProductsHeader';
 import ProductsFilters from './components/ProductsFilters';
 import ProductsGrid from './components/ProductsGrid';
@@ -59,9 +59,6 @@ const ArtisanProducts = () => {
       if (!response.ok) throw new Error('Failed to fetch products');
 
       const data = await response.json();
-      console.log('📦 Products API Response:', data);
-      console.log('📦 Products array:', data.data);
-      console.log('📦 Total products:', data.data?.length || 0);
       setProducts(data.data || []);
     } catch (error) {
       console.error('Error loading products:', error);

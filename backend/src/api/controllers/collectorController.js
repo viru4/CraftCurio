@@ -1,4 +1,10 @@
 import Collector from '../../models/Collector.js';
+import {
+  buildCollectorIdentifierFilter,
+  findCollectorByIdentifier,
+  generateCollectorId,
+  normalizeCollectorId
+} from '../../utils/collectorIdentifier.js';
 
 // Get all collectors with pagination
 export const getCollectors = async (req, res) => {
@@ -36,15 +42,14 @@ export const getCollectors = async (req, res) => {
   }
 };
 
-// Get collector by ID
+// Get collector by ID (MongoDB _id or userId)
 export const getCollectorById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const collector = await Collector.findOne({ id: id })
-      .populate('userId')
-      .populate('wishlist.productId')
-      .populate('purchaseHistory.productId');
+    const collector = await findCollectorByIdentifier(id, {
+      populate: ['userId', 'wishlist.productId', 'purchaseHistory.productId']
+    });
 
     if (!collector) {
       return res.status(404).json({
@@ -71,7 +76,23 @@ export const getCollectorById = async (req, res) => {
 // Create new collector
 export const createCollector = async (req, res) => {
   try {
-    const collector = new Collector(req.body);
+    const payload = { ...req.body };
+
+    if (payload.id) {
+      payload.id = normalizeCollectorId(payload.id);
+      const existing = await Collector.exists({ id: payload.id });
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          error: 'Duplicate collector id',
+          message: `Collector id ${payload.id} already exists`
+        });
+      }
+    } else {
+      payload.id = await generateCollectorId();
+    }
+
+    const collector = new Collector(payload);
     await collector.save();
 
     res.status(201).json({
@@ -81,7 +102,7 @@ export const createCollector = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating collector:', error);
-    
+
     if (error.name === 'ValidationError') {
       return res.status(400).json({
         success: false,
@@ -89,12 +110,12 @@ export const createCollector = async (req, res) => {
         details: error.errors
       });
     }
-    
+
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
         error: 'Duplicate key error',
-        message: 'Collector with this ID already exists'
+        message: 'A collector already exists for this user'
       });
     }
 
@@ -110,16 +131,40 @@ export const createCollector = async (req, res) => {
 export const updateCollector = async (req, res) => {
   try {
     const { id } = req.params;
+    const currentCollector = await findCollectorByIdentifier(id);
+
+    if (!currentCollector) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collector not found',
+        message: `No collector found with ID: ${id}`
+      });
+    }
+
     const updates = { ...req.body, updatedAt: new Date() };
 
-    const collector = await Collector.findOneAndUpdate(
-      { id: id },
+    if (updates.id) {
+      updates.id = normalizeCollectorId(updates.id);
+      const exists = await Collector.exists({ id: updates.id, _id: { $ne: currentCollector._id } });
+      if (exists) {
+        return res.status(409).json({
+          success: false,
+          error: 'Duplicate collector id',
+          message: `Collector id ${updates.id} already exists`
+        });
+      }
+    }
+
+    const collector = await Collector.findByIdAndUpdate(
+      currentCollector._id,
       updates,
       { new: true, runValidators: true }
-    ).populate('userId')
-     .populate('wishlist.productId')
-     .populate('purchaseHistory.productId');
+    )
+      .populate('userId')
+      .populate('wishlist.productId')
+      .populate('purchaseHistory.productId');
 
+    // collector should exist because we already found it, but guard just in case
     if (!collector) {
       return res.status(404).json({
         success: false,
@@ -135,7 +180,7 @@ export const updateCollector = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating collector:', error);
-    
+
     if (error.name === 'ValidationError') {
       return res.status(400).json({
         success: false,
@@ -157,7 +202,15 @@ export const deleteCollector = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const collector = await Collector.findOneAndDelete({ id: id });
+    const filter = buildCollectorIdentifierFilter(id);
+    if (!filter) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid collector identifier'
+      });
+    }
+
+    const collector = await Collector.findOneAndDelete(filter);
 
     if (!collector) {
       return res.status(404).json({
@@ -187,15 +240,24 @@ export const addToWishlist = async (req, res) => {
     const { id } = req.params;
     const { productId } = req.body;
 
-    const collector = await Collector.findOneAndUpdate(
-      { id: id },
-      { 
-        $addToSet: { 
-          wishlist: { 
-            productId: productId,
+    const currentCollector = await findCollectorByIdentifier(id);
+    if (!currentCollector) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collector not found',
+        message: `No collector found with ID: ${id}`
+      });
+    }
+
+    const collector = await Collector.findByIdAndUpdate(
+      currentCollector._id,
+      {
+        $addToSet: {
+          wishlist: {
+            productId,
             addedAt: new Date()
-          } 
-        } 
+          }
+        }
       },
       { new: true }
     ).populate('wishlist.productId');
@@ -228,12 +290,21 @@ export const removeFromWishlist = async (req, res) => {
   try {
     const { id, productId } = req.params;
 
-    const collector = await Collector.findOneAndUpdate(
-      { id: id },
-      { 
-        $pull: { 
-          wishlist: { productId: productId }
-        } 
+    const currentCollector = await findCollectorByIdentifier(id);
+    if (!currentCollector) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collector not found',
+        message: `No collector found with ID: ${id}`
+      });
+    }
+
+    const collector = await Collector.findByIdAndUpdate(
+      currentCollector._id,
+      {
+        $pull: {
+          wishlist: { productId }
+        }
       },
       { new: true }
     ).populate('wishlist.productId');

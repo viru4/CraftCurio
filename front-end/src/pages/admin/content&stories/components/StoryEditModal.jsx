@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { X, Save, Image, Plus, Trash2 } from 'lucide-react';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 const StoryEditModal = ({ artisan, onClose, onSave }) => {
   const [saving, setSaving] = useState(false);

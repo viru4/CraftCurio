@@ -2,6 +2,7 @@ import User from '../../models/User.js';
 import Artisan from '../../models/Artisan.js';
 import Collector from '../../models/Collector.js';
 import bcrypt from 'bcryptjs';
+import { generateCollectorId } from '../../utils/collectorIdentifier.js';
 
 const sanitizeUser = (userDoc) => {
   if (!userDoc) return null;
@@ -179,9 +180,8 @@ export const createUser = async (req, res) => {
         suspended: !isActive
       });
     } else if (role === 'collector') {
-      const collectorCount = await Collector.countDocuments();
-      const collectorId = `collector${collectorCount + 1}`;
-      
+      const collectorId = await generateCollectorId();
+
       await Collector.create({
         id: collectorId,
         userId: user._id,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, Footer } from '@/components/layout';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 const ArtisanStoryDetail = () => {
   const { id } = useParams();

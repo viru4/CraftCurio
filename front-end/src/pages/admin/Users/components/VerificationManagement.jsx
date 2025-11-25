@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, Search, Filter, Download, Clock, Shield } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 import VerificationDetailsModal from '../../components/VerificationDetailsModal';
 
 const VerificationManagement = () => {

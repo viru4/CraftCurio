@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 import { Star, TrendingUp, MessageSquare, ThumbsUp } from 'lucide-react';
 import ReviewsFilters from './ReviewsFilters';
 import ReviewsList from './ReviewsList';

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Menu, X } from 'lucide-react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 import ArtisanSidebar from '../components/ArtisanSidebar';
 import ConversationsList from './components/ConversationsList';
 import ChatArea from './components/ChatArea';

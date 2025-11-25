@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import genToken from '../../utils/token.js';
 import Artisan from '../../models/Artisan.js';
 import Collector from '../../models/Collector.js';
+import { generateCollectorId } from '../../utils/collectorIdentifier.js';
 
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
 
@@ -310,9 +311,8 @@ export const verifyOTPForSignUp = async (req, res) => {
         verified: false
       });
     } else if (userRole === 'collector') {
-      const collectorCount = await Collector.countDocuments();
-      const collectorId = `collector${collectorCount + 1}`;
-      
+      const collectorId = await generateCollectorId();
+
       await Collector.create({
         id: collectorId,
         userId: user._id,

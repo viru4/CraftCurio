@@ -1,8 +1,9 @@
 import User from '../../models/User.js';
 import Artisan from '../../models/Artisan.js';
-import Collector from '../../models/Collector.js';
 import bcrypt from 'bcryptjs';
 import genToken from '../../utils/token.js';
+import Collector from '../../models/Collector.js';
+import { generateCollectorId } from '../../utils/collectorIdentifier.js';
 
 const normalizeEmail = (email = '') => email.trim().toLowerCase();
 
@@ -52,12 +53,13 @@ export const signUp = async (req, res) => {
     });
 
     // Create role-specific profile
+    let artisan, collector;
     if (userRole === 'artisan') {
       // Generate unique artisan ID
       const artisanCount = await Artisan.countDocuments();
       const artisanId = `artisan${artisanCount + 1}`;
       
-      await Artisan.create({
+      artisan = await Artisan.create({
         id: artisanId,
         userId: user._id,
         name: fullName.trim(),
@@ -65,11 +67,9 @@ export const signUp = async (req, res) => {
         verified: false
       });
     } else if (userRole === 'collector') {
-      // Generate unique collector ID
-      const collectorCount = await Collector.countDocuments();
-      const collectorId = `collector${collectorCount + 1}`;
-      
-      await Collector.create({
+      const collectorId = await generateCollectorId();
+
+      collector = await Collector.create({
         id: collectorId,
         userId: user._id,
         name: fullName.trim(),
@@ -80,9 +80,20 @@ export const signUp = async (req, res) => {
     const token = genToken(user._id.toString());
     res.cookie('token', token, buildCookieOptions());
 
+    const userData = sanitizeUser(user);
+    
+    // Add role-specific IDs to user data
+    if (artisan) {
+      userData.artisanId = artisan._id;
+      userData.artisanProfileId = artisan.id;
+    } else if (collector) {
+      userData.collectorId = collector._id;
+      userData.collectorProfileId = collector.id;
+    }
+
     return res.status(201).json({
       message: 'User registered successfully.',
-      user: sanitizeUser(user),
+      user: userData,
       token
     });
   } catch (error) {
@@ -115,9 +126,26 @@ export const signIn = async (req, res) => {
     const token = genToken(user._id.toString());
     res.cookie('token', token, buildCookieOptions());
 
+    // Fetch role-specific profile ID
+    const userData = sanitizeUser(user);
+    
+    if (user.role === 'artisan') {
+      const artisan = await Artisan.findOne({ userId: user._id });
+      if (artisan) {
+        userData.artisanId = artisan._id;
+        userData.artisanProfileId = artisan.id; // Custom ID like "artisan1"
+      }
+    } else if (user.role === 'collector') {
+      const collector = await Collector.findOne({ userId: user._id });
+      if (collector) {
+        userData.collectorId = collector._id;
+        userData.collectorProfileId = collector.id; // Custom ID like "collector1"
+      }
+    }
+
     return res.status(200).json({
       message: 'Signed in successfully.',
-      user: sanitizeUser(user),
+      user: userData,
       token
     });
   } catch (error) {
@@ -142,8 +170,25 @@ export const getCurrentUser = async (req, res) => {
       return res.status(401).json({ message: 'Not authenticated' });
     }
 
+    const userData = sanitizeUser(req.user);
+    
+    // Fetch role-specific profile ID
+    if (req.user.role === 'artisan') {
+      const artisan = await Artisan.findOne({ userId: req.user._id });
+      if (artisan) {
+        userData.artisanId = artisan._id;
+        userData.artisanProfileId = artisan.id; // Custom ID like "artisan1"
+      }
+    } else if (req.user.role === 'collector') {
+      const collector = await Collector.findOne({ userId: req.user._id });
+      if (collector) {
+        userData.collectorId = collector._id;
+        userData.collectorProfileId = collector.id; // Custom ID like "collector1"
+      }
+    }
+
     return res.status(200).json({
-      user: sanitizeUser(req.user)
+      user: userData
     });
   } catch (error) {
     console.error('getCurrentUser error:', error);

@@ -1,24 +1,66 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import {
+  createCollectible,
+  createCollectibles,
   getCollectibles,
   getCollectibleById,
-  createCollectibles
+  updateCollectible,
+  deleteCollectible,
+  likeCollectible,
+  getCollectorListings
 } from '../controllers/collectibleController.js';
+import { authenticate, optionalAuth } from '../../middleware/authMiddleware.js';
+import { validateBody, validateObjectId, schemas } from '../../middleware/validation.js';
 import Collectible from '../../models/Collectible.js';
+
+/**
+ * Collectible Routes - Enhanced with auction and direct sale support
+ * Handles all collectible listing operations with proper authentication
+ */
 
 const router = express.Router();
 
-// GET /api/collectibles - Get all collectibles
+/**
+ * @route   POST /api/collectibles
+ * @desc    Create a new collectible listing (direct sale or auction)
+ * @access  Private (Authenticated collectors only)
+ * @body    CollectibleData with saleType: 'direct' | 'auction'
+ */
+router.post(
+  '/',
+  authenticate,
+  validateBody(schemas.createCollectible),
+  createCollectible
+);
+
+/**
+ * @route   POST /api/collectibles/bulk
+ * @desc    Bulk create collectibles (for seeding/admin)
+ * @access  Private (Admin only)
+ */
+router.post('/bulk', createCollectibles);
+
+/**
+ * @route   GET /api/collectibles
+ * @desc    Get all collectibles with filtering, pagination, and search
+ * @access  Public
+ * @query   page, limit, category, status, saleType, promoted, featured, popular, recent, minPrice, maxPrice, search
+ */
 router.get('/', getCollectibles);
 
-// GET /api/collectibles/featured - Get featured items
+/**
+ * @route   GET /api/collectibles/featured
+ * @desc    Get featured collectibles
+ * @access  Public
+ */
 router.get('/featured', async (req, res) => {
   try {
-    const collectibles = await Collectible.find({ featured: true })
-      .sort({ createdAt: -1 })
-      .limit(10);
-    
+    const collectibles = await Collectible.find({ featured: true, status: 'active' })
+      .sort({ promoted: -1, createdAt: -1 })
+      .limit(10)
+      .populate('owner', 'name profilePhotoUrl')
+      .lean();
+
     res.status(200).json({
       message: 'Featured collectibles retrieved successfully',
       count: collectibles.length,
@@ -29,13 +71,19 @@ router.get('/featured', async (req, res) => {
   }
 });
 
-// GET /api/collectibles/popular - Get popular items
+/**
+ * @route   GET /api/collectibles/popular
+ * @desc    Get popular collectibles based on views and likes
+ * @access  Public
+ */
 router.get('/popular', async (req, res) => {
   try {
-    const collectibles = await Collectible.find({ popular: true })
-      .sort({ views: -1, createdAt: -1 })
-      .limit(10);
-    
+    const collectibles = await Collectible.find({ popular: true, status: 'active' })
+      .sort({ views: -1, likes: -1, createdAt: -1 })
+      .limit(10)
+      .populate('owner', 'name profilePhotoUrl')
+      .lean();
+
     res.status(200).json({
       message: 'Popular collectibles retrieved successfully',
       count: collectibles.length,
@@ -46,13 +94,19 @@ router.get('/popular', async (req, res) => {
   }
 });
 
-// GET /api/collectibles/recent - Get recent items
+/**
+ * @route   GET /api/collectibles/recent
+ * @desc    Get recently added collectibles
+ * @access  Public
+ */
 router.get('/recent', async (req, res) => {
   try {
-    const collectibles = await Collectible.find({ recent: true })
+    const collectibles = await Collectible.find({ recent: true, status: 'active' })
       .sort({ createdAt: -1 })
-      .limit(10);
-    
+      .limit(10)
+      .populate('owner', 'name profilePhotoUrl')
+      .lean();
+
     res.status(200).json({
       message: 'Recent collectibles retrieved successfully',
       count: collectibles.length,
@@ -63,104 +117,94 @@ router.get('/recent', async (req, res) => {
   }
 });
 
-// GET /api/collectibles/:id - Get single collectible
-// IMPORTANT: This route must be AFTER the specific routes (featured, popular, recent)
-// to avoid route conflicts
-router.get('/:id', getCollectibleById);
-
-// POST /api/collectibles - Create new collectible
-router.post('/', createCollectibles);
-
-// PATCH /api/collectibles/:id - Update collectible
-router.patch('/:id', async (req, res) => {
+/**
+ * @route   GET /api/collectibles/promoted
+ * @desc    Get promoted/sponsored collectibles
+ * @access  Public
+ */
+router.get('/promoted', async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
-
-    // Find collectible by MongoDB _id or custom id field
-    let collectible = await Collectible.findById(id);
-    if (!collectible) {
-      collectible = await Collectible.findOne({ id });
-    }
-
-    if (!collectible) {
-      return res.status(404).json({ error: 'Collectible not found' });
-    }
-
-    // Update fields
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] !== undefined) {
-        collectible[key] = updateData[key];
-      }
-    });
-
-    const updatedCollectible = await collectible.save();
+    const now = new Date();
+    const collectibles = await Collectible.find({
+      promoted: true,
+      status: 'active',
+      $or: [
+        { promotionEndDate: { $exists: false } },
+        { promotionEndDate: { $gt: now } }
+      ]
+    })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('owner', 'name profilePhotoUrl')
+      .lean();
 
     res.status(200).json({
-      message: 'Collectible updated successfully',
-      data: updatedCollectible
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// DELETE /api/collectibles/:id - Delete collectible
-router.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Find and delete collectible by MongoDB _id or custom id field
-    let collectible = await Collectible.findByIdAndDelete(id);
-    if (!collectible) {
-      collectible = await Collectible.findOneAndDelete({ id });
-    }
-
-    if (!collectible) {
-      return res.status(404).json({ error: 'Collectible not found' });
-    }
-
-    res.status(200).json({
-      message: 'Collectible deleted successfully',
-      data: collectible
+      message: 'Promoted collectibles retrieved successfully',
+      count: collectibles.length,
+      data: collectibles
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// PUT /api/collectibles/:id/like - Like a collectible
-router.put('/:id/like', async (req, res) => {
-  try {
-    const { id } = req.params;
-    let collectible = null;
-    
-    // Check if ID is a valid MongoDB ObjectId format
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
-    
-    if (isValidObjectId) {
-      collectible = await Collectible.findById(id);
-    }
-    
-    // If not found by _id or not a valid ObjectId, try custom 'id' field
-    if (!collectible) {
-      collectible = await Collectible.findOne({ id });
-    }
-    
-    if (!collectible) {
-      return res.status(404).json({ error: 'Collectible not found' });
-    }
-    
-    collectible.likes += 1;
-    await collectible.save();
-    
-    res.status(200).json({
-      message: 'Collectible liked successfully',
-      data: collectible
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+/**
+ * @route   GET /api/collectibles/collector/:id/listings
+ * @desc    Get all collectibles listed by a specific collector
+ * @access  Public
+ * @query   status, saleType, page, limit
+ */
+router.get('/collector/:id/listings', validateObjectId('id'), getCollectorListings);
+
+/**
+ * @route   GET /api/collectibles/:id
+ * @desc    Get single collectible by ID
+ * @access  Public
+ */
+router.get('/:id', validateObjectId('id'), getCollectibleById);
+
+/**
+ * @route   PUT /api/collectibles/:id
+ * @desc    Update a collectible listing
+ * @access  Private (Owner or Admin only)
+ */
+router.put(
+  '/:id',
+  authenticate,
+  validateObjectId('id'),
+  validateBody(schemas.updateCollectible),
+  updateCollectible
+);
+
+/**
+ * @route   PATCH /api/collectibles/:id
+ * @desc    Partially update a collectible listing
+ * @access  Private (Owner or Admin only)
+ */
+router.patch(
+  '/:id',
+  authenticate,
+  validateObjectId('id'),
+  updateCollectible
+);
+
+/**
+ * @route   DELETE /api/collectibles/:id
+ * @desc    Delete a collectible listing
+ * @access  Private (Owner or Admin only)
+ */
+router.delete(
+  '/:id',
+  authenticate,
+  validateObjectId('id'),
+  deleteCollectible
+);
+
+/**
+ * @route   PUT /api/collectibles/:id/like
+ * @desc    Like/favorite a collectible
+ * @access  Public
+ */
+router.put('/:id/like', validateObjectId('id'), likeCollectible);
 
 export default router;

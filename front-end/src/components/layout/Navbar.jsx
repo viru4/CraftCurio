@@ -8,7 +8,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 
 const Navbar = () => {
-  const { user, isAuthenticated, isArtisan, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, isArtisan, isAdmin, isCollector, logout } = useAuth();
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
   const navigate = useNavigate();
@@ -62,6 +62,7 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/" className={`text-base font-medium transition-colors ${isActive('/') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Home</Link>
             <Link to="/collectibles" className={`text-base font-medium transition-colors ${isActive('/collectibles') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Collectibles</Link>
+            <Link to="/auctions" className={`text-base font-medium transition-colors ${isActive('/auctions') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Auctions</Link>
             <Link to="/artisans" className={`text-base font-medium transition-colors ${isActive('/artisans') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Artisan Products</Link>
             <Link to="/artisan-stories" className={`text-base font-medium transition-colors ${isActive('/artisan-stories') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>Artisan Stories</Link>
             <Link to="/about-us" className={`text-base font-medium transition-colors ${isActive('/about-us') ? 'text-[var(--primary-color)] font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)]'}`}>About Us</Link>
@@ -116,6 +117,18 @@ const Navbar = () => {
                     <p className="text-xs text-stone-500">{user?.email}</p>
                     <p className="text-xs text-[var(--primary-color)] mt-1 capitalize">{user?.role}</p>
                   </div>
+                  {isCollector && (
+                    <button
+                      onClick={() => {
+                        navigate('/collector/dashboard');
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Collector Dashboard</span>
+                    </button>
+                  )}
                   {isArtisan && (
                     <button
                       onClick={() => {
@@ -221,6 +234,7 @@ const Navbar = () => {
                 <nav className="flex-1 px-6 py-4 space-y-1">
                   <Link to="/" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Home</Link>
                   <Link to="/collectibles" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/collectibles') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Collectibles</Link>
+                  <Link to="/auctions" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/auctions') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Auctions</Link>
                   <Link to="/artisans" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/artisans') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Artisan Products</Link>
                   <Link to="/artisan-stories" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/artisan-stories') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>Artisan Stories</Link>
                   <Link to="/about-us" className={`block py-3 text-base font-medium rounded-lg px-3 transition-colors ${isActive('/about-us') ? 'text-[var(--primary-color)] bg-amber-50 font-semibold' : 'text-[var(--text-primary)] hover:text-[var(--primary-color)] hover:bg-stone-50'}`}>About Us</Link>
@@ -258,6 +272,14 @@ const Navbar = () => {
                       </Link>
                       
                       <div className="h-px bg-gray-200 my-3" />
+                      
+                      {/* Dashboard for Collectors */}
+                      {isCollector && (
+                        <Link to="/collector/dashboard" className="flex items-center gap-3 py-3 px-3 text-[var(--text-primary)] text-sm font-medium hover:bg-stone-50 rounded-lg transition-colors">
+                          <LayoutDashboard className="h-5 w-5" />
+                          <span>Collector Dashboard</span>
+                        </Link>
+                      )}
                       
                       {/* Dashboard for Artisans */}
                       {isArtisan && (

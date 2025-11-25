@@ -8,7 +8,7 @@ import OrdersFilters from './components/OrdersFilters';
 import OrdersStats from './components/OrdersStats';
 import OrdersTable from './components/OrdersTable';
 import OrderDetailsModal from './components/OrderDetailsModal';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 
 const Orders = () => {
   const { user, isArtisan, loading: authLoading } = useAuth();

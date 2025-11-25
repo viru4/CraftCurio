@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ArtisanSidebar from '../components/ArtisanSidebar';
 import { Menu, Upload, X, Plus, ArrowLeft, Save } from 'lucide-react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 
 const AddProduct = () => {
   const { user, isArtisan, loading: authLoading } = useAuth();
@@ -394,7 +394,7 @@ const AddProduct = () => {
                         className="px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
                       >
                         <option value="INR">INR</option>
-                        <option value="USD">USD</option>
+                        <option value="INR">INR (₹)</option>
                         <option value="EUR">EUR</option>
                         <option value="GBP">GBP</option>
                       </select>

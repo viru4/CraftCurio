@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Package, MapPin, CreditCard, Truck, User, Phone, Mail, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import API_BASE_URL from '../../../../config/api';
+import { API_BASE_URL } from '../../../../utils/api';
 
 const OrderDetailsModal = ({ order, onClose, onUpdateStatus, onRefresh }) => {
   const [updating, setUpdating] = useState(false);

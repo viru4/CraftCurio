@@ -16,6 +16,8 @@ import ArtisansProducts from '@/pages/artisans/ArtisansProducts'
 import ArtisanStories from '@/pages/artisans/ArtisanStories'
 import ArtisanStoryDetail from '@/pages/artisans/ArtisanStoryDetail'
 import AboutUs from '@/pages/AboutUs'
+import Auctions from '@/pages/Auctions/Auctions'
+import CollectorDashboard from '@/pages/CollectorDashboardPage'
 import ArtisanDashboard from '@/pages/artisans/artisanDashboard/ArtisanDashboard'
 import ArtisanProfile from '@/pages/artisans/artisanDashboard/profile/Profile'
 import ArtisanProductsManagement from '@/pages/artisans/artisanDashboard/Products/ArtisanProducts'
@@ -58,6 +60,9 @@ export default function AppRoutes() {
       <Route path="/artisan-stories" element={<ArtisanStories />} />
       <Route path="/artisan-stories/:id" element={<ArtisanStoryDetail />} />
       <Route path="/about-us" element={<AboutUs />} />
+      <Route path="/auctions" element={<Auctions />} />
+      <Route path="/auctions/:auctionId" element={<Auctions />} />
+      <Route path="/collector/dashboard" element={<CollectorDashboard />} />
       <Route path="/artisan/dashboard" element={<ArtisanDashboard />} />
       <Route path="/artisan/profile" element={<ArtisanProfile />} />
       <Route path="/artisan/products" element={<ArtisanProductsManagement />} />

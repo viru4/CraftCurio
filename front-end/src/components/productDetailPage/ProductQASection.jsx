@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { HelpCircle, ThumbsUp, User, Calendar, MessageCircle, X, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
-import API_BASE_URL from '../../config/api';
+import { API_BASE_URL } from '../../utils/api';
 
 const ProductQASection = ({ product }) => {
   const { user } = useAuth();

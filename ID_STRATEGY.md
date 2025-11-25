@@ -136,10 +136,11 @@ export const getUserById = async (req, res) => {
 - [x] Routes already handle custom id
 
 ### Step 2: Data Migration
-Run migration script:
+Run migration scripts:
 ```bash
 cd backend
 node scripts/migrate-collectible-ids.js
+node scripts/migrate-collector-ids.js
 ```
 
 ### Step 3: Frontend Updates (In Progress)

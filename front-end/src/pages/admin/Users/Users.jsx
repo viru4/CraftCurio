@@ -7,7 +7,7 @@ import UsersToolbar from './components/UsersToolbar';
 import UsersTable from './components/UsersTable';
 import AddUserModal from './components/AddUserModal';
 import UserActionsModal from './components/UserActionsModal';
-import { API_ENDPOINTS } from '../../../config/api';
+import { API_ENDPOINTS } from '../../../utils/api';
 
 const Users = () => {
   const [users, setUsers] = useState([]);

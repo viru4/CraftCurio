@@ -1,6 +1,17 @@
 import mongoose from 'mongoose';
 import Collectible from '../../models/Collectible.js';
+import Collector from '../../models/Collector.js';
+import { updateAuctionStatus, getAuctionStats } from '../../services/auctionService.js';
+import { findCollectorByIdentifier } from '../../utils/collectorIdentifier.js';
 
+/**
+ * Collectible Controller - Enhanced with auction and direct sale support
+ * Manages all collectible listing operations with proper validation and ownership
+ */
+
+/**
+ * Helper function to convert string to positive integer
+ */
 const toPositiveInt = (value, fallback) => {
   const parsed = parseInt(value, 10);
   if (Number.isFinite(parsed) && parsed > 0) {
@@ -9,6 +20,82 @@ const toPositiveInt = (value, fallback) => {
   return fallback;
 };
 
+/**
+ * Create a new collectible listing (direct sale or auction)
+ * POST /api/collectibles
+ * @access Private - Authenticated collectors only
+ */
+export const createCollectible = async (req, res) => {
+  try {
+    const collectibleData = req.validatedBody || req.body;
+    const userId = req.user?._id || req.user?.id;
+
+    // Set owner if not provided
+    if (!collectibleData.owner && userId) {
+      // Find or create collector profile
+      let collector = await Collector.findOne({ userId });
+      if (collector) {
+        collectibleData.owner = collector._id;
+      }
+    }
+
+    // Validate auction-specific logic
+    if (collectibleData.saleType === 'auction') {
+      if (!collectibleData.auction) {
+        return res.status(400).json({
+          error: 'Auction details are required for auction listings'
+        });
+      }
+
+      // Set initial auction values
+      collectibleData.auction.currentBid = collectibleData.price; // Starting bid
+      collectibleData.auction.bidHistory = [];
+      collectibleData.auction.totalBids = 0;
+      collectibleData.auction.uniqueBidders = 0;
+
+      // Validate times
+      const startTime = new Date(collectibleData.auction.startTime);
+      const endTime = new Date(collectibleData.auction.endTime);
+
+      if (startTime >= endTime) {
+        return res.status(400).json({
+          error: 'Auction end time must be after start time'
+        });
+      }
+
+      if (startTime <= new Date()) {
+        return res.status(400).json({
+          error: 'Auction start time must be in the future'
+        });
+      }
+    }
+
+    const collectible = new Collectible(collectibleData);
+    await collectible.save();
+
+    // Update collector's listed items
+    if (collectibleData.owner) {
+      await Collector.findByIdAndUpdate(
+        collectibleData.owner,
+        { $push: { listedCollectibles: collectible._id } }
+      );
+    }
+
+    res.status(201).json({
+      message: 'Collectible created successfully',
+      data: collectible
+    });
+  } catch (error) {
+    console.error('Error creating collectible:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Bulk create collectibles (for seeding/admin)
+ * POST /api/collectibles/bulk
+ * @access Private - Admin only
+ */
 export const createCollectibles = async (req, res) => {
   try {
     const collectibles = req.body.collectibles;
@@ -23,28 +110,46 @@ export const createCollectibles = async (req, res) => {
       id: item.id || undefined,  // Preserve custom ID if provided
       price: typeof item.price === 'string' ? parseFloat(item.price) || 0 : (typeof item.price === 'number' ? item.price : 0),
       views: item.views || 0,
-      likes: item.likes || 0
+      likes: item.likes || 0,
+      saleType: item.saleType || 'direct' // Default to direct sale
     }));
 
     const result = await Collectible.insertMany(normalizedCollectibles);
-    res.status(201).json({ 
-      message: 'Collectibles created successfully', 
+    res.status(201).json({
+      message: 'Collectibles created successfully',
       count: result.length,
-      data: result 
+      data: result
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+/**
+ * Get all collectibles with advanced filtering
+ * GET /api/collectibles
+ * @access Public
+ */
 export const getCollectibles = async (req, res) => {
   try {
-    const { category, featured, popular, recent, search, status } = req.query;
+    const {
+      category,
+      featured,
+      popular,
+      recent,
+      search,
+      status,
+      saleType, // Filter by 'direct' or 'auction'
+      promoted,
+      minPrice,
+      maxPrice
+    } = req.query;
+
     const limit = Math.min(toPositiveInt(req.query.limit, 20), 100);
     const page = toPositiveInt(req.query.page, 1);
-    
+
     const query = {};
-    
+
     // Add filters
     if (category) {
       // Check if category is an ObjectId or string name
@@ -54,69 +159,340 @@ export const getCollectibles = async (req, res) => {
         query.category = { $regex: category, $options: 'i' };
       }
     }
+
     if (status) query.status = status;
+    if (saleType) query.saleType = saleType;
+    if (promoted === 'true') query.promoted = true;
     if (featured === 'true') query.featured = true;
     if (popular === 'true') query.popular = true;
     if (recent === 'true') query.recent = true;
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
     if (search) {
       query.$text = { $search: search };
     }
-    
+
     const skip = (page - 1) * limit;
-    
+
     const collectibles = await Collectible.find(query)
-      .sort(search ? { score: { $meta: 'textScore' } } : { createdAt: -1 })
+      .sort(search ? { score: { $meta: 'textScore' } } : { promoted: -1, createdAt: -1 })
       .limit(limit)
       .skip(skip)
+      .populate('owner', 'name profilePhotoUrl location')
       .lean();
-      
+
+    // Update auction statuses for auction items
+    const updatedCollectibles = await Promise.all(
+      collectibles.map(async (item) => {
+        if (item.saleType === 'auction') {
+          await updateAuctionStatus(item._id);
+          const updated = await Collectible.findById(item._id).lean();
+          return { ...updated, stats: getAuctionStats(updated) };
+        }
+        return item;
+      })
+    );
+
     const total = await Collectible.countDocuments(query);
     const totalPages = Math.ceil(total / limit) || 1;
-    
+
     res.status(200).json({
       message: 'Collectibles retrieved successfully',
-      count: collectibles.length,
+      count: updatedCollectibles.length,
       total,
       page,
       totalPages,
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
-      data: collectibles
+      data: updatedCollectibles
     });
   } catch (error) {
+    console.error('Error fetching collectibles:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
+/**
+ * Get a single collectible by ID
+ * GET /api/collectibles/:id
+ * @access Public
+ */
 export const getCollectibleById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     let collectible = null;
-    
+
     // Check if ID is a valid MongoDB ObjectId format
     const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
-    
+
     if (isValidObjectId) {
       // Try MongoDB _id first if it's a valid ObjectId format
+      collectible = await Collectible.findById(id).populate('owner', 'name profilePhotoUrl location email');
+    }
+
+    // If not found by _id or not a valid ObjectId, try custom 'id' field
+    if (!collectible) {
+      collectible = await Collectible.findOne({ id }).populate('owner', 'name profilePhotoUrl location email');
+    }
+
+    if (!collectible) {
+      return res.status(404).json({ error: 'Collectible not found' });
+    }
+
+    // Update auction status if needed
+    if (collectible.saleType === 'auction') {
+      await updateAuctionStatus(collectible._id);
+      collectible = await Collectible.findById(collectible._id).populate('owner', 'name profilePhotoUrl location email');
+    }
+
+    // Increment views
+    collectible.views += 1;
+    await collectible.save();
+
+    // Add auction stats if applicable
+    const response = collectible.toObject();
+    if (collectible.saleType === 'auction') {
+      response.stats = getAuctionStats(collectible);
+    }
+
+    res.status(200).json({
+      message: 'Collectible retrieved successfully',
+      data: response
+    });
+  } catch (error) {
+    console.error('Error fetching collectible:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Update a collectible listing
+ * PUT /api/collectibles/:id
+ * @access Private - Owner or Admin only
+ */
+export const updateCollectible = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.validatedBody || req.body;
+    const userId = req.user?._id || req.user?.id;
+
+    // Find collectible
+    let collectible = await Collectible.findById(id);
+    if (!collectible) {
+      collectible = await Collectible.findOne({ id });
+    }
+
+    if (!collectible) {
+      return res.status(404).json({ error: 'Collectible not found' });
+    }
+
+    // Check ownership
+    if (collectible.owner && collectible.owner.toString() !== userId.toString() && req.user?.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'You do not have permission to update this listing'
+      });
+    }
+
+    // Prevent certain updates for active auctions with bids
+    if (collectible.saleType === 'auction' &&
+      collectible.auction.bidHistory.length > 0 &&
+      collectible.auction.auctionStatus === 'live') {
+
+      const restrictedFields = ['price', 'auction.startTime', 'auction.endTime', 'auction.reservePrice'];
+      const attemptedChanges = restrictedFields.filter(field => updateData[field] !== undefined);
+
+      if (attemptedChanges.length > 0) {
+        return res.status(400).json({
+          error: 'Cannot modify key auction parameters after bids have been placed'
+        });
+      }
+    }
+
+    // Update fields
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined && key !== '_id' && key !== 'owner') {
+        if (key === 'auction' && collectible.auction) {
+          // Merge auction updates
+          Object.assign(collectible.auction, updateData[key]);
+        } else {
+          collectible[key] = updateData[key];
+        }
+      }
+    });
+
+    const updatedCollectible = await collectible.save();
+
+    res.status(200).json({
+      message: 'Collectible updated successfully',
+      data: updatedCollectible
+    });
+  } catch (error) {
+    console.error('Error updating collectible:', error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Delete a collectible listing
+ * DELETE /api/collectibles/:id
+ * @access Private - Owner or Admin only
+ */
+export const deleteCollectible = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?._id || req.user?.id;
+
+    // Find collectible
+    let collectible = await Collectible.findById(id);
+    if (!collectible) {
+      collectible = await Collectible.findOne({ id });
+    }
+
+    if (!collectible) {
+      return res.status(404).json({ error: 'Collectible not found' });
+    }
+
+    // Check ownership
+    if (collectible.owner && collectible.owner.toString() !== userId.toString() && req.user?.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'You do not have permission to delete this listing'
+      });
+    }
+
+    // Prevent deletion of active auctions with bids
+    if (collectible.saleType === 'auction' &&
+      collectible.auction.bidHistory.length > 0 &&
+      collectible.auction.auctionStatus === 'live') {
+      return res.status(400).json({
+        error: 'Cannot delete active auction with existing bids. Cancel the auction first.'
+      });
+    }
+
+    // Remove from collector's listings
+    if (collectible.owner) {
+      await Collector.findByIdAndUpdate(
+        collectible.owner,
+        { $pull: { listedCollectibles: collectible._id } }
+      );
+    }
+
+    await Collectible.findByIdAndDelete(collectible._id);
+
+    res.status(200).json({
+      message: 'Collectible deleted successfully',
+      data: collectible
+    });
+  } catch (error) {
+    console.error('Error deleting collectible:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Like/Unlike a collectible
+ * PUT /api/collectibles/:id/like
+ * @access Public
+ */
+export const likeCollectible = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let collectible = null;
+
+    // Check if ID is a valid MongoDB ObjectId format
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
+
+    if (isValidObjectId) {
       collectible = await Collectible.findById(id);
     }
-    
+
     // If not found by _id or not a valid ObjectId, try custom 'id' field
     if (!collectible) {
       collectible = await Collectible.findOne({ id });
     }
-    
+
     if (!collectible) {
       return res.status(404).json({ error: 'Collectible not found' });
     }
-    
-    // Increment views
-    collectible.views += 1;
+
+    collectible.likes += 1;
     await collectible.save();
-    
-    res.status(200).json({ data: collectible });
+
+    res.status(200).json({
+      message: 'Collectible liked successfully',
+      data: { likes: collectible.likes }
+    });
   } catch (error) {
+    console.error('Error liking collectible:', error);
     res.status(500).json({ error: error.message });
   }
+};
+
+/**
+ * Get collectibles by collector
+ * GET /api/collector/:id/listings
+ * @access Public
+ */
+export const getCollectorListings = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, saleType, page = 1, limit = 20 } = req.query;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = Math.min(parseInt(limit, 10), 100);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Find collector by MongoDB _id, userId or custom id
+    const collector = await findCollectorByIdentifier(id, { lean: true });
+
+    if (!collector) {
+      return res.status(404).json({ error: 'Collector not found' });
+    }
+
+    // Build query
+    const query = { owner: collector._id };
+    if (status) query.status = status;
+    if (saleType) query.saleType = saleType;
+
+    const collectibles = await Collectible.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    const total = await Collectible.countDocuments(query);
+
+    res.status(200).json({
+      message: 'Collector listings retrieved successfully',
+      data: collectibles,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching collector listings:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export default {
+  createCollectible,
+  createCollectibles,
+  getCollectibles,
+  getCollectibleById,
+  updateCollectible,
+  deleteCollectible,
+  likeCollectible,
+  getCollectorListings
 };

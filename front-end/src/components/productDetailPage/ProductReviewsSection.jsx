@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, User, Calendar, MessageSquare, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
-import API_BASE_URL from '../../config/api';
+import { API_BASE_URL } from '../../utils/api';
 
 const ProductReviewsSection = ({ product }) => {
   const { user } = useAuth();

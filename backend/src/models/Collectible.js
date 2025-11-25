@@ -48,6 +48,51 @@ const collectibleSchema = new mongoose.Schema({
   serialNumber: { type: String },
   editionNumber: { type: String },
 
+  // Owner information
+  owner: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Collector',
+    required: false // Optional for backwards compatibility
+  },
+
+  // Sale type: direct sale or auction
+  saleType: { 
+    type: String, 
+    enum: ['direct', 'auction'], 
+    default: 'direct',
+    required: true 
+  },
+
+  // Auction-specific fields
+  auction: {
+    startTime: { type: Date },
+    endTime: { type: Date },
+    reservePrice: { type: Number, min: 0 }, // Minimum price to sell
+    currentBid: { type: Number, min: 0, default: 0 },
+    minimumBidIncrement: { type: Number, min: 1, default: 10 }, // Minimum amount to increase bid
+    buyNowPrice: { type: Number, min: 0 }, // Optional buy-it-now price
+    bidHistory: [{
+      bidder: { type: mongoose.Schema.Types.ObjectId, ref: 'Collector', required: true },
+      amount: { type: Number, required: true, min: 0 },
+      timestamp: { type: Date, default: Date.now },
+      bidderName: String, // Denormalized for quick display
+      bidderEmail: String // For notifications
+    }],
+    winner: { type: mongoose.Schema.Types.ObjectId, ref: 'Collector' },
+    winningBid: { type: Number, min: 0 },
+    auctionStatus: { 
+      type: String, 
+      enum: ['scheduled', 'live', 'ended', 'cancelled', 'sold'], 
+      default: 'scheduled' 
+    },
+    totalBids: { type: Number, default: 0, min: 0 },
+    uniqueBidders: { type: Number, default: 0, min: 0 }
+  },
+
+  // Promotion/featured status
+  promoted: { type: Boolean, default: false },
+  promotionEndDate: { type: Date },
+
   // Shipping information
   shippingInfo: {
     estimatedDeliveryDays: { type: String, default: '5-7' },
@@ -79,12 +124,31 @@ const collectibleSchema = new mongoose.Schema({
   authenticityCertificateUrl: { type: String },
   status: { 
     type: String, 
-    enum: ['pending', 'approved', 'rejected', 'active', 'inactive'], 
+    enum: ['pending', 'approved', 'rejected', 'active', 'inactive', 'sold'], 
     default: 'pending' 
   },                                                        // Collectible approval status
 
   tags: [{ type: String }] // Indexed via schema.index() below
 }, { timestamps: true });
+
+// Virtual property to check if auction is active
+collectibleSchema.virtual('isAuctionActive').get(function() {
+  if (this.saleType !== 'auction' || !this.auction) return false;
+  const now = new Date();
+  return this.auction.auctionStatus === 'live' && 
+         this.auction.startTime <= now && 
+         this.auction.endTime > now;
+});
+
+// Virtual property to get time remaining in auction
+collectibleSchema.virtual('timeRemaining').get(function() {
+  if (this.saleType !== 'auction' || !this.auction || !this.isAuctionActive) return 0;
+  return Math.max(0, this.auction.endTime - new Date());
+});
+
+// Ensure virtuals are included in JSON output
+collectibleSchema.set('toJSON', { virtuals: true });
+collectibleSchema.set('toObject', { virtuals: true });
 
 // Indexes for better query performance
 // Note: id field already has unique: true which creates an index, so we don't need to index it again
@@ -94,5 +158,10 @@ collectibleSchema.index({ featured: 1, popular: 1 });
 collectibleSchema.index({ status: 1 });
 collectibleSchema.index({ createdAt: -1 });
 collectibleSchema.index({ title: 'text', description: 'text', tags: 'text' }); // Text search index (fixed: name -> title)
+collectibleSchema.index({ saleType: 1 });
+collectibleSchema.index({ owner: 1 });
+collectibleSchema.index({ 'auction.auctionStatus': 1 });
+collectibleSchema.index({ 'auction.endTime': 1 });
+collectibleSchema.index({ promoted: 1 });
 
 export default mongoose.model('Collectible', collectibleSchema);

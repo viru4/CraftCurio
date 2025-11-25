@@ -1,6 +1,6 @@
 import { Award, Shield, CheckCircle, Plus, Trash2, Upload, FileText, X, Image, ExternalLink, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 // Verification Form Component
 const VerificationForm = ({ verified, onVerificationUpdate }) => {

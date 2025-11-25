@@ -4,7 +4,7 @@ import AdminSidebar from './components/AdminSidebar';
 import MobileSidebar from './components/MobileSidebar';
 import AdminHeader from './components/AdminHeader';
 import { Upload, X, Plus, ArrowLeft, Save } from 'lucide-react';
-import { API_ENDPOINTS } from '@/config/api';
+import { API_ENDPOINTS } from '@/utils/api';
 
 const EditProduct = () => {
   const { id } = useParams();

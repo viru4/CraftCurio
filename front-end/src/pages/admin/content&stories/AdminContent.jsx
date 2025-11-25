@@ -6,7 +6,7 @@ import StoriesTable from './components/StoriesTable';
 import StoryViewModal from './components/StoryViewModal';
 import StoryEditModal from './components/StoryEditModal';
 import { Search, RefreshCw, FileText } from 'lucide-react';
-import API_BASE_URL from '@/config/api';
+import { API_BASE_URL } from '@/utils/api';
 
 const AdminContent = () => {
   const [artisans, setArtisans] = useState([]);

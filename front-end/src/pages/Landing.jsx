@@ -4,7 +4,7 @@ import { Carousel, CarouselItem, CarouselPrevious, CarouselNext } from "@/compon
 import { useCarouselControls } from "@/components/ui/use-carousel-controls";
 import { Link, useNavigate } from 'react-router-dom';
 import { CategoryGrid } from "@/components/category";
-import API_BASE_URL from "@/config/api";
+import { API_BASE_URL } from "@/utils/api";
 
 export default function Landing() {
   const [collectibleCategories, setCollectibleCategories] = useState([]);
@@ -332,9 +332,6 @@ function FeaturedProducts() {
 
         // Shuffle and limit to 8 products max
         let finalProducts = combinedProducts.sort(() => 0.5 - Math.random()).slice(0, 8);
-        
-        // Debug: Log the products being set
-        console.log('Final products for carousel:', finalProducts);
         
         // If no products from API, use fallback products
         if (finalProducts.length === 0) {
