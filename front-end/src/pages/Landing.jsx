@@ -4,6 +4,7 @@ import { Carousel, CarouselItem, CarouselPrevious, CarouselNext } from "@/compon
 import { useCarouselControls } from "@/components/ui/use-carousel-controls";
 import { Link, useNavigate } from 'react-router-dom';
 import { CategoryGrid } from "@/components/category";
+import { Typewriter } from "react-simple-typewriter";
 import { API_BASE_URL } from "@/utils/api";
 
 export default function Landing() {
@@ -51,15 +52,25 @@ export default function Landing() {
         <section className="relative">
           <div className="hero-banner-bg flex min-h-[60vh] lg:min-h-[80vh] flex-col gap-6 bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center">
             <h1 className="text-white text-5xl md:text-7xl font-black leading-tight tracking-tighter max-w-4xl">
-              Discover Unique Collectibles & Artisan Products
+            Discover Unique {" "}
+              <Typewriter
+                  words={["Collectibles", "Artisan Products", "Auctions", "Stories", "Events"]}
+                  loop={true}
+                  cursor
+                  cursorStyle="|"
+                  typeSpeed={80}
+                  deleteSpeed={50}
+                  delaySpeed={1200}
+                  cursorColor="#EC6D13"
+                />
             </h1>
             <p className="text-white text-lg md:text-xl font-normal max-w-2xl">
               Explore a curated selection of handcrafted items and rare collectibles from local artisans.
             </p>
             <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
-              <a href="#" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transform hover:scale-105 transition-all">
+              <Link to="/artisans" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transform hover:scale-105 transition-all">
                 <span className="truncate">Shop Now</span>
-              </a>
+              </Link>
               <Link to="/become-seller" className="flex min-w-[84px] max-w-[480px] items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-[var(--primary-color)] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transform hover:scale-105 transition-all">
                 <span className="truncate">Become a seller</span>
               </Link>

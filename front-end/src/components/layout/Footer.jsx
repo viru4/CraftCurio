@@ -52,7 +52,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 border-t border-gray-700 pt-8 text-center">
-          <p className="text-base text-gray-400">© 2024 CraftCurio. All rights reserved.</p>
+          <p className="text-base text-gray-400">© 2025 CraftCurio. All rights reserved.</p>
         </div>
       </div>
     </footer>
