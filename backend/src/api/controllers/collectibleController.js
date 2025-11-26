@@ -34,9 +34,25 @@ export const createCollectible = async (req, res) => {
     if (!collectibleData.owner && userId) {
       // Find or create collector profile
       let collector = await Collector.findOne({ userId });
-      if (collector) {
-        collectibleData.owner = collector._id;
+      
+      if (!collector) {
+        // Create collector profile if it doesn't exist
+        console.log('Creating collector profile for user:', userId);
+        const { generateCollectorId } = await import('../../utils/collectorIdentifier.js');
+        collector = new Collector({
+          userId,
+          id: await generateCollectorId(),
+          name: req.user?.name || req.user?.username || 'Anonymous Collector',
+          email: req.user?.email,
+          listedCollectibles: [],
+          activeBids: [],
+          wonAuctions: []
+        });
+        await collector.save();
+        console.log('Collector profile created:', collector._id);
       }
+      
+      collectibleData.owner = collector._id;
     }
 
     // Validate auction-specific logic
@@ -56,6 +72,7 @@ export const createCollectible = async (req, res) => {
       // Validate times
       const startTime = new Date(collectibleData.auction.startTime);
       const endTime = new Date(collectibleData.auction.endTime);
+      const now = new Date();
 
       if (startTime >= endTime) {
         return res.status(400).json({
@@ -63,15 +80,30 @@ export const createCollectible = async (req, res) => {
         });
       }
 
-      if (startTime <= new Date()) {
+      if (startTime <= now) {
         return res.status(400).json({
           error: 'Auction start time must be in the future'
         });
+      }
+
+      // Set initial auction status based on timing
+      // If start time is within the next 5 minutes, set to 'live' immediately
+      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+      if (startTime <= fiveMinutesFromNow) {
+        collectibleData.auction.auctionStatus = 'live';
+        collectibleData.status = 'active';
+      } else {
+        collectibleData.auction.auctionStatus = 'scheduled';
       }
     }
 
     const collectible = new Collectible(collectibleData);
     await collectible.save();
+
+    // Update auction status if needed
+    if (collectibleData.saleType === 'auction') {
+      await updateAuctionStatus(collectible._id);
+    }
 
     // Update collector's listed items
     if (collectibleData.owner) {

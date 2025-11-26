@@ -67,9 +67,9 @@ export default function Auctions() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {auctions.map((auction) => (
                 <div
-                  key={auction.id}
+                  key={auction._id || auction.id}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate(`/auctions/${auction.id}`)}
+                  onClick={() => navigate(`/auctions/${auction._id || auction.id}`)}
                 >
                   <div className="aspect-square relative">
                     <img
@@ -89,7 +89,7 @@ export default function Auctions() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Current Bid</span>
                         <span className="font-bold text-primary">
-                          ₹{auction.currentBid?.toLocaleString()}
+                          ₹{auction.auction?.currentBid?.toLocaleString() || auction.price?.toLocaleString()}
                         </span>
                       </div>
                       {auction.timeRemaining && (
@@ -103,7 +103,7 @@ export default function Auctions() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">Total Bids</span>
                         <span className="text-sm font-medium">
-                          {auction.totalBids || 0}
+                          {auction.auction?.totalBids || 0}
                         </span>
                       </div>
                     </div>
@@ -111,7 +111,7 @@ export default function Auctions() {
                       className="w-full mt-4 bg-primary text-white py-2 rounded hover:bg-primary-dark transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/auctions/${auction.id}`);
+                        navigate(`/auctions/${auction._id || auction.id}`);
                       }}
                     >
                       View Auction

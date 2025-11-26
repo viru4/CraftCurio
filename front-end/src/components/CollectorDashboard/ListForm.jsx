@@ -242,8 +242,9 @@ const ListForm = ({
     if (formData.saleType === 'direct') {
       submitData.price = parseFloat(formData.price);
     } else {
+      // For auctions, price field should be the starting bid
+      submitData.price = parseFloat(formData.startingBid);
       submitData.auction = {
-        startingBid: parseFloat(formData.startingBid),
         startTime: new Date(formData.startTime).toISOString(),
         endTime: new Date(formData.endTime).toISOString(),
       };

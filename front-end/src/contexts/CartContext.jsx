@@ -141,6 +141,11 @@ export const CartProvider = ({ children }) => {
         method: 'DELETE',
       });
     } catch (error) {
+      // Silently handle 404 errors (item not in cart)
+      if (error.message === 'Cart not found' || error.message?.includes('404')) {
+        // Item wasn't in cart, no need to show error
+        return;
+      }
       console.error('Error removing from cart:', error);
       // Revert on error
       setCartItems(previousItems);

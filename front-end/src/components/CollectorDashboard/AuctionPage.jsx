@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useAuction, usePlaceBid, useBuyNow } from '../../hooks/useAuction';
 import { formatTimeRemainingString } from '../../utils/socket';
+import { useAuth } from '../../contexts/AuthContext';
 
 /**
  * AuctionPage Component - Live auction viewing and bidding interface
@@ -10,9 +11,10 @@ import { formatTimeRemainingString } from '../../utils/socket';
  */
 
 const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
-  const { auction, isLoading, error, timeRemaining } = useAuction(auctionId);
-  const { placeBid, isPlacingBid, bidError } = usePlaceBid();
-  const { buyNow, isBuying, buyError } = useBuyNow();
+  const { user } = useAuth();
+  const { auction, loading: isLoading, error, timeRemaining } = useAuction(auctionId);
+  const { bid: placeBid, loading: isPlacingBid, error: bidError } = usePlaceBid();
+  const { buy: buyNow, loading: isBuying, error: buyError } = useBuyNow();
 
   const [bidAmount, setBidAmount] = useState('');
   const [localError, setLocalError] = useState('');
@@ -33,7 +35,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
     
     const currentBid = auction.auction.currentBid || auction.auction.startingBid || 0;
     const increment = currentBid * 0.05; // 5% increment
-    const minIncrement = Math.max(1, increment); // At least $1
+    const minIncrement = Math.max(10, increment); // At least ₹10
     
     return currentBid + minIncrement;
   };
@@ -42,6 +44,11 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
   const handlePlaceBid = async (e) => {
     e.preventDefault();
     setLocalError('');
+
+    if (!user) {
+      setLocalError('Please sign in to place a bid');
+      return;
+    }
 
     const amount = parseFloat(bidAmount);
     const minBid = calculateMinimumBid();
@@ -53,12 +60,18 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
     }
 
     if (amount < minBid) {
-      setLocalError(`Bid must be at least $${minBid.toFixed(2)}`);
+      setLocalError(`Bid must be at least ₹${minBid.toFixed(2)}`);
       return;
     }
 
     try {
-      await placeBid(auctionId, amount);
+      const bidData = {
+        bidAmount: amount,
+        bidderId: user._id,
+        bidderName: user.name || user.username || 'Anonymous',
+        bidderEmail: user.email
+      };
+      await placeBid(auctionId, bidData);
       // Success - bid amount will auto-update to new minimum
     } catch (err) {
       setLocalError(err.message || 'Failed to place bid');
@@ -67,12 +80,22 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
 
   // Handle buy now
   const handleBuyNow = async () => {
+    if (!user) {
+      setLocalError('Please sign in to make a purchase');
+      return;
+    }
+
     if (!window.confirm('Are you sure you want to buy this item now?')) {
       return;
     }
 
     try {
-      await buyNow(auctionId);
+      const buyerData = {
+        buyerId: user._id,
+        buyerName: user.name || user.username || 'Anonymous',
+        buyerEmail: user.email
+      };
+      await buyNow(auctionId, buyerData);
       onBuySuccess && onBuySuccess(auction);
       alert('Purchase successful! Auction has been finalized.');
     } catch (err) {
@@ -221,7 +244,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
               <div className="text-center">
                 <p className="text-sm text-gray-600 mb-1">Current Bid</p>
                 <p className="text-4xl font-bold text-orange-600">
-                  ${auction.auction?.currentBid?.toFixed(2) || auction.auction?.startingBid?.toFixed(2)}
+                  ₹{auction.auction?.currentBid?.toFixed(2) || auction.auction?.startingBid?.toFixed(2)}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
                   {auction.auction?.totalBids || 0} bid{auction.auction?.totalBids !== 1 ? 's' : ''}
@@ -236,7 +259,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
                   <div>
                     <p className="text-sm text-gray-600">Buy It Now</p>
                     <p className="text-2xl font-bold text-green-600">
-                      ${auction.auction.buyNowPrice.toFixed(2)}
+                      ₹{auction.auction.buyNowPrice.toFixed(2)}
                     </p>
                   </div>
                   <button
@@ -263,7 +286,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
 
                 <div className="mb-4">
                   <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Bid Amount ($)
+                    Your Bid Amount (₹)
                   </label>
                   <input
                     type="number"
@@ -276,7 +299,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
                     disabled={isPlacingBid}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Minimum bid: ${calculateMinimumBid().toFixed(2)}
+                    Minimum bid: ₹{calculateMinimumBid().toFixed(2)}
                   </p>
                 </div>
 
@@ -336,7 +359,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
                             </p>
                           </div>
                           <p className={`text-lg font-bold ${index === 0 ? 'text-orange-600' : 'text-gray-600'}`}>
-                            ${bid.amount.toFixed(2)}
+                            ₹{bid.amount.toFixed(2)}
                           </p>
                         </div>
                       ))

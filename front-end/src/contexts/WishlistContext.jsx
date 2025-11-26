@@ -47,11 +47,9 @@ export const WishlistProvider = ({ children }) => {
       try {
         const error = await response.json();
         errorMessage = error.message || errorMessage;
-        console.error('API Error Response:', error);
       } catch (e) {
-        console.error('Failed to parse error response:', e);
+        // Failed to parse error response
       }
-      console.error('API Request failed:', { url, status: response.status, statusText: response.statusText });
       throw new Error(errorMessage);
     }
 
@@ -175,6 +173,11 @@ export const WishlistProvider = ({ children }) => {
       setWishlistItems(updatedWishlist.data.items || []);
       
     } catch (error) {
+      // Silently handle 404 errors (item not in wishlist)
+      if (error.message === 'Wishlist not found' || error.message?.includes('404')) {
+        // Item wasn't in wishlist, no need to show error
+        return;
+      }
       console.error('Error removing from wishlist:', error);
       // Revert on error
       setWishlistItems(previousItems);

@@ -133,20 +133,18 @@ export const useAuction = (auctionId) => {
   useEffect(() => {
     if (!auctionId) return;
 
-    // Initialize socket
-    initializeSocket();
+    // Initialize socket only once
+    const socket = initializeSocket();
+    if (!socket) return;
 
     // Join auction room
     joinAuction(auctionId, (data) => {
-      console.log('Joined auction, received data:', data);
       setTimeRemaining(data.timeRemaining || 0);
     });
 
     // Listen for new bids
     const cleanupNewBid = onNewBid((data) => {
       if (data.collectibleId === auctionId) {
-        console.log('New bid received:', data);
-        
         setAuction((prev) => {
           if (!prev) return prev;
           
@@ -188,7 +186,6 @@ export const useAuction = (auctionId) => {
     // Listen for auction ended
     const cleanupEnded = onAuctionEnded((data) => {
       if (data.collectibleId === auctionId) {
-        console.log('Auction ended:', data);
         setHasEnded(true);
         setTimeRemaining(0);
         
@@ -212,7 +209,6 @@ export const useAuction = (auctionId) => {
     // Listen for auction cancelled
     const cleanupCancelled = onAuctionCancelled((data) => {
       if (data.collectibleId === auctionId) {
-        console.log('Auction cancelled:', data);
         setHasEnded(true);
         
         setAuction((prev) => {

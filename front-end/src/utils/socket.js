@@ -89,7 +89,6 @@ export const joinAuction = (collectibleId, onAuctionData) => {
     return;
   }
 
-  console.log(`🔔 Joining auction room: ${collectibleId}`);
   socket.emit('joinAuction', { collectibleId });
 
   // Listen for initial auction data
@@ -105,7 +104,6 @@ export const joinAuction = (collectibleId, onAuctionData) => {
 export const leaveAuction = (collectibleId) => {
   if (!socket) return;
 
-  console.log(`👋 Leaving auction room: ${collectibleId}`);
   socket.emit('leaveAuction', { collectibleId });
 };
 

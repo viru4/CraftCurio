@@ -19,6 +19,14 @@ export default defineConfig(({ mode }) => {
       hmr: isHttpsHosted
         ? { protocol: 'wss', clientPort: 443 }
         : undefined,
+      // Proxy API calls to backend server
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
     },
     resolve: {
       alias: {

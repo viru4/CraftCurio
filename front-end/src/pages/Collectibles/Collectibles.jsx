@@ -65,11 +65,15 @@ const Collectibles = () => {
     fetchCollectibleCategories();
   }, []);
 
-  // Fetch collectible items from API (when implemented)
+  // Fetch collectible items from API (only direct sales, exclude auctions)
   useEffect(() => {
     const fetchCollectibleItems = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/collectibles');
+        const response = await axios.get('http://localhost:8000/api/collectibles', {
+          params: {
+            saleType: 'direct' // Only fetch direct sale items, exclude auctions
+          }
+        });
   
         if (response.data && Array.isArray(response.data.data)) {
           setCollectibleItems(response.data.data);

@@ -221,14 +221,24 @@ const CollectorDashboardContent = () => {
 const CollectorDashboardPage = () => {
   const { user } = useAuth();
 
-  const collectorId = user?.collectorId || user?._id;
+  // Use user._id as collectorId since the backend can find collector by userId
+  const collectorId = user?._id;
   
   console.log('CollectorDashboardPage: User and CollectorId', {
     user,
     collectorId,
-    userCollectorId: user?.collectorId,
-    userId: user?._id
+    userId: user?._id,
+    userRole: user?.role
   });
+
+  // Show loading if no user yet
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
 
   return (
     <CollectorProvider collectorId={collectorId}>

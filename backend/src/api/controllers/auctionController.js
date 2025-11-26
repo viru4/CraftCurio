@@ -125,7 +125,19 @@ export const placeBid = async (req, res) => {
 export const buyNow = async (req, res) => {
   try {
     const { id } = req.params;
-    const { buyerId, buyerName, buyerEmail } = req.validatedBody || req.body;
+    const bodyData = req.validatedBody || req.body;
+    const { buyerId, buyerName, buyerEmail } = bodyData;
+
+    console.log('Buy-now request received:', { buyerId, buyerName, buyerEmail, bodyData });
+
+    // Validate required fields
+    if (!buyerId || !buyerName || !buyerEmail) {
+      console.error('Missing fields in buy-now request:', { buyerId, buyerName, buyerEmail });
+      return res.status(400).json({ 
+        error: 'Missing required fields: buyerId, buyerName, and buyerEmail are required',
+        received: { buyerId: !!buyerId, buyerName: !!buyerName, buyerEmail: !!buyerEmail }
+      });
+    }
 
     // Find the collectible
     let collectible = await Collectible.findById(id);
@@ -233,11 +245,19 @@ export const getLiveAuctions = async (req, res) => {
     const limitNum = Math.min(parseInt(limit, 10), 100);
     const skip = (pageNum - 1) * limitNum;
 
-    // Build query
+    const now = new Date();
+
+    // Build query - include both 'live' and 'scheduled' auctions that should be live
     const query = {
       saleType: 'auction',
-      'auction.auctionStatus': 'live',
-      'auction.endTime': { $gt: new Date() }
+      $or: [
+        { 'auction.auctionStatus': 'live' },
+        { 
+          'auction.auctionStatus': 'scheduled',
+          'auction.startTime': { $lte: now }
+        }
+      ],
+      'auction.endTime': { $gt: now }
     };
 
     if (category) {
@@ -270,10 +290,25 @@ export const getLiveAuctions = async (req, res) => {
       .populate('owner', 'name profilePhotoUrl')
       .lean();
 
+    // Update auction statuses for scheduled auctions that should be live
+    for (const auction of auctions) {
+      if (auction.auction.auctionStatus === 'scheduled' && new Date(auction.auction.startTime) <= now) {
+        await updateAuctionStatus(auction._id);
+      }
+    }
+
+    // Refetch to get updated statuses
+    const updatedAuctions = await Collectible.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limitNum)
+      .populate('owner', 'name profilePhotoUrl')
+      .lean();
+
     const total = await Collectible.countDocuments(query);
 
     // Add auction stats to each item
-    const auctionsWithStats = auctions.map(auction => ({
+    const auctionsWithStats = updatedAuctions.map(auction => ({
       ...auction,
       stats: getAuctionStats(auction)
     }));
@@ -308,12 +343,12 @@ export const getAuctionDetails = async (req, res) => {
 
     let collectible = await Collectible.findById(id)
       .populate('owner', 'name profilePhotoUrl location')
-      .populate('auction.bidHistory.bidder', 'name profilePhotoUrl');
+      .lean();
       
     if (!collectible) {
       collectible = await Collectible.findOne({ id })
         .populate('owner', 'name profilePhotoUrl location')
-        .populate('auction.bidHistory.bidder', 'name profilePhotoUrl');
+        .lean();
     }
 
     if (!collectible) {
@@ -327,17 +362,37 @@ export const getAuctionDetails = async (req, res) => {
     // Update status if needed
     await updateAuctionStatus(collectible._id);
     
-    // Refresh after potential update
+    // Refresh after potential update with safe populate
     collectible = await Collectible.findById(collectible._id)
       .populate('owner', 'name profilePhotoUrl location')
-      .populate('auction.bidHistory.bidder', 'name profilePhotoUrl');
+      .lean();
+
+    // Manually populate bidHistory bidders to handle null references
+    if (collectible.auction?.bidHistory && collectible.auction.bidHistory.length > 0) {
+      const bidderIds = collectible.auction.bidHistory
+        .map(bid => bid.bidder)
+        .filter(id => id); // Filter out null/undefined
+      
+      if (bidderIds.length > 0) {
+        const bidders = await Collector.find({ _id: { $in: bidderIds } })
+          .select('name profilePhotoUrl')
+          .lean();
+        
+        const bidderMap = new Map(bidders.map(b => [b._id.toString(), b]));
+        
+        collectible.auction.bidHistory = collectible.auction.bidHistory.map(bid => ({
+          ...bid,
+          bidder: bid.bidder ? bidderMap.get(bid.bidder.toString()) || bid.bidder : null
+        }));
+      }
+    }
 
     const stats = getAuctionStats(collectible);
 
     res.status(200).json({
       message: 'Auction details retrieved successfully',
       data: {
-        ...collectible.toObject(),
+        ...collectible,
         stats
       }
     });

@@ -5,8 +5,8 @@ import axios from 'axios';
  * Handles authentication, error handling, and API requests
  */
 
-// Base URL for API - adjust based on environment
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Base URL for API - use empty string for relative requests (proxied by Vite)
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const buildEndpoint = (path) => `${API_BASE_URL}/api${path}`;
 
@@ -52,11 +52,11 @@ api.interceptors.request.use(
   (config) => {
     // Get token from localStorage
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -75,7 +75,7 @@ api.interceptors.response.use(
     // Handle specific error cases
     if (error.response) {
       const { status, data } = error.response;
-      
+
       switch (status) {
         case 401:
           // Unauthorized - redirect to login
@@ -100,7 +100,7 @@ api.interceptors.response.use(
     } else {
       console.error('Request error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );
