@@ -8,7 +8,7 @@ export const submitVerification = async (req, res) => {
     const { fullName, idType, idNumber, idDocumentUrl, craftProofUrl, businessRegistrationUrl, additionalInfo } = req.body;
 
     // Check if user already has a pending or approved verification
-    const existingVerification = await Verification.findOne({ 
+    const existingVerification = await Verification.findOne({
       userId,
       status: { $in: ['pending', 'approved'] }
     });
@@ -211,9 +211,17 @@ export const approveVerification = async (req, res) => {
       { new: true }
     );
 
+    // IMPORTANT: Change user role to artisan
+    const User = (await import('../../models/User.js')).default;
+    await User.findByIdAndUpdate(
+      verification.userId,
+      { role: 'artisan' },
+      { new: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Verification approved successfully',
+      message: 'Verification approved successfully. User role changed to artisan.',
       data: verification
     });
   } catch (error) {

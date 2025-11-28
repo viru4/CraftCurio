@@ -23,10 +23,13 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
 
     try {
       setUploading(true);
-      // TODO: Implement actual image upload to server
-      // For now, create a local preview URL
-      const imageUrl = URL.createObjectURL(file);
-      onImageChange(imageUrl);
+
+      // Upload to Cloudinary
+      const { uploadSingleImage } = await import('../../../../../utils/uploadApi.js');
+      const result = await uploadSingleImage(file, 'profiles');
+
+      // Update profile with uploaded URL
+      onImageChange(result.url);
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image. Please try again.');
@@ -45,11 +48,11 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
         {/* Profile Image and Info */}
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="relative flex-shrink-0">
-            <div 
+            <div
               className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-[#ec6d13] to-[#d87a5b] bg-cover bg-center"
               style={{
-                backgroundImage: profileData.profileImage 
-                  ? `url(${profileData.profileImage})` 
+                backgroundImage: profileData.profileImage
+                  ? `url(${profileData.profileImage})`
                   : undefined
               }}
             >
@@ -59,7 +62,7 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
                 </div>
               )}
             </div>
-            <button 
+            <button
               onClick={handleButtonClick}
               disabled={uploading}
               className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-700 hover:bg-stone-300 transition-colors disabled:opacity-50"
@@ -87,11 +90,10 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
             <p className="text-stone-500 text-sm sm:text-base">
               {profileData.specializations[0] || 'Craft Specialization'}
             </p>
-            <div className={`mt-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs sm:text-sm font-medium w-fit ${
-              profileData.verified 
-                ? 'bg-green-100 text-green-800' 
+            <div className={`mt-1 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs sm:text-sm font-medium w-fit ${profileData.verified
+                ? 'bg-green-100 text-green-800'
                 : 'bg-yellow-100 text-yellow-800'
-            }`}>
+              }`}>
               <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{profileData.verified ? 'Verified Artisan' : 'Pending Verification'}</span>
             </div>
@@ -99,7 +101,7 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
         </div>
 
         {/* Upload Button */}
-        <button 
+        <button
           onClick={handleButtonClick}
           disabled={uploading}
           className="w-full sm:w-auto px-4 sm:px-6 py-2.5 rounded-xl bg-stone-100 text-stone-800 text-sm font-bold hover:bg-stone-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

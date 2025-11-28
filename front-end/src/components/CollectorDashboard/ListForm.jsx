@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import ImageUpload from '../common/ImageUpload';
 
 /**
  * ListForm Component - Form for creating or editing collectible listings
@@ -7,11 +8,11 @@ import PropTypes from 'prop-types';
  * Includes image preview, validation, and dynamic auction fields
  */
 
-const ListForm = ({ 
-  initialData = null, 
-  onSubmit, 
+const ListForm = ({
+  initialData = null,
+  onSubmit,
   onCancel,
-  isLoading = false 
+  isLoading = false
 }) => {
   const isEditMode = !!initialData;
 
@@ -32,7 +33,7 @@ const ListForm = ({
   });
 
   const [errors, setErrors] = useState({});
-  const [imagePreview, setImagePreview] = useState('');
+  const [uploadError, setUploadError] = useState(null);
 
   // Categories list
   const categories = [
@@ -51,7 +52,7 @@ const ListForm = ({
   useEffect(() => {
     if (initialData) {
       const isAuction = initialData.saleType === 'auction';
-      
+
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
@@ -67,7 +68,7 @@ const ListForm = ({
         endTime: isAuction ? formatDateTimeForInput(initialData.auction?.endTime) : '',
       });
 
-      setImagePreview(initialData.image || '');
+      // Image will be shown in ImageUpload component
     }
   }, [initialData]);
 
@@ -94,10 +95,7 @@ const ListForm = ({
       }));
     }
 
-    // Update image preview
-    if (name === 'image') {
-      setImagePreview(value);
-    }
+    // Image handled by ImageUpload component
   };
 
   // Handle sale type change
@@ -138,10 +136,8 @@ const ListForm = ({
       newErrors.category = 'Category is required';
     }
 
-    if (!formData.image.trim()) {
-      newErrors.image = 'Image URL is required';
-    } else if (!isValidUrl(formData.image)) {
-      newErrors.image = 'Please enter a valid URL';
+    if (!formData.image || !formData.image.trim()) {
+      newErrors.image = 'Image is required';
     }
 
     // Sale-type specific validations
@@ -212,20 +208,34 @@ const ListForm = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // URL validation
-  const isValidUrl = (string) => {
-    try {
-      new URL(string);
-      return true;
-    } catch {
-      return false;
+  // Handle image upload completion
+  const handleImageUpload = (uploadedUrl) => {
+    setFormData(prev => ({
+      ...prev,
+      image: uploadedUrl
+    }));
+    setUploadError(null);
+    // Clear image error if exists
+    if (errors.image) {
+      setErrors(prev => ({ ...prev, image: '' }));
     }
+  };
+
+  // Handle image upload error
+  const handleImageUploadError = (error) => {
+    setUploadError(error.message || 'Failed to upload image');
+    setErrors(prev => ({ ...prev, image: 'Image upload failed' }));
+  };
+
+  // Handle image removal
+  const handleImageRemove = () => {
+    setFormData(prev => ({ ...prev, image: '' }));
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
@@ -294,9 +304,8 @@ const ListForm = ({
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              errors.title ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.title ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+              }`}
             placeholder="e.g., Handcrafted Ceramic Vase"
           />
           {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
@@ -313,9 +322,8 @@ const ListForm = ({
             value={formData.description}
             onChange={handleChange}
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              errors.description ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.description ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+              }`}
             placeholder="Describe your collectible in detail..."
           />
           {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
@@ -331,9 +339,8 @@ const ListForm = ({
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              errors.category ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.category ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+              }`}
           >
             <option value="">Select a category</option>
             {categories.map(cat => (
@@ -343,38 +350,23 @@ const ListForm = ({
           {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
         </div>
 
-        {/* Image URL */}
+        {/* Image Upload */}
         <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-            Image URL <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Product Image <span className="text-red-500">*</span>
           </label>
-          <input
-            type="url"
-            id="image"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              errors.image ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-            }`}
-            placeholder="https://example.com/image.jpg"
+          <ImageUpload
+            onUploadComplete={handleImageUpload}
+            onUploadError={handleImageUploadError}
+            multiple={false}
+            currentImages={formData.image ? [formData.image] : []}
+            onRemoveImage={handleImageRemove}
+            label="Upload Collectible Image"
+            folder="collectibles"
+            showPreview={true}
           />
           {errors.image && <p className="text-red-500 text-sm mt-1">{errors.image}</p>}
-
-          {/* Image Preview */}
-          {imagePreview && isValidUrl(imagePreview) && (
-            <div className="mt-3">
-              <p className="text-sm text-gray-600 mb-2">Preview:</p>
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-full max-w-md h-48 object-cover rounded-md border border-gray-300"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-            </div>
-          )}
+          {uploadError && <p className="text-red-500 text-sm mt-1">{uploadError}</p>}
         </div>
       </div>
 
@@ -428,9 +420,8 @@ const ListForm = ({
               onChange={handleChange}
               step="0.01"
               min="0"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.price ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.price ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                }`}
               placeholder="0.00"
             />
             {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
@@ -456,9 +447,8 @@ const ListForm = ({
               onChange={handleChange}
               step="0.01"
               min="0"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.startingBid ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.startingBid ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                }`}
               placeholder="0.00"
             />
             {errors.startingBid && <p className="text-red-500 text-sm mt-1">{errors.startingBid}</p>}
@@ -477,9 +467,8 @@ const ListForm = ({
               onChange={handleChange}
               step="0.01"
               min="0"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.reservePrice ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.reservePrice ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                }`}
               placeholder="0.00"
             />
             {errors.reservePrice && <p className="text-red-500 text-sm mt-1">{errors.reservePrice}</p>}
@@ -499,9 +488,8 @@ const ListForm = ({
               onChange={handleChange}
               step="0.01"
               min="0"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.buyNowPrice ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.buyNowPrice ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                }`}
               placeholder="0.00"
             />
             {errors.buyNowPrice && <p className="text-red-500 text-sm mt-1">{errors.buyNowPrice}</p>}
@@ -520,9 +508,8 @@ const ListForm = ({
                 name="startTime"
                 value={formData.startTime}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  errors.startTime ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-                }`}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.startTime ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                  }`}
               />
               {errors.startTime && <p className="text-red-500 text-sm mt-1">{errors.startTime}</p>}
             </div>
@@ -537,9 +524,8 @@ const ListForm = ({
                 name="endTime"
                 value={formData.endTime}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  errors.endTime ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-                }`}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.endTime ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                  }`}
               />
               {errors.endTime && <p className="text-red-500 text-sm mt-1">{errors.endTime}</p>}
             </div>

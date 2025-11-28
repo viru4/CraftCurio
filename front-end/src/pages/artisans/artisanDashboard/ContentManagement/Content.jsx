@@ -16,7 +16,7 @@ const Content = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('story');
   const [loading, setLoading] = useState(true);
-  
+
   // Story content states
   const [storyContent, setStoryContent] = useState('');
   const [photos, setPhotos] = useState([]);
@@ -26,7 +26,7 @@ const Content = () => {
   const [challenges, setChallenges] = useState([]);
   const [triumphs, setTriumphs] = useState([]);
   const [videos, setVideos] = useState([]);
-  
+
   const [lastSaved, setLastSaved] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -35,10 +35,10 @@ const Content = () => {
     const fetchArtisanData = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         // First, try to find artisan by userId if artisanId is not available
         let artisanId = user?.artisanId;
-        
+
         if (!artisanId && user?._id) {
           // Fetch all artisans and find the one with matching userId
           const listResponse = await fetch(`${API_BASE_URL}/api/artisans?limit=1000`, {
@@ -46,7 +46,7 @@ const Content = () => {
               'Authorization': `Bearer ${token}`
             }
           });
-          
+
           if (listResponse.ok) {
             const listData = await listResponse.json();
             const artisan = listData.data?.find(a => a.userId === user._id || a.userId?._id === user._id);
@@ -111,10 +111,10 @@ const Content = () => {
   const handleAutoSave = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       // Get artisan ID
       let artisanId = user?.artisanId;
-      
+
       if (!artisanId && user?._id) {
         // Fetch all artisans and find the one with matching userId
         const listResponse = await fetch(`${API_BASE_URL}/api/artisans?limit=1000`, {
@@ -122,7 +122,7 @@ const Content = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (listResponse.ok) {
           const listData = await listResponse.json();
           const artisan = listData.data?.find(a => a.userId === user._id || a.userId?._id === user._id);
@@ -131,14 +131,14 @@ const Content = () => {
           }
         }
       }
-      
+
       if (!artisanId) {
         console.error('Cannot save: No artisan profile found');
         return;
       }
-    
+
       setIsSaving(true);
-      
+
       // Prepare story data
       const storyData = {
         fullBio: storyContent,
@@ -164,10 +164,10 @@ const Content = () => {
 
       if (response.ok) {
         const now = new Date();
-        const timeString = now.toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
+        const timeString = now.toLocaleTimeString('en-US', {
+          hour: 'numeric',
           minute: '2-digit',
-          hour12: true 
+          hour12: true
         });
         setLastSaved(timeString);
       } else {
@@ -182,10 +182,10 @@ const Content = () => {
 
   // Auto-save functionality
   useEffect(() => {
-    const hasContent = storyContent || photos.length > 0 || handwrittenNotes.length > 0 || 
-                       quotes.length > 0 || culturalContext || challenges.length > 0 || 
-                       triumphs.length > 0 || videos.length > 0;
-    
+    const hasContent = storyContent || photos.length > 0 || handwrittenNotes.length > 0 ||
+      quotes.length > 0 || culturalContext || challenges.length > 0 ||
+      triumphs.length > 0 || videos.length > 0;
+
     if (hasContent && !loading) {
       const timer = setTimeout(() => {
         handleAutoSave();
@@ -198,10 +198,10 @@ const Content = () => {
   const handlePreview = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       // Get artisan profile ID (custom ID like "artisan1")
       let artisanProfileId = user?.artisanProfileId;
-      
+
       if (!artisanProfileId && user?._id) {
         // Fetch all artisans and find the one with matching userId
         const listResponse = await fetch(`${API_BASE_URL}/api/artisans?limit=1000`, {
@@ -209,7 +209,7 @@ const Content = () => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (listResponse.ok) {
           const listData = await listResponse.json();
           const artisan = listData.data?.find(a => a.userId === user._id || a.userId?._id === user._id);
@@ -218,7 +218,7 @@ const Content = () => {
           }
         }
       }
-      
+
       // Navigate to artisan story page
       if (artisanProfileId) {
         window.open(`/artisan-stories/${artisanProfileId}`, '_blank');
@@ -235,7 +235,7 @@ const Content = () => {
     try {
       // Save before publishing
       await handleAutoSave();
-      
+
       alert('Story published successfully! Your story is now live on the Artisan Stories page.');
     } catch (error) {
       console.error('Failed to publish:', error);
@@ -248,25 +248,27 @@ const Content = () => {
   };
 
   const handleMediaUpload = async (files, type = 'photos') => {
-    // For demo: Create temporary URLs
-    // In production: Upload to cloud storage and get URLs
-    const newMediaFiles = await Promise.all(
-      files.map(async (file) => {
-        // TODO: Upload to cloud storage (AWS S3, Cloudinary, etc.)
-        // For now, create object URL for preview
-        return {
-          url: URL.createObjectURL(file),
-          type: file.type,
-          name: file.name,
-          file: file
-        };
-      })
-    );
-    
-    if (type === 'photos') {
-      setPhotos(prev => [...prev, ...newMediaFiles]);
-    } else {
-      setHandwrittenNotes(prev => [...prev, ...newMediaFiles]);
+    try {
+      // Upload files to Cloudinary
+      const { uploadMultipleImages } = await import('@/utils/uploadApi.js');
+      const folder = type === 'photos' ? 'content/photos' : 'content/notes';
+
+      const uploadedUrls = await uploadMultipleImages(files, folder);
+
+      const newMediaFiles = uploadedUrls.map((url, index) => ({
+        url,
+        type: files[index].type,
+        name: files[index].name
+      }));
+
+      if (type === 'photos') {
+        setPhotos(prev => [...prev, ...newMediaFiles]);
+      } else {
+        setHandwrittenNotes(prev => [...prev, ...newMediaFiles]);
+      }
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      alert('Failed to upload files. Please try again.');
     }
   };
 
@@ -274,18 +276,12 @@ const Content = () => {
     if (type === 'photos') {
       setPhotos(prev => {
         const newFiles = [...prev];
-        if (newFiles[index].url.startsWith('blob:')) {
-          URL.revokeObjectURL(newFiles[index].url);
-        }
         newFiles.splice(index, 1);
         return newFiles;
       });
     } else {
       setHandwrittenNotes(prev => {
         const newFiles = [...prev];
-        if (newFiles[index].url.startsWith('blob:')) {
-          URL.revokeObjectURL(newFiles[index].url);
-        }
         newFiles.splice(index, 1);
         return newFiles;
       });
@@ -334,14 +330,14 @@ const Content = () => {
           {/* Content Area */}
           <div className="p-4 sm:p-6 lg:p-8">
             {/* Header */}
-            <ContentHeader 
+            <ContentHeader
               onPreview={handlePreview}
               onPublish={handlePublish}
               lastSaved={lastSaved}
             />
 
             {/* Tabs */}
-            <ContentTabs 
+            <ContentTabs
               activeTab={activeTab}
               onTabChange={handleTabChange}
             />
@@ -350,13 +346,13 @@ const Content = () => {
             <div className="mt-6 space-y-6 sm:space-y-8">
               {activeTab === 'story' && (
                 <>
-                  <StoryEditor 
+                  <StoryEditor
                     content={storyContent}
                     onChange={handleContentChange}
                     lastSaved={lastSaved}
                   />
-                  
-                  <MediaGallery 
+
+                  <MediaGallery
                     title="Gallery Photos"
                     description="Upload images that showcase your workspace, process, and artistry"
                     images={photos}
@@ -364,7 +360,7 @@ const Content = () => {
                     onDelete={(index) => handleMediaDelete(index, 'photos')}
                   />
 
-                  <MediaGallery 
+                  <MediaGallery
                     title="Design Sketches & Handwritten Notes"
                     description="Share your design process, sketches, and personal notes"
                     images={handwrittenNotes}
@@ -372,7 +368,7 @@ const Content = () => {
                     onDelete={(index) => handleMediaDelete(index, 'notes')}
                   />
 
-                  <AdditionalStoryFields 
+                  <AdditionalStoryFields
                     quotes={quotes}
                     onQuotesChange={setQuotes}
                     culturalContext={culturalContext}

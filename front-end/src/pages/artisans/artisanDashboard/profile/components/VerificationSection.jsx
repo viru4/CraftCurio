@@ -1,6 +1,7 @@
 import { Award, Shield, CheckCircle, Plus, Trash2, Upload, FileText, X, Image, ExternalLink, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '@/utils/api';
+import ImageUpload from '@/components/common/ImageUpload';
 
 // Verification Form Component
 const VerificationForm = ({ verified, onVerificationUpdate }) => {
@@ -30,20 +31,20 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data) {
             setExistingRequest(data.data);
             const newStatus = data.data.status;
-            
+
             // If status changed to approved, refresh profile data
             if (newStatus === 'approved' && verificationStatus !== 'approved') {
               if (onVerificationUpdate) {
                 onVerificationUpdate();
               }
             }
-            
+
             setVerificationStatus(newStatus);
           }
         }
@@ -53,20 +54,30 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
     };
 
     fetchVerificationStatus();
-    
+
     // Poll every 30 seconds to check for status updates
     const interval = setInterval(fetchVerificationStatus, 30000);
-    
+
     return () => clearInterval(interval);
   }, [verificationStatus, onVerificationUpdate]);
 
-  const handleFileChange = (field, file) => {
-    if (file) {
+  const handleFileChange = async (field, file) => {
+    if (!file) return;
+
+    try {
+      // Upload to Cloudinary
+      const { uploadSingleImage } = await import('../../../../../utils/uploadApi.js');
+      const result = await uploadSingleImage(file, 'verification');
+
+      // Update form data with uploaded URL
       setVerificationData(prev => ({
         ...prev,
         [field]: file,
-        [`${field}Url`]: URL.createObjectURL(file)
+        [`${field}Url`]: result.url
       }));
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file. Please try again.');
     }
   };
 
@@ -76,7 +87,7 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
 
     try {
       const token = localStorage.getItem('token');
-      
+
       // In production, upload files to cloud storage first
       // For now, we'll send the data
       const formData = {
@@ -413,11 +424,17 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
     if (newAward.name.trim()) {
       const awardData = {
         name: newAward.name.trim(),
-        imageUrl: newAward.imageUrl.trim()
+        imageUrl: newAward.imageUrl || ''
       };
       const updatedAwards = [...awards, awardData];
       onInputChange('awards', updatedAwards);
       setNewAward({ name: '', imageUrl: '' });
+    }
+  };
+
+  const handleAwardImageUpload = (uploadedUrls) => {
+    if (uploadedUrls && uploadedUrls.length > 0) {
+      setNewAward(prev => ({ ...prev, imageUrl: uploadedUrls[0] }));
     }
   };
 
@@ -432,11 +449,17 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
     if (newCertification.name.trim()) {
       const certData = {
         name: newCertification.name.trim(),
-        imageUrl: newCertification.imageUrl.trim()
+        imageUrl: newCertification.imageUrl || ''
       };
       const updatedCertifications = [...certifications, certData];
       onInputChange('certifications', updatedCertifications);
       setNewCertification({ name: '', imageUrl: '' });
+    }
+  };
+
+  const handleCertImageUpload = (uploadedUrls) => {
+    if (uploadedUrls && uploadedUrls.length > 0) {
+      setNewCertification(prev => ({ ...prev, imageUrl: uploadedUrls[0] }));
     }
   };
 
@@ -454,8 +477,8 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
           onClick={() => setActiveSection('verification')}
           className={`
             flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm font-medium
-            ${activeSection === 'verification' 
-              ? 'bg-[#ec6d13] text-white shadow-md' 
+            ${activeSection === 'verification'
+              ? 'bg-[#ec6d13] text-white shadow-md'
               : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
             }
           `}
@@ -467,8 +490,8 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
           onClick={() => setActiveSection('awards')}
           className={`
             flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm font-medium
-            ${activeSection === 'awards' 
-              ? 'bg-[#ec6d13] text-white shadow-md' 
+            ${activeSection === 'awards'
+              ? 'bg-[#ec6d13] text-white shadow-md'
               : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
             }
           `}
@@ -480,8 +503,8 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
           onClick={() => setActiveSection('certifications')}
           className={`
             flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all text-xs sm:text-sm font-medium
-            ${activeSection === 'certifications' 
-              ? 'bg-[#ec6d13] text-white shadow-md' 
+            ${activeSection === 'certifications'
+              ? 'bg-[#ec6d13] text-white shadow-md'
               : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
             }
           `}
@@ -493,7 +516,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
 
       {/* Verification Status Section */}
       {activeSection === 'verification' && (
-        <VerificationForm 
+        <VerificationForm
           verified={verified}
           profileData={profileData}
           onInputChange={onInputChange}
@@ -518,16 +541,16 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                 placeholder="Award name (e.g., Best Artisan Award 2023)"
                 className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
               />
-              <div className="flex items-center gap-2">
-                <Image className="w-4 h-4 text-stone-400 flex-shrink-0" />
-                <input
-                  type="url"
-                  value={newAward.imageUrl}
-                  onChange={(e) => setNewAward(prev => ({ ...prev, imageUrl: e.target.value }))}
-                  placeholder="Photo URL (optional - link to award certificate/photo)"
-                  className="flex-1 px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
-                />
-              </div>
+              <ImageUpload
+                onUploadComplete={handleAwardImageUpload}
+                multiple={false}
+                maxFiles={1}
+                label="Upload Award Certificate (Optional)"
+                folder="verification/awards"
+                showPreview={true}
+                currentImages={newAward.imageUrl ? [newAward.imageUrl] : []}
+                onRemoveImage={() => setNewAward(prev => ({ ...prev, imageUrl: '' }))}
+              />
               <button
                 onClick={handleAddAward}
                 disabled={!newAward.name.trim()}
@@ -545,7 +568,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
               {awards.map((award, index) => {
                 const awardName = typeof award === 'string' ? award : award.name;
                 const awardImage = typeof award === 'object' ? award.imageUrl : null;
-                
+
                 return (
                   <div
                     key={index}
@@ -556,8 +579,8 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                       <div className="flex-shrink-0">
                         {awardImage ? (
                           <div className="relative w-full sm:w-20 h-32 sm:h-20 rounded-lg overflow-hidden bg-white border border-amber-300">
-                            <img 
-                              src={awardImage} 
+                            <img
+                              src={awardImage}
                               alt={awardName}
                               className="w-full h-full object-cover"
                               onError={(e) => {
@@ -582,7 +605,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Award Details */}
                       <div className="flex-1 min-w-0">
                         <p className="text-xs sm:text-sm font-semibold text-stone-900 break-words mb-1">
@@ -595,7 +618,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                           </p>
                         )}
                       </div>
-                      
+
                       {/* Delete Button */}
                       <button
                         onClick={() => handleRemoveAward(index)}
@@ -635,16 +658,16 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                 placeholder="Certification name (e.g., Master Craftsman Certificate)"
                 className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
               />
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-stone-400 flex-shrink-0" />
-                <input
-                  type="url"
-                  value={newCertification.imageUrl}
-                  onChange={(e) => setNewCertification(prev => ({ ...prev, imageUrl: e.target.value }))}
-                  placeholder="Document URL (optional - link to certificate/document)"
-                  className="flex-1 px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#ec6d13] focus:border-transparent"
-                />
-              </div>
+              <ImageUpload
+                onUploadComplete={handleCertImageUpload}
+                multiple={false}
+                maxFiles={1}
+                label="Upload Certification Document (Optional)"
+                folder="verification/certifications"
+                showPreview={true}
+                currentImages={newCertification.imageUrl ? [newCertification.imageUrl] : []}
+                onRemoveImage={() => setNewCertification(prev => ({ ...prev, imageUrl: '' }))}
+              />
               <button
                 onClick={handleAddCertification}
                 disabled={!newCertification.name.trim()}
@@ -662,7 +685,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
               {certifications.map((cert, index) => {
                 const certName = typeof cert === 'string' ? cert : cert.name;
                 const certImage = typeof cert === 'object' ? cert.imageUrl : null;
-                
+
                 return (
                   <div
                     key={index}
@@ -673,8 +696,8 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                       <div className="flex-shrink-0">
                         {certImage ? (
                           <div className="relative w-full sm:w-24 h-32 sm:h-24 rounded-lg overflow-hidden bg-white border border-blue-300">
-                            <img 
-                              src={certImage} 
+                            <img
+                              src={certImage}
                               alt={certName}
                               className="w-full h-full object-cover"
                               onError={(e) => {
@@ -699,7 +722,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Certification Details */}
                       <div className="flex-1 min-w-0">
                         <p className="text-xs sm:text-sm font-semibold text-stone-900 break-words mb-1">
@@ -712,7 +735,7 @@ const VerificationSection = ({ profileData, onInputChange, onVerificationUpdate 
                           </p>
                         )}
                       </div>
-                      
+
                       {/* Delete Button */}
                       <button
                         onClick={() => handleRemoveCertification(index)}

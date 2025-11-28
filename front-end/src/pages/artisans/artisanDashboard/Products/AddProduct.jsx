@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import ArtisanSidebar from '../components/ArtisanSidebar';
 import { Menu, Upload, X, Plus, ArrowLeft, Save } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/api';
+import ImageUpload from '@/components/common/ImageUpload';
 
 const AddProduct = () => {
   const { user, isArtisan, loading: authLoading } = useAuth();
@@ -13,11 +14,13 @@ const AddProduct = () => {
   const [categories, setCategories] = useState([]);
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
-  const [imageUrls, setImageUrls] = useState(['']);
-  const [storyMediaUrls, setStoryMediaUrls] = useState(['']);
+  const [productImages, setProductImages] = useState([]); // Changed from imageUrls
+  const [storyMediaUrls, setStoryMediaUrls] = useState([]);
+  const [certificateUrl, setCertificateUrl] = useState(''); // Changed
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [errors, setErrors] = useState({});
+  const [uploadError, setUploadError] = useState(null);
 
   const [formData, setFormData] = useState({
     id: '',
@@ -80,9 +83,8 @@ const AddProduct = () => {
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
-    
-    const validImages = imageUrls.filter(url => url.trim());
-    if (validImages.length === 0) newErrors.images = 'At least one product image is required';
+
+    if (productImages.length === 0) newErrors.images = 'At least one product image is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -95,39 +97,40 @@ const AddProduct = () => {
     }
   };
 
-  const handleImageUrlChange = (index, value) => {
-    const newImageUrls = [...imageUrls];
-    newImageUrls[index] = value;
-    setImageUrls(newImageUrls);
+  // Handle product images upload
+  const handleProductImagesUpload = (uploadedUrls) => {
+    setProductImages(prev => [...prev, ...uploadedUrls]);
+    setUploadError(null);
     if (errors.images) {
       setErrors(prev => ({ ...prev, images: '' }));
     }
   };
 
-  const addImageUrlField = () => {
-    setImageUrls([...imageUrls, '']);
+  const handleRemoveProductImage = (index) => {
+    setProductImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const removeImageUrlField = (index) => {
-    if (imageUrls.length > 1) {
-      setImageUrls(imageUrls.filter((_, i) => i !== index));
-    }
+  // Handle story media upload
+  const handleStoryMediaUpload = (uploadedUrls) => {
+    setStoryMediaUrls(prev => [...prev, ...uploadedUrls]);
   };
 
-  const handleStoryMediaUrlChange = (index, value) => {
-    const newStoryMediaUrls = [...storyMediaUrls];
-    newStoryMediaUrls[index] = value;
-    setStoryMediaUrls(newStoryMediaUrls);
+  const handleRemoveStoryMedia = (index) => {
+    setStoryMediaUrls(prev => prev.filter((_, i) => i !== index));
   };
 
-  const addStoryMediaUrlField = () => {
-    setStoryMediaUrls([...storyMediaUrls, '']);
+  // Handle certificate upload
+  const handleCertificateUpload = (uploadedUrl) => {
+    setCertificateUrl(uploadedUrl);
   };
 
-  const removeStoryMediaUrlField = (index) => {
-    if (storyMediaUrls.length > 1) {
-      setStoryMediaUrls(storyMediaUrls.filter((_, i) => i !== index));
-    }
+  const handleRemoveCertificate = () => {
+    setCertificateUrl('');
+  };
+
+  // Handle upload errors
+  const handleUploadError = (error) => {
+    setUploadError(error.message || 'Upload failed');
   };
 
   const handleAddTag = () => {
@@ -143,7 +146,7 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       alert('Please fill in all required fields correctly.');
       return;
@@ -152,13 +155,13 @@ const AddProduct = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      
+
       const productData = {
         id: formData.id,
         title: formData.title,
         description: formData.description,
         category: formData.category,
-        images: imageUrls.filter(url => url.trim()),
+        images: productImages, // Use uploaded images
         price: parseFloat(formData.price),
         currency: formData.currency,
         artisanInfo: {
@@ -175,7 +178,7 @@ const AddProduct = () => {
           storyText: formData.productStoryText,
           storyMediaUrls: storyMediaUrls.filter(url => url.trim())
         },
-        authenticityCertificateUrl: formData.authenticityCertificateUrl,
+        authenticityCertificateUrl: certificateUrl, // Use uploaded certificate
         availability: formData.availability,
         shippingInfo: {
           weight: formData.weight ? parseFloat(formData.weight) : undefined,
@@ -220,10 +223,10 @@ const AddProduct = () => {
   return (
     <div className="flex min-h-screen bg-stone-50">
       {/* Sidebar */}
-      <ArtisanSidebar 
-        user={user} 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
+      <ArtisanSidebar
+        user={user}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {/* Main Content */}
@@ -261,7 +264,7 @@ const AddProduct = () => {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 space-y-8">
-              
+
               {/* Basic Information */}
               <section>
                 <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b border-stone-200">
@@ -343,7 +346,7 @@ const AddProduct = () => {
                         + Add Custom Category
                       </option>
                     </select>
-                    
+
                     {/* Custom Category Input */}
                     {showCustomCategory && (
                       <div className="mt-3 p-4 bg-stone-50 rounded-xl border border-stone-200">
@@ -378,7 +381,7 @@ const AddProduct = () => {
                         </p>
                       </div>
                     )}
-                    
+
                     {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
                   </div>
 
@@ -431,37 +434,20 @@ const AddProduct = () => {
                 <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b border-stone-200">
                   Product Images *
                 </h2>
-                <div className="space-y-3">
-                  {imageUrls.map((url, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => handleImageUrlChange(index, e.target.value)}
-                        className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
-                        placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
-                      />
-                      {imageUrls.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeImageUrlField(index)}
-                          className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addImageUrlField}
-                    className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 rounded-xl hover:border-[#ec6d13] hover:bg-[#ec6d13]/5 transition-colors text-stone-600 w-full"
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span>Add Another Image URL</span>
-                  </button>
-                  {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
-                </div>
+                <ImageUpload
+                  onUploadComplete={handleProductImagesUpload}
+                  onUploadError={handleUploadError}
+                  multiple={true}
+                  maxFiles={10}
+                  currentImages={productImages}
+                  onRemoveImage={handleRemoveProductImage}
+                  label="Upload Product Images"
+                  folder="products"
+                  showPreview={true}
+                />
+                {errors.images && <p className="text-red-500 text-sm mt-2">{errors.images}</p>}
+                {uploadError && <p className="text-red-500 text-sm mt-2">{uploadError}</p>}
+                <p className="text-stone-500 text-xs mt-2">Upload up to 10 images. First image will be the main product image.</p>
               </section>
 
               {/* Craft Details */}
@@ -526,54 +512,39 @@ const AddProduct = () => {
                     />
                   </div>
 
-                  {/* Story Media URLs */}
+                  {/* Story Media */}
                   <div>
                     <label className="block text-stone-800 text-sm font-medium mb-2">
-                      Story Media URLs (Optional)
+                      Story Media (Optional)
                     </label>
-                    <div className="space-y-3">
-                      {storyMediaUrls.map((url, index) => (
-                        <div key={index} className="flex gap-2">
-                          <input
-                            type="url"
-                            value={url}
-                            onChange={(e) => handleStoryMediaUrlChange(index, e.target.value)}
-                            className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
-                            placeholder="Enter media URL for product story"
-                          />
-                          {storyMediaUrls.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeStoryMediaUrlField(index)}
-                              className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                            >
-                              <X className="h-5 w-5" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={addStoryMediaUrlField}
-                        className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 rounded-xl hover:border-[#ec6d13] hover:bg-[#ec6d13]/5 transition-colors text-stone-600"
-                      >
-                        <Plus className="h-5 w-5" />
-                        <span>Add Story Media URL</span>
-                      </button>
-                    </div>
+                    <ImageUpload
+                      onUploadComplete={handleStoryMediaUpload}
+                      onUploadError={handleUploadError}
+                      multiple={true}
+                      maxFiles={5}
+                      currentImages={storyMediaUrls}
+                      onRemoveImage={handleRemoveStoryMedia}
+                      label="Upload Story Images/Videos"
+                      folder="products/stories"
+                      showPreview={true}
+                    />
+                    <p className="text-stone-500 text-xs mt-2">Upload images or videos that tell your product's story</p>
                   </div>
 
                   {/* Authenticity Certificate */}
                   <div>
                     <label className="block text-stone-800 text-sm font-medium mb-2">
-                      Authenticity Certificate URL (Optional)
+                      Authenticity Certificate (Optional)
                     </label>
-                    <input
-                      type="url"
-                      value={formData.authenticityCertificateUrl}
-                      onChange={(e) => handleInputChange('authenticityCertificateUrl', e.target.value)}
-                      className="w-full px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
-                      placeholder="Enter URL to authenticity certificate"
+                    <ImageUpload
+                      onUploadComplete={handleCertificateUpload}
+                      onUploadError={handleUploadError}
+                      multiple={false}
+                      currentImages={certificateUrl ? [certificateUrl] : []}
+                      onRemoveImage={handleRemoveCertificate}
+                      label="Upload Certificate"
+                      folder="products/certificates"
+                      showPreview={true}
                     />
                   </div>
                 </div>

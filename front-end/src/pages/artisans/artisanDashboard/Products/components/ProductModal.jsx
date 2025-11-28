@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import ImageUpload from '@/components/common/ImageUpload';
 
 const ProductModal = ({ product, categories, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   useEffect(() => {
     if (product) {
@@ -51,7 +53,7 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
@@ -78,15 +80,17 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
     }
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    // TODO: Implement actual image upload
-    // For now, just store file names
-    const imageUrls = files.map(file => URL.createObjectURL(file));
+  // Handle image uploads
+  const handleImagesUpload = (uploadedUrls) => {
     setFormData(prev => ({
       ...prev,
-      images: [...prev.images, ...imageUrls]
+      images: [...prev.images, ...uploadedUrls]
     }));
+    setUploadError(null);
+  };
+
+  const handleUploadError = (error) => {
+    setUploadError(error.message || 'Failed to upload image');
   };
 
   const handleRemoveImage = (index) => {
@@ -114,38 +118,22 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Images Section */}
           <div>
             <label className="block text-stone-800 text-base font-medium mb-2">
               Product Images
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-              {formData.images.map((image, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-stone-200">
-                  <img src={image} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-              
-              {/* Upload Button */}
-              <label className="aspect-square rounded-lg border-2 border-dashed border-stone-300 hover:border-[#ec6d13] transition-colors cursor-pointer flex flex-col items-center justify-center bg-stone-50">
-                <Upload className="h-8 w-8 text-stone-400 mb-2" />
-                <span className="text-xs text-stone-600">Upload</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
+            <ImageUpload
+              onUploadComplete={handleImagesUpload}
+              onUploadError={handleUploadError}
+              multiple={true}
+              maxFiles={10}
+              currentImages={formData.images}
+              onRemoveImage={handleRemoveImage}
+              label="Upload Product Images"
+              folder="products"
+              showPreview={true}
+            />
+            {uploadError && <p className="text-red-500 text-sm mt-2">{uploadError}</p>}
           </div>
 
           {/* Basic Info */}

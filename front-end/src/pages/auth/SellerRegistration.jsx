@@ -1,41 +1,131 @@
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { sellerRegistrationSchema, sellerRegistrationDefaults } from '@/forms/SellerRegistrationSchema'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/layout'
+import { Upload, FileText, Building, CheckCircle } from 'lucide-react'
+import { API_BASE_URL } from '@/utils/api'
 
 export default function SellerRegistration() {
   const [submitted, setSubmitted] = useState(false)
-  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  const form = useForm({
-    resolver: zodResolver(sellerRegistrationSchema),
-    defaultValues: sellerRegistrationDefaults,
-    mode: 'onSubmit',
+  // Form state
+  const [formData, setFormData] = useState({
+    fullName: '',
+    businessName: '',
+    email: '',
+    phone: '',
+    businessType: 'individual',
+    taxId: '',
+    idType: 'passport',
+    idNumber: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    website: '',
+    portfolio: '',
+    additionalInfo: '',
+    agreeTerms: false
   })
-  const { register, handleSubmit, formState } = form
-  const { errors, isSubmitting } = formState
 
-  async function onSubmit(values) {
-    const idFiles = Array.from(values.governmentId)
-    const addressFiles = Array.from(values.proofOfAddress)
+  // File upload states
+  const [idDocumentUrl, setIdDocumentUrl] = useState('')
+  const [craftProofUrl, setCraftProofUrl] = useState('')
+  const [businessRegistrationUrl, setBusinessRegistrationUrl] = useState('')
+  const [uploadingId, setUploadingId] = useState(false)
+  const [uploadingCraft, setUploadingCraft] = useState(false)
+  const [uploadingBusiness, setUploadingBusiness] = useState(false)
 
-    const verificationChecks = {
-      emailDomain: /@.+\./.test(values.email),
-      phoneLength: values.phone.replace(/\D/g, '').length >= 8,
-      taxIdShape: /[A-Za-z0-9]{8,}/.test(values.taxId),
-      hasIdFiles: idFiles.length > 0,
-      hasAddressFiles: addressFiles.length > 0,
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
+  }
+
+  const handleFileUpload = async (file, type) => {
+    if (!file) return
+
+    try {
+      // Set loading state
+      if (type === 'id') setUploadingId(true)
+      else if (type === 'craft') setUploadingCraft(true)
+      else setUploadingBusiness(true)
+
+      // Upload to Cloudinary
+      const { uploadSingleImage } = await import('@/utils/uploadApi.js')
+      const result = await uploadSingleImage(file, 'verification')
+
+      // Update state with URL
+      if (type === 'id') setIdDocumentUrl(result.url)
+      else if (type === 'craft') setCraftProofUrl(result.url)
+      else setBusinessRegistrationUrl(result.url)
+
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      alert('Failed to upload file. Please try again.')
+    } finally {
+      if (type === 'id') setUploadingId(false)
+      else if (type === 'craft') setUploadingCraft(false)
+      else setUploadingBusiness(false)
+    }
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault()
+
+    if (!formData.agreeTerms) {
+      alert('Please agree to the terms and conditions')
+      return
     }
 
-    const passed = Object.values(verificationChecks).every(Boolean)
-    setResult({ passed, verificationChecks })
-    setSubmitted(true)
+    if (!idDocumentUrl || !craftProofUrl) {
+      alert('Please upload required documents (Government ID and Craft Proof)')
+      return
+    }
 
-    // Here you would POST to your backend for real verification.
-    // For security, we do NOT upload files client-side without server integration.
+    setLoading(true)
+
+    try {
+      const token = localStorage.getItem('token')
+
+      // Submit seller registration as verification request
+      const submitData = {
+        fullName: formData.fullName,
+        idType: formData.idType,
+        idNumber: formData.idNumber,
+        idDocumentUrl,
+        craftProofUrl,
+        businessRegistrationUrl,
+        additionalInfo: `Business: ${formData.businessName}\nBusiness Type: ${formData.businessType}\nTax ID: ${formData.taxId}\nAddress: ${formData.addressLine1}, ${formData.addressLine2 ? formData.addressLine2 + ', ' : ''}${formData.city}, ${formData.state} ${formData.postalCode}, ${formData.country}\nWebsite: ${formData.website || 'N/A'}\nPortfolio: ${formData.portfolio || 'N/A'}\n\nAdditional Info:\n${formData.additionalInfo}`
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/verification/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(submitData)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setSubmitted(true)
+      } else {
+        throw new Error(result.message || 'Failed to submit registration')
+      }
+    } catch (error) {
+      console.error('Error submitting registration:', error)
+      alert(error.message || 'Failed to submit registration. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -45,80 +135,241 @@ export default function SellerRegistration() {
         <section className="py-12 px-4 md:px-10 lg:px-20 bg-white">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-2">Become a Seller / Artisan</h1>
-            <p className="text-[var(--text-secondary)] mb-8">Provide your details for verification. We require identity and address proof to keep our marketplace trustworthy.</p>
+            <p className="text-[var(--text-secondary)] mb-8">Provide your details for verification. We require identity and craft proof to keep our marketplace trustworthy.</p>
 
             {!submitted ? (
-              <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Field label="Full name" error={errors.fullName?.message}><Input id="fullName" {...register('fullName')} placeholder="Jane Doe" /></Field>
-                  <Field label="Business / Shop name" error={errors.businessName?.message}><Input id="businessName" {...register('businessName')} placeholder="CraftCurio Studio" /></Field>
-                </div>
-
-                <Field label="Email" error={errors.email?.message}><Input id="email" type="email" {...register('email')} placeholder="you@example.com" /></Field>
-                <Field label="Phone" error={errors.phone?.message}><Input id="phone" type="tel" {...register('phone')} placeholder="+1 555 000 0000" /></Field>
-
-                <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Business type</label>
-                  <select className="w-full h-9 rounded-md border px-3 text-sm" {...register('businessType')}>
-                    <option value="individual">Individual</option>
-                    <option value="company">Company</option>
-                  </select>
-                  {errors.businessType && <ErrorText>{errors.businessType.message}</ErrorText>}
-                </div>
-                <Field label="Tax ID / GST / VAT" error={errors.taxId?.message}><Input id="taxId" {...register('taxId')} placeholder="ABCD123456" /></Field>
-
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Field label="Address line 1" error={errors.addressLine1?.message}><Input id="address1" {...register('addressLine1')} placeholder="123 Artisan St" /></Field>
-                  <Field label="Address line 2" error={errors.addressLine2?.message}><Input id="address2" {...register('addressLine2')} placeholder="Suite, unit, etc. (optional)" /></Field>
-                </div>
-
-                <Field label="City" error={errors.city?.message}><Input id="city" {...register('city')} /></Field>
-                <Field label="State / Province" error={errors.state?.message}><Input id="state" {...register('state')} /></Field>
-                <Field label="Postal / ZIP" error={errors.postalCode?.message}><Input id="postalCode" {...register('postalCode')} /></Field>
-                <Field label="Country" error={errors.country?.message}><Input id="country" {...register('country')} /></Field>
-
-                <Field label="Website (optional)" error={errors.website?.message} helper="If you sell elsewhere, add a link."><Input id="website" {...register('website')} placeholder="https://example.com" /></Field>
-                <Field label="Portfolio (optional)" error={errors.portfolio?.message}><Input id="portfolio" {...register('portfolio')} placeholder="https://instagram.com/yourshop" /></Field>
-
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="governmentId" className="block text-sm font-medium text-[var(--text-primary)] mb-1">Government ID (JPG/PNG/PDF, max 5MB)</label>
-                    <Input id="governmentId" type="file" accept="image/jpeg,image/png,application/pdf" {...register('governmentId')} />
-                    {errors.governmentId && <ErrorText>{errors.governmentId.message}</ErrorText>}
-                  </div>
-                  <div>
-                    <label htmlFor="proofOfAddress" className="block text-sm font-medium text-[var(--text-primary)] mb-1">Proof of Address (JPG/PNG/PDF, max 5MB)</label>
-                    <Input id="proofOfAddress" type="file" accept="image/jpeg,image/png,application/pdf" {...register('proofOfAddress')} />
-                    {errors.proofOfAddress && <ErrorText>{errors.proofOfAddress.message}</ErrorText>}
+              <form noValidate onSubmit={onSubmit} className="space-y-6">
+                {/* Personal Information */}
+                <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
+                  <h2 className="text-xl font-bold text-stone-900 mb-4">Personal Information</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field label="Full Legal Name">
+                      <Input name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="As shown on your ID" required />
+                    </Field>
+                    <Field label="Business / Shop Name">
+                      <Input name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="CraftCurio Studio" required />
+                    </Field>
+                    <Field label="Email">
+                      <Input name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="you@example.com" required />
+                    </Field>
+                    <Field label="Phone">
+                      <Input name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="+1 555 000 0000" required />
+                    </Field>
                   </div>
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="inline-flex items-start gap-2 text-sm text-[var(--text-secondary)]">
-                    <input type="checkbox" className="mt-1" {...register('agreeTerms')} />
-                    <span>I confirm that the information provided is accurate and I agree to the marketplace terms, including identity and address verification.</span>
+                {/* Business Details */}
+                <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
+                  <h2 className="text-xl font-bold text-stone-900 mb-4">Business Details</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field label="Business Type">
+                      <select name="businessType" value={formData.businessType} onChange={handleInputChange} className="w-full h-10 rounded-md border px-3 text-sm">
+                        <option value="individual">Individual</option>
+                        <option value="company">Company</option>
+                      </select>
+                    </Field>
+                    <Field label="Tax ID / GST / VAT">
+                      <Input name="taxId" value={formData.taxId} onChange={handleInputChange} placeholder="ABCD123456" required />
+                    </Field>
+                  </div>
+                </div>
+
+                {/* Identification */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <h2 className="text-xl font-bold text-blue-900 mb-4">Identity Verification</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field label="Government ID Type">
+                      <select name="idType" value={formData.idType} onChange={handleInputChange} className="w-full h-10 rounded-md border px-3 text-sm">
+                        <option value="passport">Passport</option>
+                        <option value="drivers_license">Driver's License</option>
+                        <option value="national_id">National ID Card</option>
+                        <option value="aadhaar">Aadhaar Card</option>
+                      </select>
+                    </Field>
+                    <Field label="ID Number">
+                      <Input name="idNumber" value={formData.idNumber} onChange={handleInputChange} placeholder="Enter your ID number" required />
+                    </Field>
+                  </div>
+
+                  {/* ID Document Upload */}
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium text-blue-900 mb-2">
+                      Government ID Document <span className="text-red-500">*</span>
+                    </label>
+                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
+                      <div className="space-y-1 text-center">
+                        <Upload className="mx-auto h-12 w-12 text-blue-400" />
+                        <div className="flex text-sm text-blue-600">
+                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                            <span>Upload a file</span>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={(e) => handleFileUpload(e.target.files[0], 'id')}
+                              className="sr-only"
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
+                      </div>
+                    </div>
+                    {uploadingId && <p className="mt-2 text-sm text-blue-600">Uploading...</p>}
+                    {idDocumentUrl && <p className="mt-2 text-sm text-green-600">✓ File uploaded successfully</p>}
+                  </div>
+
+                  {/* Craft Proof Upload */}
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium text-blue-900 mb-2">
+                      Proof of Craft Expertise <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-blue-700 mb-2">
+                      Upload certificates, awards, workshop photos, or portfolio images
+                    </p>
+                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
+                      <div className="space-y-1 text-center">
+                        <FileText className="mx-auto h-12 w-12 text-blue-400" />
+                        <div className="flex text-sm text-blue-600">
+                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                            <span>Upload a file</span>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={(e) => handleFileUpload(e.target.files[0], 'craft')}
+                              className="sr-only"
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
+                      </div>
+                    </div>
+                    {uploadingCraft && <p className="mt-2 text-sm text-blue-600">Uploading...</p>}
+                    {craftProofUrl && <p className="mt-2 text-sm text-green-600">✓ File uploaded successfully</p>}
+                  </div>
+
+                  {/* Business Registration (Optional) */}
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium text-blue-900 mb-2">
+                      Business Registration (Optional)
+                    </label>
+                    <p className="text-xs text-blue-700 mb-2">
+                      GST certificate, business license, or registration document if applicable
+                    </p>
+                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
+                      <div className="space-y-1 text-center">
+                        <Building className="mx-auto h-12 w-12 text-blue-400" />
+                        <div className="flex text-sm text-blue-600">
+                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                            <span>Upload a file</span>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={(e) => handleFileUpload(e.target.files[0], 'business')}
+                              className="sr-only"
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
+                      </div>
+                    </div>
+                    {uploadingBusiness && <p className="mt-2 text-sm text-blue-600">Uploading...</p>}
+                    {businessRegistrationUrl && <p className="mt-2 text-sm text-green-600">✓ File uploaded successfully</p>}
+                  </div>
+                </div>
+
+                {/* Address Information */}
+                <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
+                  <h2 className="text-xl font-bold text-stone-900 mb-4">Address Information</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field label="Address Line 1">
+                      <Input name="addressLine1" value={formData.addressLine1} onChange={handleInputChange} placeholder="123 Artisan St" required />
+                    </Field>
+                    <Field label="Address Line 2">
+                      <Input name="addressLine2" value={formData.addressLine2} onChange={handleInputChange} placeholder="Suite, unit, etc. (optional)" />
+                    </Field>
+                    <Field label="City">
+                      <Input name="city" value={formData.city} onChange={handleInputChange} required />
+                    </Field>
+                    <Field label="State / Province">
+                      <Input name="state" value={formData.state} onChange={handleInputChange} required />
+                    </Field>
+                    <Field label="Postal / ZIP">
+                      <Input name="postalCode" value={formData.postalCode} onChange={handleInputChange} required />
+                    </Field>
+                    <Field label="Country">
+                      <Input name="country" value={formData.country} onChange={handleInputChange} required />
+                    </Field>
+                  </div>
+                </div>
+
+                {/* Portfolio Links */}
+                <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
+                  <h2 className="text-xl font-bold text-stone-900 mb-4">Portfolio (Optional)</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Field label="Website" helper="If you sell elsewhere, add a link">
+                      <Input name="website" value={formData.website} onChange={handleInputChange} placeholder="https://example.com" />
+                    </Field>
+                    <Field label="Portfolio / Social Media">
+                      <Input name="portfolio" value={formData.portfolio} onChange={handleInputChange} placeholder="https://instagram.com/yourshop" />
+                    </Field>
+                  </div>
+                </div>
+
+                {/* Additional Information */}
+                <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
+                  <Field label="Additional Information">
+                    <textarea
+                      name="additionalInfo"
+                      value={formData.additionalInfo}
+                      onChange={handleInputChange}
+                      rows={4}
+                      className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      placeholder="Tell us more about your craft, experience, or anything else that helps verify your expertise..."
+                    />
+                  </Field>
+                </div>
+
+                {/* Terms Agreement */}
+                <div className="bg-stone-50 border border-stone-200 rounded-lg p-6">
+                  <label className="inline-flex items-start gap-3 text-sm text-stone-700">
+                    <input
+                      type="checkbox"
+                      name="agreeTerms"
+                      checked={formData.agreeTerms}
+                      onChange={handleInputChange}
+                      className="mt-1 h-4 w-4"
+                    />
+                    <span>I confirm that the information provided is accurate and I agree to the marketplace terms, including identity and craft verification. My information will be reviewed within 2-3 business days.</span>
                   </label>
-                  {errors.agreeTerms && <ErrorText>{errors.agreeTerms.message}</ErrorText>}
                 </div>
 
-                <div className="md:col-span-2 flex gap-3">
-                  <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting…' : 'Submit application'}</Button>
-                  <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancel</Button>
+                {/* Submit Buttons */}
+                <div className="flex gap-3">
+                  <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+                    {loading ? 'Submitting…' : 'Submit Application'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => window.history.back()}>
+                    Cancel
+                  </Button>
                 </div>
               </form>
             ) : (
-              <div className="bg-[var(--secondary-color)] rounded-lg p-6">
-                <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Application received</h2>
-                <p className="text-[var(--text-secondary)] mb-4">Your details passed our initial checks. We will complete verification and notify you by email.</p>
-                {result && (
-                  <ul className="text-sm text-[var(--text-secondary)] list-disc pl-5">
-                    <li>Email format check: {result.verificationChecks.emailDomain ? 'OK' : 'Failed'}</li>
-                    <li>Phone length check: {result.verificationChecks.phoneLength ? 'OK' : 'Failed'}</li>
-                    <li>Tax ID pattern check: {result.verificationChecks.taxIdShape ? 'OK' : 'Failed'}</li>
-                    <li>Government ID provided: {result.verificationChecks.hasIdFiles ? 'OK' : 'Missing'}</li>
-                    <li>Proof of Address provided: {result.verificationChecks.hasAddressFiles ? 'OK' : 'Missing'}</li>
-                  </ul>
-                )}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-8">
+                <div className="flex items-center gap-4 mb-4">
+                  <CheckCircle className="w-16 h-16 text-green-600" />
+                  <div>
+                    <h2 className="text-2xl font-bold text-green-900 mb-2">Application Received!</h2>
+                    <p className="text-green-800">Your seller registration has been submitted successfully.</p>
+                  </div>
+                </div>
+                <p className="text-green-700 mb-4">
+                  We will review your application and verify your documents within 2-3 business days. You will receive an email notification once your application is approved.
+                </p>
+                <Button onClick={() => window.location.href = '/'} className="bg-green-600 hover:bg-green-700">
+                  Return to Home
+                </Button>
               </div>
             )}
           </div>
@@ -131,14 +382,10 @@ export default function SellerRegistration() {
 function Field({ label, error, helper, children }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">{label}</label>
+      <label className="block text-sm font-medium text-stone-900 mb-1">{label}</label>
       {children}
-      {helper ? <p className="text-xs text-[var(--text-secondary)] mt-1">{helper}</p> : null}
-      {error ? <ErrorText>{error}</ErrorText> : null}
+      {helper && <p className="text-xs text-stone-600 mt-1">{helper}</p>}
+      {error && <p className="text-sm mt-1 text-red-600">{error}</p>}
     </div>
   )
-}
-
-function ErrorText({ children }) {
-  return <p className="text-sm mt-1 text-[#b91c1c]">{children}</p>
 }

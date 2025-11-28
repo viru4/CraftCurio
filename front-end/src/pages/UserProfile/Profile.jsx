@@ -18,7 +18,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+
   // Profile data state
   const [profileData, setProfileData] = useState({
     name: '',
@@ -134,7 +134,7 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError('Passwords do not match');
       return;
@@ -183,15 +183,21 @@ const Profile = () => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileData(prev => ({
-          ...prev,
-          profileImage: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      // Upload to Cloudinary
+      const { uploadSingleImage } = await import('../../utils/uploadApi.js');
+      const result = await uploadSingleImage(file, 'profiles');
+
+      // Update profile with uploaded URL
+      setProfileData(prev => ({
+        ...prev,
+        profileImage: result.url
+      }));
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      alert('Failed to upload image. Please try again.');
     }
   };
 
@@ -226,7 +232,7 @@ const Profile = () => {
         )}
 
         {/* Sidebar */}
-        <ProfileSidebar 
+        <ProfileSidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isSidebarOpen={isSidebarOpen}
@@ -243,17 +249,17 @@ const Profile = () => {
 
             {activeTab === 'profile' && (
               <>
-                <ProfileHeader 
+                <ProfileHeader
                   profileData={profileData}
                   onImageUpload={handleImageUpload}
                 />
-                <PersonalInfoForm 
+                <PersonalInfoForm
                   profileData={profileData}
                   onChange={handleProfileChange}
                   onSubmit={handleProfileSubmit}
                   saving={saving}
                 />
-                <AddressForm 
+                <AddressForm
                   profileData={profileData}
                   onChange={handleProfileChange}
                   onSubmit={handleProfileSubmit}
@@ -267,7 +273,7 @@ const Profile = () => {
             )}
 
             {activeTab === 'security' && (
-              <SecuritySettings 
+              <SecuritySettings
                 passwordData={passwordData}
                 onChange={handlePasswordChange}
                 onSubmit={handlePasswordSubmit}
