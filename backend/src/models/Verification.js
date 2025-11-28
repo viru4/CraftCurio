@@ -18,7 +18,7 @@ const verificationSchema = new mongoose.Schema({
   },
   idType: {
     type: String,
-    enum: ['passport', 'drivers_license', 'national_id', 'other'],
+    enum: ['passport', 'drivers_license', 'national_id', 'aadhaar', 'other'],
     required: true
   },
   idNumber: {

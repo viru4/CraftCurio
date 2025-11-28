@@ -303,21 +303,6 @@ Authorization: Bearer <token>
 GET /api/auction/live?sortBy=endingSoon&page=1&limit=20
 ```
 
-### Socket.io Client Connection
-
-```javascript
-import io from 'socket.io-client';
-
-const socket = io('http://localhost:8000');
-
-// Join an auction room
-socket.emit('joinAuction', { collectibleId: 'auction_id' });
-
-// Listen for new bids
-socket.on('newBid', (data) => {
-  console.log('New bid:', data);
-  // Update UI with new bid amount
-});
 
 // Listen for countdown updates
 socket.on('countdownUpdate', (data) => {

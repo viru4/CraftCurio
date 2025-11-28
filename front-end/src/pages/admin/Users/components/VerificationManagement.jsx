@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, Search, Filter, Download, Clock, Shield } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '@/utils/api';
-import VerificationDetailsModal from '../../components/VerificationDetailsModal';
+import VerificationDetailsModal from './VerificationDetailsModal';
 
 const VerificationManagement = () => {
   const [searchParams] = useSearchParams();
   const userIdFromUrl = searchParams.get('userId');
-  
+
   const [verifications, setVerifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVerification, setSelectedVerification] = useState(null);
@@ -78,6 +78,8 @@ const VerificationManagement = () => {
         const data = await response.json();
         setSelectedVerification(data.data);
         setShowModal(true);
+      } else {
+        console.error('Failed to fetch details');
       }
     } catch (error) {
       console.error('Error fetching verification details:', error);
@@ -157,8 +159,8 @@ const VerificationManagement = () => {
           Verification Management
         </h1>
         <p className="text-gray-600 mt-2">
-          {userIdFromUrl 
-            ? 'Showing verification requests for selected user' 
+          {userIdFromUrl
+            ? 'Showing verification requests for selected user'
             : 'Review and manage artisan verification requests'}
         </p>
       </div>
@@ -314,7 +316,7 @@ const VerificationManagement = () => {
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleViewDetails(verification._id)}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
                         >
                           <Eye className="w-4 h-4" />
                           Review

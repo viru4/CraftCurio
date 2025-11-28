@@ -16,48 +16,54 @@ const artisanSchema = new mongoose.Schema({
     instagram: String,
     twitter: String
   },
-  awards: [{ type: String }],
-  certifications: [{ type: String }],
+  awards: [{
+    name: { type: String },
+    imageUrl: { type: String }
+  }],
+  certifications: [{
+    name: { type: String },
+    imageUrl: { type: String }
+  }],
   verified: { type: Boolean, default: false },
-  
+
   // Story details for artisan story page
   story: {
     // Gallery photos (array of image URLs)
     photos: [{ type: String }],
-    
+
     // Videos (array of video objects with url and title)
     videos: [{
       url: { type: String },
       title: { type: String },
       thumbnail: { type: String } // Optional thumbnail image
     }],
-    
+
     // Handwritten notes, sketches, or design images
     handwrittenNotes: [{ type: String }],
-    
+
     // Inspirational quotes from the artisan
     quotes: [{ type: String }],
-    
+
     // Cultural context and heritage information
     culturalContext: { type: String },
-    
+
     // Challenges faced by the artisan
     challenges: [{ type: String }],
-    
+
     // Triumphs and achievements
     triumphs: [{ type: String }],
-    
+
     // Location coordinates for map (optional)
     locationCoordinates: {
       latitude: { type: Number },
       longitude: { type: Number }
     }
   },
-  
+
   // Engagement metrics
   likes: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
-  
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

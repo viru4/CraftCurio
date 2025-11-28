@@ -6,43 +6,40 @@
 [![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
 [![Socket.io](https://img.shields.io/badge/Socket.io-4.8-black.svg)](https://socket.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.0-green.svg)](https://www.mongodb.com/)
+# 🎨 CraftCurio - Collector Dashboard
+
+> A complete full-stack marketplace for craft collectibles with real-time auction bidding
+
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.8-black.svg)](https://socket.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.0-green.svg)](https://www.mongodb.com/)
 
 ---
 
 ## 📌 Quick Navigation
 
 ### 🚀 Getting Started
-- **[Quick Start Guide](FRONTEND_QUICKSTART.md)** - Get running in 5 minutes
-- **[Complete Frontend Guide](FRONTEND_GUIDE.md)** - Full documentation (800+ lines)
-- **[Project Complete Summary](PROJECT_COMPLETE.md)** - Overview of everything built
+- **[Complete Frontend Guide](docs/FRONTEND_GUIDE.md)** - Full documentation
+- **[Backend Structure](docs/BACKEND_STRUCTURE.md)** - Folder overview
+- **[Database Scripts](docs/DATABASE_SCRIPTS.md)** - Seeding and management
 
-### 📚 Backend Documentation
-- **[API Reference](backend/API_REFERENCE.md)** - All 19 REST endpoints
-- **[Auction System](backend/AUCTION_SYSTEM_DOCUMENTATION.md)** - Auction logic & real-time features
-- **[Implementation Summary](backend/IMPLEMENTATION_SUMMARY.md)** - Feature checklist
-- **[Quick Reference](backend/QUICK_REFERENCE.md)** - Command cheatsheet
+### 📚 Documentation
+- **[API Reference](docs/API_REFERENCE.md)** - All 19 REST endpoints
+- **[Auction System](docs/AUCTION_SYSTEM.md)** - Auction logic & real-time features
+- **[Security Policy](docs/SECURITY.md)** - Security guidelines
 
 ### 🎯 Features at a Glance
 
-#### ✅ Direct Sales
-- Create fixed-price listings
-- Edit/delete listings
-- View statistics
-- Promote items
+#### ✅ Direct Sales & Auctions
+- Create fixed-price or auction listings
+- Real-time bidding with Socket.io
+- Countdown timers and reserve pricing
 
-#### ✅ Live Auctions
-- Real-time bidding
-- Countdown timers
-- Reserve pricing
-- Buy now option
-- Bid history
-- Email notifications
-
-#### ✅ Dashboard
-- Search & filter
-- Sort by multiple criteria
-- Responsive grid layout
-- Real-time updates
+#### ✅ Admin & Artisan Features (New!)
+- **Verification Management**: Admin portal to review and approve artisan verification requests.
+- **Artisan Stories**: Rich profile pages with awards, certifications, and multimedia stories.
+- **Seller Registration**: Streamlined onboarding with progress bars and document uploads.
 
 ---
 
@@ -73,7 +70,7 @@ cd backend
 npm install
 
 # Create .env file
-echo "PORT=5000
+echo "PORT=8000
 MONGODB_URI=mongodb://localhost:27017/craftcurio
 JWT_SECRET=your_secret_key
 JWT_EXPIRES_IN=7d" > .env
@@ -81,7 +78,7 @@ JWT_EXPIRES_IN=7d" > .env
 npm start
 ```
 
-Server: `http://localhost:5000`
+Server: `http://localhost:8000`
 
 ### 2. Frontend
 
@@ -90,8 +87,8 @@ cd front-end
 npm install
 
 # Create .env file
-echo "VITE_API_BASE_URL=http://localhost:5000/api
-VITE_SOCKET_URL=http://localhost:5000" > .env
+echo "VITE_API_BASE_URL=http://localhost:8000
+VITE_SOCKET_URL=http://localhost:8000" > .env
 
 npm run dev
 ```
@@ -105,24 +102,8 @@ App: `http://localhost:5173`
 ```
 CraftCurio/
 ├── backend/              # Node.js/Express API
-│   ├── src/
-│   │   ├── models/       # Mongoose schemas
-│   │   ├── api/          # Controllers & routes
-│   │   ├── services/     # Business logic
-│   │   ├── middleware/   # Auth, validation, errors
-│   │   └── sockets/      # Socket.io handlers
-│   └── server.js         # Entry point
-│
 ├── front-end/            # React app
-│   ├── src/
-│   │   ├── components/   # UI components
-│   │   ├── pages/        # Page components
-│   │   ├── hooks/        # Custom hooks (11 total)
-│   │   ├── contexts/     # State management
-│   │   └── utils/        # API & Socket.io
-│   └── vite.config.js
-│
-└── Documentation/        # Guides (2000+ lines)
+└── docs/                 # Documentation
 ```
 
 ---
@@ -131,56 +112,38 @@ CraftCurio/
 
 ### As a Collector:
 
-1. **Manage Listings**
-   - Create direct sale or auction listings
-   - Edit listings (title, price, description)
-   - Delete listings
-   - Promote featured items
-   - View statistics (views, likes)
+1.  **Manage Listings**
+    - Create direct sale or auction listings
+    - Edit listings (title, price, description)
+    - Delete listings
+    - Promote featured items
+    - View statistics (views, likes)
 
-2. **Run Auctions**
-   - Set starting bid, reserve price, buy now price
-   - Schedule start/end times
-   - Watch live bids in real-time
-   - Receive notifications
-   - End auctions early (if no bids)
+2.  **Run Auctions**
+    - Set starting bid, reserve price, buy now price
+    - Schedule start/end times
+    - Watch live bids in real-time
+    - Receive notifications
+    - End auctions early (if no bids)
 
-3. **Organize Dashboard**
-   - Search collectibles
-   - Filter by status (active, sold, live, ended)
-   - Sort by date, price, views, title
-   - Switch between Direct Sales & Auctions tabs
+3.  **Organize Dashboard**
+    - Search collectibles
+    - Filter by status (active, sold, live, ended)
+    - Sort by date, price, views, title
+    - Switch between Direct Sales & Auctions tabs
 
-4. **Bid on Auctions**
-   - View live countdown timers
-   - Place bids (auto-calculates minimum)
-   - See bid history
-   - Use buy now option
-   - Get ending soon alerts
+4.  **Bid on Auctions**
+    - View live countdown timers
+    - Place bids (auto-calculates minimum)
+    - See bid history
+    - Use buy now option
+    - Get ending soon alerts
 
 ---
 
-## 🔌 API Endpoints (19 Total)
+## 🔌 API Endpoints
 
-### Collectibles
-```http
-GET    /api/collectibles              # List all
-GET    /api/collectibles/:id          # Get one
-POST   /api/collectibles              # Create
-PUT    /api/collectibles/:id          # Update
-DELETE /api/collectibles/:id          # Delete
-GET    /api/collectors/:id/listings   # Owner's listings
-```
-
-### Auctions
-```http
-GET    /api/auctions/live             # Live auctions
-GET    /api/auctions/:id              # Auction details
-POST   /api/auctions/:id/bid          # Place bid
-POST   /api/auctions/:id/buy-now      # Instant purchase
-DELETE /api/auctions/:id/cancel       # Cancel auction
-POST   /api/auctions/:id/finalize     # Finalize (admin)
-```
+See **[API Reference](docs/API_REFERENCE.md)** for full details.
 
 ---
 
@@ -340,13 +303,13 @@ useCancelAuction()
 ### Socket.io not connecting?
 ```bash
 # Check environment variable
-echo $VITE_SOCKET_URL  # Should be: http://localhost:5000
+echo $VITE_SOCKET_URL  # Should be: http://localhost:8000
 ```
 
 ### API calls failing?
 ```bash
 # Verify backend is running
-curl http://localhost:5000/api/collectibles
+curl http://localhost:8000/api/collectibles
 
 # Check JWT token in browser
 # Console → Application → Local Storage → 'token'
@@ -361,13 +324,13 @@ curl http://localhost:5000/api/collectibles
 
 ## 📚 Documentation
 
-| Guide | Description | Lines |
-|-------|-------------|-------|
-| [FRONTEND_GUIDE.md](FRONTEND_GUIDE.md) | Complete frontend docs | 800+ |
-| [FRONTEND_QUICKSTART.md](FRONTEND_QUICKSTART.md) | 5-minute quick start | 200+ |
-| [PROJECT_COMPLETE.md](PROJECT_COMPLETE.md) | Full project summary | 400+ |
-| [API_REFERENCE.md](backend/API_REFERENCE.md) | Backend API docs | 400+ |
-| [AUCTION_SYSTEM_DOCUMENTATION.md](backend/AUCTION_SYSTEM_DOCUMENTATION.md) | Auction system | 300+ |
+| Guide | Description |
+|-------|-------------|
+| [FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md) | Complete frontend docs |
+| [API_REFERENCE.md](docs/API_REFERENCE.md) | Backend API docs |
+| [AUCTION_SYSTEM.md](docs/AUCTION_SYSTEM.md) | Auction system details |
+| [BACKEND_STRUCTURE.md](docs/BACKEND_STRUCTURE.md) | Backend folder structure |
+| [DATABASE_SCRIPTS.md](docs/DATABASE_SCRIPTS.md) | Database management scripts |
 
 ---
 

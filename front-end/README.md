@@ -1,1 +1,0 @@
-#Craft Curio - A digital marketplace for local artisans & collectibles

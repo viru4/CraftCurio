@@ -38,6 +38,11 @@ export default function SellerRegistration() {
   const [uploadingId, setUploadingId] = useState(false)
   const [uploadingCraft, setUploadingCraft] = useState(false)
   const [uploadingBusiness, setUploadingBusiness] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({
+    id: 0,
+    craft: 0,
+    business: 0
+  })
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -58,7 +63,9 @@ export default function SellerRegistration() {
 
       // Upload to Cloudinary
       const { uploadSingleImage } = await import('@/utils/uploadApi.js')
-      const result = await uploadSingleImage(file, 'verification')
+      const result = await uploadSingleImage(file, 'verification', (percent) => {
+        setUploadProgress(prev => ({ ...prev, [type]: percent }))
+      })
 
       // Update state with URL
       if (type === 'id') setIdDocumentUrl(result.url)
@@ -196,25 +203,41 @@ export default function SellerRegistration() {
                     <label className="block text-sm font-medium text-blue-900 mb-2">
                       Government ID Document <span className="text-red-500">*</span>
                     </label>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
-                      <div className="space-y-1 text-center">
-                        <Upload className="mx-auto h-12 w-12 text-blue-400" />
-                        <div className="flex text-sm text-blue-600">
-                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
-                            <span>Upload a file</span>
-                            <input
-                              type="file"
-                              accept="image/*,.pdf"
-                              onChange={(e) => handleFileUpload(e.target.files[0], 'id')}
-                              className="sr-only"
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
+                    {uploadingId ? (
+                      <div className="mt-1 flex flex-col justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg bg-blue-50">
+                        <div className="w-full max-w-xs mx-auto space-y-2">
+                          <div className="flex justify-between text-xs text-blue-600 font-medium">
+                            <span>Uploading...</span>
+                            <span>{uploadProgress.id}%</span>
+                          </div>
+                          <div className="w-full bg-blue-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                              style={{ width: `${uploadProgress.id}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
                       </div>
-                    </div>
-                    {uploadingId && <p className="mt-2 text-sm text-blue-600">Uploading...</p>}
+                    ) : (
+                      <label className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors cursor-pointer">
+                        <div className="space-y-1 text-center">
+                          <Upload className="mx-auto h-12 w-12 text-blue-400" />
+                          <div className="flex text-sm text-blue-600 justify-center">
+                            <span className="font-medium text-blue-600 hover:text-blue-500">
+                              Upload a file
+                            </span>
+                            <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => handleFileUpload(e.target.files[0], 'id')}
+                            className="sr-only"
+                          />
+                        </div>
+                      </label>
+                    )}
                     {idDocumentUrl && <p className="mt-2 text-sm text-green-600">✓ File uploaded successfully</p>}
                   </div>
 
@@ -226,25 +249,41 @@ export default function SellerRegistration() {
                     <p className="text-xs text-blue-700 mb-2">
                       Upload certificates, awards, workshop photos, or portfolio images
                     </p>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
-                      <div className="space-y-1 text-center">
-                        <FileText className="mx-auto h-12 w-12 text-blue-400" />
-                        <div className="flex text-sm text-blue-600">
-                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
-                            <span>Upload a file</span>
-                            <input
-                              type="file"
-                              accept="image/*,.pdf"
-                              onChange={(e) => handleFileUpload(e.target.files[0], 'craft')}
-                              className="sr-only"
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
+                    {uploadingCraft ? (
+                      <div className="mt-1 flex flex-col justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg bg-blue-50">
+                        <div className="w-full max-w-xs mx-auto space-y-2">
+                          <div className="flex justify-between text-xs text-blue-600 font-medium">
+                            <span>Uploading...</span>
+                            <span>{uploadProgress.craft}%</span>
+                          </div>
+                          <div className="w-full bg-blue-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                              style={{ width: `${uploadProgress.craft}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
                       </div>
-                    </div>
-                    {uploadingCraft && <p className="mt-2 text-sm text-blue-600">Uploading...</p>}
+                    ) : (
+                      <label className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors cursor-pointer">
+                        <div className="space-y-1 text-center">
+                          <FileText className="mx-auto h-12 w-12 text-blue-400" />
+                          <div className="flex text-sm text-blue-600 justify-center">
+                            <span className="font-medium text-blue-600 hover:text-blue-500">
+                              Upload a file
+                            </span>
+                            <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => handleFileUpload(e.target.files[0], 'craft')}
+                            className="sr-only"
+                          />
+                        </div>
+                      </label>
+                    )}
                     {craftProofUrl && <p className="mt-2 text-sm text-green-600">✓ File uploaded successfully</p>}
                   </div>
 
@@ -256,25 +295,41 @@ export default function SellerRegistration() {
                     <p className="text-xs text-blue-700 mb-2">
                       GST certificate, business license, or registration document if applicable
                     </p>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
-                      <div className="space-y-1 text-center">
-                        <Building className="mx-auto h-12 w-12 text-blue-400" />
-                        <div className="flex text-sm text-blue-600">
-                          <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
-                            <span>Upload a file</span>
-                            <input
-                              type="file"
-                              accept="image/*,.pdf"
-                              onChange={(e) => handleFileUpload(e.target.files[0], 'business')}
-                              className="sr-only"
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
+                    {uploadingBusiness ? (
+                      <div className="mt-1 flex flex-col justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg bg-blue-50">
+                        <div className="w-full max-w-xs mx-auto space-y-2">
+                          <div className="flex justify-between text-xs text-blue-600 font-medium">
+                            <span>Uploading...</span>
+                            <span>{uploadProgress.business}%</span>
+                          </div>
+                          <div className="w-full bg-blue-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                              style={{ width: `${uploadProgress.business}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
                       </div>
-                    </div>
-                    {uploadingBusiness && <p className="mt-2 text-sm text-blue-600">Uploading...</p>}
+                    ) : (
+                      <label className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-300 border-dashed rounded-lg hover:border-blue-400 transition-colors cursor-pointer">
+                        <div className="space-y-1 text-center">
+                          <Building className="mx-auto h-12 w-12 text-blue-400" />
+                          <div className="flex text-sm text-blue-600 justify-center">
+                            <span className="font-medium text-blue-600 hover:text-blue-500">
+                              Upload a file
+                            </span>
+                            <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-blue-500">PNG, JPG, PDF up to 10MB</p>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => handleFileUpload(e.target.files[0], 'business')}
+                            className="sr-only"
+                          />
+                        </div>
+                      </label>
+                    )}
                     {businessRegistrationUrl && <p className="mt-2 text-sm text-green-600">✓ File uploaded successfully</p>}
                   </div>
                 </div>

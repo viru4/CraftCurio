@@ -51,6 +51,16 @@ export const submitVerification = async (req, res) => {
     });
   } catch (error) {
     console.error('Submit verification error:', error);
+
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', '),
+        error: error.message
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Failed to submit verification request',
@@ -68,8 +78,9 @@ export const getMyVerification = async (req, res) => {
       .sort({ createdAt: -1 }); // Get most recent
 
     if (!verification) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
+        data: null,
         message: 'No verification request found'
       });
     }
@@ -111,8 +122,8 @@ export const getAllVerifications = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const verifications = await Verification.find(query)
-      .populate('userId', 'username email')
-      .populate('reviewedBy', 'username email')
+      .populate('userId', 'name email')
+      .populate('reviewedBy', 'name email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -142,17 +153,14 @@ export const getAllVerifications = async (req, res) => {
 };
 
 // Get specific verification request (Admin)
+// Get specific verification request (Admin)
 export const getVerificationById = async (req, res) => {
   try {
     const { id } = req.params;
 
     const verification = await Verification.findById(id)
-      .populate('userId', 'username email phone')
-      .populate('reviewedBy', 'username email')
-      .populate({
-        path: 'artisanId',
-        select: 'name craftSpecialization location briefBio'
-      });
+      .populate('userId', 'name email phone')
+      .populate('reviewedBy', 'name email');
 
     if (!verification) {
       return res.status(404).json({

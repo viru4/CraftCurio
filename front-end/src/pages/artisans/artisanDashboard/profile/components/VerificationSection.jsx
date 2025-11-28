@@ -17,6 +17,8 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
     businessRegistrationUrl: '',
     additionalInfo: ''
   });
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [uploadingFields, setUploadingFields] = useState({});
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [existingRequest, setExistingRequest] = useState(null);
@@ -65,9 +67,14 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
     if (!file) return;
 
     try {
+      setUploadingFields(prev => ({ ...prev, [field]: true }));
+      setUploadProgress(prev => ({ ...prev, [field]: 0 }));
+
       // Upload to Cloudinary
       const { uploadSingleImage } = await import('../../../../../utils/uploadApi.js');
-      const result = await uploadSingleImage(file, 'verification');
+      const result = await uploadSingleImage(file, 'verification', (percent) => {
+        setUploadProgress(prev => ({ ...prev, [field]: percent }));
+      });
 
       // Update form data with uploaded URL
       setVerificationData(prev => ({
@@ -78,6 +85,9 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
     } catch (error) {
       console.error('Error uploading file:', error);
       alert('Failed to upload file. Please try again.');
+    } finally {
+      setUploadingFields(prev => ({ ...prev, [field]: false }));
+      setUploadProgress(prev => ({ ...prev, [field]: 0 }));
     }
   };
 
@@ -126,89 +136,92 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
     }
   };
 
-  if (verified) {
-    return (
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-green-900 mb-2">
-              ✓ Verified Artisan
-            </h3>
-            <p className="text-sm text-green-800">
-              Your profile has been verified! This badge shows customers that you are a trusted artisan on CraftCurio.
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium">
-              <Shield className="w-5 h-5" />
-              <span>Verified Badge Active</span>
+  // Helper to render file upload section with progress
+  const renderFileUpload = (label, field, icon, description, required = true) => (
+    <div>
+      <label className="block text-sm font-medium text-stone-700 mb-2">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {description && (
+        <p className="text-xs text-stone-500 mb-2">
+          {description}
+        </p>
+      )}
+
+      {uploadingFields[field] ? (
+        <div className="mt-1 flex flex-col justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg bg-stone-50">
+          <div className="w-full max-w-xs mx-auto space-y-2">
+            <div className="flex justify-between text-xs text-stone-600 font-medium">
+              <span>Uploading...</span>
+              <span>{uploadProgress[field]}%</span>
+            </div>
+            <div className="w-full bg-stone-200 rounded-full h-2.5">
+              <div
+                className="bg-[#ec6d13] h-2.5 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${uploadProgress[field]}%` }}
+              ></div>
             </div>
           </div>
         </div>
+      ) : (
+        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
+          <div className="space-y-1 text-center">
+            {icon}
+            <div className="flex text-sm text-stone-600">
+              <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
+                <span>Upload a file</span>
+                <input
+                  type="file"
+                  required={required && !verificationData[field]}
+                  accept="image/*,.pdf"
+                  onChange={(e) => handleFileChange(field, e.target.files[0])}
+                  className="sr-only"
+                />
+              </label>
+              <p className="pl-1">or drag and drop</p>
+            </div>
+            <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
+          </div>
+        </div>
+      )}
+
+      {verificationData[`${field}Url`] && !uploadingFields[field] && (
+        <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+          <CheckCircle className="w-4 h-4" />
+          <span>File uploaded successfully</span>
+          <a
+            href={verificationData[`${field}Url`]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-[#ec6d13] hover:underline ml-2"
+          >
+            View
+          </a>
+        </div>
+      )}
+    </div>
+  );
+
+  if (verificationStatus === 'pending' || (existingRequest && existingRequest.status === 'pending')) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+        <h3 className="text-lg font-medium text-yellow-800 mb-2">Verification Under Review</h3>
+        <p className="text-sm text-yellow-600">
+          Your verification request is currently being reviewed by our team. This process typically takes 2-3 business days.
+        </p>
       </div>
     );
   }
 
-  if (existingRequest && verificationStatus === 'pending') {
+  if (verified || verificationStatus === 'approved') {
     return (
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-blue-600 animate-pulse" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-blue-900 mb-2">
-              Verification Under Review
-            </h3>
-            <p className="text-sm text-blue-800 mb-4">
-              Your verification request is being reviewed by our team. We'll notify you once the review is complete.
-            </p>
-            <div className="bg-white/50 rounded-lg p-4 space-y-2">
-              <p className="text-xs font-semibold text-blue-900">Submitted Information:</p>
-              <p className="text-xs text-blue-800">Full Name: {existingRequest.fullName}</p>
-              <p className="text-xs text-blue-800">ID Type: {existingRequest.idType}</p>
-              <p className="text-xs text-blue-800">Submitted: {new Date(existingRequest.createdAt).toLocaleDateString()}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (existingRequest && verificationStatus === 'rejected') {
-    return (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <X className="w-8 h-8 text-red-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-red-900 mb-2">
-                Verification Request Rejected
-              </h3>
-              <p className="text-sm text-red-800 mb-4">
-                Your verification request was reviewed and requires improvements before approval.
-              </p>
-              {existingRequest.adminComments && (
-                <div className="bg-white rounded-lg p-4 mb-4">
-                  <p className="text-xs font-semibold text-stone-900 mb-2">Admin Feedback:</p>
-                  <p className="text-sm text-stone-700">{existingRequest.adminComments}</p>
-                </div>
-              )}
-              <button
-                onClick={() => {
-                  setExistingRequest(null);
-                  setVerificationStatus(null);
-                }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
-              >
-                Submit New Request
-              </button>
-            </div>
-          </div>
-        </div>
+      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+        <Shield className="w-12 h-12 text-green-500 mx-auto mb-3" />
+        <h3 className="text-lg font-medium text-green-800 mb-2">You are a Verified Artisan!</h3>
+        <p className="text-sm text-green-600">
+          Congratulations! Your profile has been verified. You now have the verified badge on your profile.
+        </p>
       </div>
     );
   }
@@ -275,96 +288,35 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
           </div>
 
           {/* ID Document Upload */}
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">
-              Government ID Document <span className="text-red-500">*</span>
-            </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
-              <div className="space-y-1 text-center">
-                <Upload className="mx-auto h-12 w-12 text-stone-400" />
-                <div className="flex text-sm text-stone-600">
-                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
-                    <span>Upload a file</span>
-                    <input
-                      type="file"
-                      required={!verificationData.idDocument}
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileChange('idDocument', e.target.files[0])}
-                      className="sr-only"
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
-              </div>
-            </div>
-            {verificationData.idDocumentUrl && (
-              <p className="mt-2 text-sm text-green-600">✓ File uploaded</p>
-            )}
-          </div>
+          {
+            renderFileUpload(
+              "Government ID Document",
+              "idDocument",
+              <Upload className="mx-auto h-12 w-12 text-stone-400" />,
+              null
+            )
+          }
 
           {/* Craft Proof Upload */}
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">
-              Proof of Craft Expertise <span className="text-red-500">*</span>
-            </label>
-            <p className="text-xs text-stone-500 mb-2">
-              Upload certificates, awards, workshop photos, or portfolio images
-            </p>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
-              <div className="space-y-1 text-center">
-                <FileText className="mx-auto h-12 w-12 text-stone-400" />
-                <div className="flex text-sm text-stone-600">
-                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
-                    <span>Upload a file</span>
-                    <input
-                      type="file"
-                      required={!verificationData.craftProof}
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileChange('craftProof', e.target.files[0])}
-                      className="sr-only"
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
-              </div>
-            </div>
-            {verificationData.craftProofUrl && (
-              <p className="mt-2 text-sm text-green-600">✓ File uploaded</p>
-            )}
-          </div>
+          {
+            renderFileUpload(
+              "Proof of Craft Expertise",
+              "craftProof",
+              <FileText className="mx-auto h-12 w-12 text-stone-400" />,
+              "Upload certificates, awards, workshop photos, or portfolio images"
+            )
+          }
 
           {/* Business Registration (Optional) */}
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">
-              Business Registration (Optional)
-            </label>
-            <p className="text-xs text-stone-500 mb-2">
-              GST certificate, business license, or registration document if applicable
-            </p>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-stone-300 border-dashed rounded-lg hover:border-[#ec6d13] transition-colors">
-              <div className="space-y-1 text-center">
-                <FileText className="mx-auto h-12 w-12 text-stone-400" />
-                <div className="flex text-sm text-stone-600">
-                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-[#ec6d13] hover:text-[#d65d0f]">
-                    <span>Upload a file</span>
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileChange('businessRegistration', e.target.files[0])}
-                      className="sr-only"
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-stone-500">PNG, JPG, PDF up to 10MB</p>
-              </div>
-            </div>
-            {verificationData.businessRegistrationUrl && (
-              <p className="mt-2 text-sm text-green-600">✓ File uploaded</p>
-            )}
-          </div>
+          {
+            renderFileUpload(
+              "Business Registration (Optional)",
+              "businessRegistration",
+              <FileText className="mx-auto h-12 w-12 text-stone-400" />,
+              "GST certificate, business license, or registration document if applicable",
+              false
+            )
+          }
 
           {/* Additional Information */}
           <div>
@@ -379,10 +331,10 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
               placeholder="Tell us more about your craft, experience, or anything else that helps verify your expertise..."
             />
           </div>
-        </div>
+        </div >
 
         {/* Submit Button */}
-        <div className="mt-6 flex items-center justify-between pt-6 border-t border-stone-200">
+        < div className="mt-6 flex items-center justify-between pt-6 border-t border-stone-200" >
           <p className="text-xs text-stone-500">
             Your information will be reviewed within 2-3 business days
           </p>
@@ -403,9 +355,9 @@ const VerificationForm = ({ verified, onVerificationUpdate }) => {
               </>
             )}
           </button>
-        </div>
-      </div>
-    </form>
+        </div >
+      </div >
+    </form >
   );
 };
 
