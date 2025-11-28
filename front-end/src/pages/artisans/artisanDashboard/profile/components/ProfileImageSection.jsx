@@ -30,6 +30,35 @@ const ProfileImageSection = ({ profileData, onImageChange }) => {
 
       // Update profile with uploaded URL
       onImageChange(result.url);
+      
+      // Also update User profile immediately to sync
+      try {
+        const token = localStorage.getItem('token');
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        await fetch(`${API_BASE_URL}/api/auth/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ profileImage: result.url })
+        });
+        
+        // Refresh auth context
+        const authResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (authResponse.ok) {
+          const authData = await authResponse.json();
+          localStorage.setItem('user', JSON.stringify(authData.user));
+          window.dispatchEvent(new Event('storage'));
+        }
+      } catch (syncError) {
+        console.error('Error syncing profile image to User:', syncError);
+        // Don't fail the upload if sync fails
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image. Please try again.');

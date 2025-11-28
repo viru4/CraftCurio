@@ -85,6 +85,18 @@ export const AuthProvider = ({ children }) => {
     };
 
     initAuth();
+
+    // Listen for storage events to update user data when profile is updated
+    const handleStorageChange = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const login = (userData, authToken) => {

@@ -1,18 +1,44 @@
+import mongoose from 'mongoose';
 import Artisan from '../../models/Artisan.js';
+
+// Helper function to check if string is a valid ObjectId
+const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
+const normalizeMediaArray = (input) => {
+  if (!Array.isArray(input)) {
+    return input;
+  }
+
+  return input
+    .map(item => {
+      if (!item) return null;
+      if (typeof item === 'string') return item;
+      if (typeof item === 'object' && item.url) return item.url;
+      return null;
+    })
+    .filter(Boolean);
+};
 
 // Get all artisans with pagination
 export const getArtisans = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(parseInt(req.query.limit) || 10, 100); // Cap at 100
     const skip = (page - 1) * limit;
 
-    const artisans = await Artisan.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
-
-    const total = await Artisan.countDocuments();
+    // Use Promise.all for parallel execution and lean() for better performance
+    const [artisans, total] = await Promise.all([
+      Artisan.find()
+        .select('-story.photos -story.handwrittenNotes -story.videos') // Exclude large fields by default
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      Artisan.countDocuments()
+    ]);
 
     res.json({
       success: true,
@@ -38,13 +64,13 @@ export const getArtisans = async (req, res) => {
 export const getArtisanById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    console.log(`Requested artisan ID: ${id}`);
-    console.log(`ID type: ${typeof id}`);
+    const query = isValidObjectId(id)
+      ? { _id: id }
+      : { id: id };
 
-    const artisan = await Artisan.findOne({ id: id }).populate('userId');
-    
-    console.log(`Found artisan: ${artisan ? 'Yes' : 'No'}`);
+    const artisan = await Artisan.findOne(query)
+      .populate('userId', 'name email role')
+      .lean();
 
     if (!artisan) {
       return res.status(404).json({
@@ -71,7 +97,17 @@ export const getArtisanById = async (req, res) => {
 // Create new artisan
 export const createArtisan = async (req, res) => {
   try {
-    const artisan = new Artisan(req.body);
+    const payload = { ...req.body };
+
+    if (payload.story) {
+      payload.story = {
+        ...payload.story,
+        photos: normalizeMediaArray(payload.story.photos),
+        handwrittenNotes: normalizeMediaArray(payload.story.handwrittenNotes),
+      };
+    }
+
+    const artisan = new Artisan(payload);
     await artisan.save();
 
     res.status(201).json({
@@ -112,11 +148,19 @@ export const updateArtisan = async (req, res) => {
     const { id } = req.params;
     const updates = { ...req.body, updatedAt: new Date() };
 
-    const artisan = await Artisan.findOneAndUpdate(
-      { id: id },
-      updates,
-      { new: true, runValidators: true }
-    ).populate('userId');
+    if (updates.story) {
+      updates.story = {
+        ...updates.story,
+        photos: normalizeMediaArray(updates.story.photos),
+        handwrittenNotes: normalizeMediaArray(updates.story.handwrittenNotes),
+      };
+    }
+
+    const query = isValidObjectId(id)
+      ? { _id: id }
+      : { id: id };
+
+    const artisan = await Artisan.findOne(query);
 
     if (!artisan) {
       return res.status(404).json({
@@ -126,9 +170,33 @@ export const updateArtisan = async (req, res) => {
       });
     }
 
+    // Sync profilePhotoUrl to User profileImage if userId exists
+    if (updates.profilePhotoUrl !== undefined && artisan.userId) {
+      try {
+        const User = (await import('../../models/User.js')).default;
+        await User.findByIdAndUpdate(
+          artisan.userId,
+          { profileImage: updates.profilePhotoUrl },
+          { new: true }
+        );
+      } catch (syncError) {
+        console.error('Error syncing profile photo to User:', syncError);
+        // Don't fail the request if sync fails, just log it
+      }
+    }
+
+    // Update artisan
+    const updatedArtisan = await Artisan.findOneAndUpdate(
+      query,
+      updates,
+      { new: true, runValidators: true }
+    )
+      .populate('userId', 'name email role profileImage')
+      .lean();
+
     res.json({
       success: true,
-      data: artisan,
+      data: updatedArtisan,
       message: 'Artisan updated successfully'
     });
   } catch (error) {
@@ -155,7 +223,11 @@ export const deleteArtisan = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const artisan = await Artisan.findOneAndDelete({ id: id });
+    const query = isValidObjectId(id)
+      ? { _id: id }
+      : { id: id };
+
+    const artisan = await Artisan.findOneAndDelete(query);
 
     if (!artisan) {
       return res.status(404).json({

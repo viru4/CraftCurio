@@ -13,14 +13,16 @@ export const getCollectors = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const collectors = await Collector.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .populate('wishlist.productId')
-      .populate('purchaseHistory.productId');
-
-    const total = await Collector.countDocuments();
+    // Use Promise.all for parallel execution and lean() for better performance
+    const [collectors, total] = await Promise.all([
+      Collector.find()
+        .select('-wishlist -purchaseHistory') // Exclude large arrays by default, populate only if needed
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      Collector.countDocuments()
+    ]);
 
     res.json({
       success: true,
@@ -152,6 +154,21 @@ export const updateCollector = async (req, res) => {
           error: 'Duplicate collector id',
           message: `Collector id ${updates.id} already exists`
         });
+      }
+    }
+
+    // Sync profilePhotoUrl to User profileImage if userId exists
+    if (updates.profilePhotoUrl !== undefined && currentCollector.userId) {
+      try {
+        const User = (await import('../../models/User.js')).default;
+        await User.findByIdAndUpdate(
+          currentCollector.userId,
+          { profileImage: updates.profilePhotoUrl },
+          { new: true }
+        );
+      } catch (syncError) {
+        console.error('Error syncing profile photo to User:', syncError);
+        // Don't fail the request if sync fails, just log it
       }
     }
 

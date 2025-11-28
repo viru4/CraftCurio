@@ -2,9 +2,17 @@ import Question from '../../models/Question.js';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
 import mongoose from 'mongoose';
 
+/**
+ * Helper function to check if string is a valid ObjectId
+ */
+const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
 // Helper function to convert string ID to ObjectId if valid
 const toObjectId = (id) => {
-  return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
+  return isValidObjectId(id) ? new mongoose.Types.ObjectId(id) : id;
 };
 
 // Get public questions for a product
@@ -13,7 +21,7 @@ export const getProductQuestions = async (req, res) => {
     const { productId } = req.params;
     const { page = 1, limit = 10, sortBy = 'createdAt', order = 'desc' } = req.query;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!isValidObjectId(productId)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'
@@ -99,7 +107,7 @@ export const submitQuestion = async (req, res) => {
     const { productId } = req.params;
     const { question } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!isValidObjectId(productId)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'

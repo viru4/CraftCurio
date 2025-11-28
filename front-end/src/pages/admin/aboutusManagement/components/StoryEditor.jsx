@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Save, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImageUpload from '@/components/common/ImageUpload';
 
 /**
  * Story Section Editor Component
@@ -116,15 +117,41 @@ const StoryEditor = ({ data, onChange, onSave, saving }) => {
       {/* Story Image */}
       <div>
         <label className="block text-sm font-semibold text-stone-700 mb-2">
-          Story Image URL
+          Story Image
         </label>
-        <input
-          type="text"
-          value={data.image || ''}
-          onChange={(e) => handleChange('image', e.target.value)}
-          className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-transparent"
-          placeholder="/images/story.jpg"
-        />
+        
+        {/* Cloudinary Upload Component */}
+        <div className="mb-3">
+          <ImageUpload
+            onUploadComplete={(url) => {
+              handleChange('image', url);
+            }}
+            onUploadError={(error) => {
+              console.error('Upload error:', error);
+              alert('Failed to upload image. Please try again.');
+            }}
+            multiple={false}
+            currentImages={data.image ? [data.image] : []}
+            onRemoveImage={() => handleChange('image', '')}
+            label="Upload Story Image"
+            folder="about-us/story"
+            showPreview={true}
+          />
+        </div>
+        
+        {/* Manual URL Input (Fallback) */}
+        <div>
+          <label className="block text-xs font-medium text-stone-600 mb-1">
+            Or enter image URL manually:
+          </label>
+          <input
+            type="text"
+            value={data.image || ''}
+            onChange={(e) => handleChange('image', e.target.value)}
+            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-transparent text-sm"
+            placeholder="https://res.cloudinary.com/..."
+          />
+        </div>
         
         {/* Image Preview */}
         {data.image && (

@@ -11,8 +11,31 @@ import {
   PaymentBilling
 } from './components';
 
+// Helper to refresh auth context
+const refreshAuthContext = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('user', JSON.stringify(data.user));
+      // Dispatch storage event to notify AuthContext
+      window.dispatchEvent(new Event('storage'));
+    }
+  } catch (error) {
+    console.error('Error refreshing auth context:', error);
+  }
+};
+
 const Profile = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, updateUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -120,6 +143,13 @@ const Profile = () => {
 
       if (response.ok) {
         alert('Profile updated successfully!');
+        // Refresh user data in auth context
+        await refreshAuthContext();
+        // Also update auth context directly
+        if (data.user) {
+          updateUser(data.user);
+        }
+        // Fetch fresh profile data
         fetchProfile();
       } else {
         alert(data.message || 'Failed to update profile');
@@ -186,6 +216,7 @@ const Profile = () => {
     if (!file) return;
 
     try {
+      setSaving(true);
       // Upload to Cloudinary
       const { uploadSingleImage } = await import('../../utils/uploadApi.js');
       const result = await uploadSingleImage(file, 'profiles');
@@ -195,9 +226,35 @@ const Profile = () => {
         ...prev,
         profileImage: result.url
       }));
+
+      // Save immediately to backend to sync with Artisan/Collector
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ profileImage: result.url })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Refresh auth context
+        await refreshAuthContext();
+        if (data.user) {
+          updateUser(data.user);
+        }
+        alert('Profile image updated successfully!');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to save profile image');
+      }
     } catch (error) {
       console.error('Error uploading profile image:', error);
       alert('Failed to upload image. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 

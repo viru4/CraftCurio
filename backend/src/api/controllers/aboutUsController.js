@@ -252,6 +252,35 @@ export const deleteArrayItem = asyncHandler(async (req, res) => {
       });
     }
 
+    // Find the item to delete and collect image URLs for cleanup
+    const itemToDelete = aboutUs[section][field].id(itemId);
+    const imageUrls = [];
+    
+    if (itemToDelete) {
+      // Collect image URLs based on field type
+      if (itemToDelete.image) {
+        imageUrls.push(itemToDelete.image);
+      }
+      if (itemToDelete.src) {
+        imageUrls.push(itemToDelete.src);
+      }
+      // For team members
+      if (itemToDelete.profilePhotoUrl) {
+        imageUrls.push(itemToDelete.profilePhotoUrl);
+      }
+    }
+
+    // Delete images from Cloudinary (non-blocking)
+    if (imageUrls.length > 0) {
+      try {
+        const { deleteImages } = await import('../../services/uploadService.js');
+        await deleteImages(imageUrls);
+      } catch (error) {
+        console.error('Error deleting images from Cloudinary:', error);
+        // Continue with deletion even if image cleanup fails
+      }
+    }
+
     // Remove the item
     aboutUs[section][field].pull(itemId);
 

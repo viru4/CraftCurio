@@ -170,20 +170,40 @@ export const getCurrentUser = async (req, res) => {
       return res.status(401).json({ message: 'Not authenticated' });
     }
 
-    const userData = sanitizeUser(req.user);
+    // Get fresh user data from database
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Get synced profile image
+    const syncedProfileImage = await getSyncedProfileImage(user);
+    if (syncedProfileImage && syncedProfileImage !== user.profileImage) {
+      user.profileImage = syncedProfileImage;
+    }
+
+    const userData = sanitizeUser(user);
     
     // Fetch role-specific profile ID
-    if (req.user.role === 'artisan') {
-      const artisan = await Artisan.findOne({ userId: req.user._id });
+    if (user.role === 'artisan') {
+      const artisan = await Artisan.findOne({ userId: user._id });
       if (artisan) {
         userData.artisanId = artisan._id;
         userData.artisanProfileId = artisan.id; // Custom ID like "artisan1"
+        // Include artisan profile photo if user doesn't have one
+        if (!userData.profileImage && artisan.profilePhotoUrl) {
+          userData.profileImage = artisan.profilePhotoUrl;
+        }
       }
-    } else if (req.user.role === 'collector') {
-      const collector = await Collector.findOne({ userId: req.user._id });
+    } else if (user.role === 'collector') {
+      const collector = await Collector.findOne({ userId: user._id });
       if (collector) {
         userData.collectorId = collector._id;
         userData.collectorProfileId = collector.id; // Custom ID like "collector1"
+        // Include collector profile photo if user doesn't have one
+        if (!userData.profileImage && collector.profilePhotoUrl) {
+          userData.profileImage = collector.profilePhotoUrl;
+        }
       }
     }
 
@@ -197,6 +217,40 @@ export const getCurrentUser = async (req, res) => {
 };
 
 // Get user profile
+// Helper function to get synced profile image
+const getSyncedProfileImage = async (user) => {
+  try {
+    // If user has profileImage, use it (it's the source of truth)
+    if (user.profileImage) {
+      return user.profileImage;
+    }
+
+    // Otherwise, check role-specific profiles
+    if (user.role === 'artisan') {
+      const Artisan = (await import('../../models/Artisan.js')).default;
+      const artisan = await Artisan.findOne({ userId: user._id }).select('profilePhotoUrl').lean();
+      if (artisan?.profilePhotoUrl) {
+        // Sync it back to User for consistency
+        await User.findByIdAndUpdate(user._id, { profileImage: artisan.profilePhotoUrl });
+        return artisan.profilePhotoUrl;
+      }
+    } else if (user.role === 'collector') {
+      const Collector = (await import('../../models/Collector.js')).default;
+      const collector = await Collector.findOne({ userId: user._id }).select('profilePhotoUrl').lean();
+      if (collector?.profilePhotoUrl) {
+        // Sync it back to User for consistency
+        await User.findByIdAndUpdate(user._id, { profileImage: collector.profilePhotoUrl });
+        return collector.profilePhotoUrl;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting synced profile image:', error);
+    return user.profileImage || null;
+  }
+};
+
 export const getProfile = async (req, res) => {
   try {
     if (!req.user) {
@@ -207,6 +261,12 @@ export const getProfile = async (req, res) => {
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Get synced profile image
+    const syncedProfileImage = await getSyncedProfileImage(user);
+    if (syncedProfileImage && syncedProfileImage !== user.profileImage) {
+      user.profileImage = syncedProfileImage;
     }
 
     return res.status(200).json({
@@ -241,6 +301,36 @@ export const updateProfile = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Sync profile image to Artisan/Collector if user has that role
+    if (profileImage !== undefined) {
+      try {
+        // Import models
+        const Artisan = (await import('../../models/Artisan.js')).default;
+        const Collector = (await import('../../models/Collector.js')).default;
+
+        // Update Artisan profile photo if user is an artisan
+        if (user.role === 'artisan') {
+          await Artisan.findOneAndUpdate(
+            { userId: user._id },
+            { profilePhotoUrl: profileImage },
+            { new: true }
+          );
+        }
+
+        // Update Collector profile photo if user is a collector
+        if (user.role === 'collector') {
+          await Collector.findOneAndUpdate(
+            { userId: user._id },
+            { profilePhotoUrl: profileImage },
+            { new: true }
+          );
+        }
+      } catch (syncError) {
+        console.error('Error syncing profile image to role-specific profile:', syncError);
+        // Don't fail the request if sync fails, just log it
+      }
     }
 
     return res.status(200).json({

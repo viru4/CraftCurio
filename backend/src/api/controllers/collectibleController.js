@@ -10,6 +10,14 @@ import { findCollectorByIdentifier } from '../../utils/collectorIdentifier.js';
  */
 
 /**
+ * Helper function to check if string is a valid ObjectId
+ */
+const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
+/**
  * Helper function to convert string to positive integer
  */
 const toPositiveInt = (value, fallback) => {
@@ -185,7 +193,7 @@ export const getCollectibles = async (req, res) => {
     // Add filters
     if (category) {
       // Check if category is an ObjectId or string name
-      if (mongoose.Types.ObjectId.isValid(category)) {
+      if (isValidObjectId(category)) {
         query.category = category;
       } else {
         query.category = { $regex: category, $options: 'i' };
@@ -262,31 +270,44 @@ export const getCollectibleById = async (req, res) => {
     let collectible = null;
 
     // Check if ID is a valid MongoDB ObjectId format
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
+    const isObjectId = isValidObjectId(id);
 
-    if (isValidObjectId) {
+    if (isObjectId) {
       // Try MongoDB _id first if it's a valid ObjectId format
-      collectible = await Collectible.findById(id).populate('owner', 'name profilePhotoUrl location email');
+      collectible = await Collectible.findById(id)
+        .populate('owner', 'name profilePhotoUrl location email')
+        .lean();
     }
 
     // If not found by _id or not a valid ObjectId, try custom 'id' field
     if (!collectible) {
-      collectible = await Collectible.findOne({ id }).populate('owner', 'name profilePhotoUrl location email');
+      collectible = await Collectible.findOne({ id })
+        .populate('owner', 'name profilePhotoUrl location email')
+        .lean();
     }
 
     if (!collectible) {
       return res.status(404).json({ error: 'Collectible not found' });
     }
 
-    // Update auction status if needed
+    // Update auction status if needed (need to convert back to document for save)
     if (collectible.saleType === 'auction') {
-      await updateAuctionStatus(collectible._id);
-      collectible = await Collectible.findById(collectible._id).populate('owner', 'name profilePhotoUrl location email');
+      const collectibleDoc = await Collectible.findById(collectible._id);
+      if (collectibleDoc) {
+        await updateAuctionStatus(collectibleDoc._id);
+        // Refetch with updated status
+        collectible = await Collectible.findById(collectibleDoc._id)
+          .populate('owner', 'name profilePhotoUrl location email')
+          .lean();
+      }
     }
 
-    // Increment views
-    collectible.views += 1;
-    await collectible.save();
+    // Increment views (use updateOne for better performance)
+    await Collectible.updateOne(
+      { _id: collectible._id },
+      { $inc: { views: 1 } }
+    );
+    collectible.views = (collectible.views || 0) + 1;
 
     // Add auction stats if applicable
     const response = collectible.toObject();
@@ -409,6 +430,29 @@ export const deleteCollectible = async (req, res) => {
       });
     }
 
+    // Collect all image URLs to delete from Cloudinary
+    const imageUrls = [];
+    if (collectible.image) {
+      imageUrls.push(collectible.image);
+    }
+    if (collectible.images && Array.isArray(collectible.images)) {
+      imageUrls.push(...collectible.images);
+    }
+    if (collectible.productStory?.storyMediaUrls && Array.isArray(collectible.productStory.storyMediaUrls)) {
+      imageUrls.push(...collectible.productStory.storyMediaUrls);
+    }
+
+    // Delete images from Cloudinary (non-blocking)
+    if (imageUrls.length > 0) {
+      try {
+        const { deleteImages } = await import('../../services/uploadService.js');
+        await deleteImages(imageUrls);
+      } catch (error) {
+        console.error('Error deleting images from Cloudinary:', error);
+        // Continue with deletion even if image cleanup fails
+      }
+    }
+
     // Remove from collector's listings
     if (collectible.owner) {
       await Collector.findByIdAndUpdate(
@@ -440,10 +484,10 @@ export const likeCollectible = async (req, res) => {
     let collectible = null;
 
     // Check if ID is a valid MongoDB ObjectId format
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
+    const isObjectId = isValidObjectId(id);
 
-    if (isValidObjectId) {
-      collectible = await Collectible.findById(id);
+    if (isObjectId) {
+      collectible = await Collectible.findById(id).lean();
     }
 
     // If not found by _id or not a valid ObjectId, try custom 'id' field

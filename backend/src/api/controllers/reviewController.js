@@ -2,13 +2,21 @@ import Review from '../../models/Review.js';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
 import mongoose from 'mongoose';
 
+/**
+ * Helper function to check if string is a valid ObjectId
+ */
+const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
 // Get public reviews for a product
 export const getProductReviews = async (req, res) => {
   try {
     const { productId } = req.params;
     const { page = 1, limit = 10, sortBy = 'createdAt', order = 'desc' } = req.query;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!isValidObjectId(productId)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'
@@ -80,7 +88,7 @@ export const submitReview = async (req, res) => {
     const { productId } = req.params;
     const { rating, title, comment, images } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
+    if (!isValidObjectId(productId)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'

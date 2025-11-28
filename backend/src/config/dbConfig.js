@@ -12,6 +12,8 @@ const connectDB = async () => {
       minPoolSize: 5,
       retryWrites: true,
       retryReads: true,
+      // Read preferences for better performance
+      readPreference: 'primaryPreferred',
     });
     
     console.log(`MongoDB Connected: ${conn.connection.host}`);

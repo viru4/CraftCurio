@@ -40,12 +40,22 @@ export default defineConfig(({ mode }) => {
             // Separate vendor chunks for better caching
             vendor: ['react', 'react-dom'],
             router: ['react-router-dom'],
-            ui: ['lucide-react']
+            ui: ['lucide-react', '@radix-ui/react-avatar', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+            forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+            utils: ['axios', 'date-fns', 'socket.io-client']
           }
         }
       },
       // Increase chunk size warning limit
-      chunkSizeWarningLimit: 1000
+      chunkSizeWarningLimit: 1000,
+      // Optimize build output
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true, // Remove console.log in production
+          drop_debugger: true
+        }
+      }
     }
   };
 });

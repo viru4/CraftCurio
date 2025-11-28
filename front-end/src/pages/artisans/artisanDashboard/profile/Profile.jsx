@@ -230,6 +230,24 @@ const Profile = () => {
         if (!artisanId && result.data?.id) {
           setArtisanId(result.data.id);
         }
+        
+        // Profile image sync is handled automatically by backend
+        // Refresh auth context to update user data
+        try {
+          const authResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (authResponse.ok) {
+            const authData = await authResponse.json();
+            localStorage.setItem('user', JSON.stringify(authData.user));
+            window.dispatchEvent(new Event('storage'));
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing auth context:', refreshError);
+        }
+        
         alert('Profile updated successfully! Your changes will appear on your artisan story page.');
       } else {
         throw new Error(result.message || 'Failed to save profile');

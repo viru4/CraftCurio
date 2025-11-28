@@ -1,6 +1,7 @@
 import React from 'react';
 import { Save, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImageUpload from '@/components/common/ImageUpload';
 
 const TestimonialsEditor = ({ data, onChange, onSave, saving }) => {
   const handleChange = (field, value) => onChange({ ...data, [field]: value });
@@ -58,9 +59,35 @@ const TestimonialsEditor = ({ data, onChange, onSave, saving }) => {
               </div>
               <textarea value={testimonial.quote || ''} onChange={(e) => handleTestimonialChange(index, 'quote', e.target.value)}
                 rows={3} className="w-full px-3 py-2 border rounded text-sm" placeholder="Testimonial quote" />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <input type="text" value={testimonial.image || ''} onChange={(e) => handleTestimonialChange(index, 'image', e.target.value)}
-                  className="px-3 py-2 border rounded text-sm" placeholder="Image URL" />
+              
+              {/* Profile Image Upload */}
+              <div>
+                <label className="block text-xs font-medium text-stone-600 mb-1">Profile Image</label>
+                <ImageUpload
+                  onUploadComplete={(url) => {
+                    handleTestimonialChange(index, 'image', url);
+                  }}
+                  onUploadError={(error) => {
+                    console.error('Upload error:', error);
+                    alert('Failed to upload image. Please try again.');
+                  }}
+                  multiple={false}
+                  currentImages={testimonial.image && testimonial.image !== '/api/placeholder/100/100' ? [testimonial.image] : []}
+                  onRemoveImage={() => handleTestimonialChange(index, 'image', '/api/placeholder/100/100')}
+                  label="Upload"
+                  folder="about-us/testimonials"
+                  showPreview={false}
+                />
+                <input 
+                  type="text" 
+                  value={testimonial.image || ''} 
+                  onChange={(e) => handleTestimonialChange(index, 'image', e.target.value)}
+                  className="mt-2 w-full px-3 py-2 border rounded text-sm" 
+                  placeholder="Or enter URL manually" 
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <select value={testimonial.type || 'collector'} onChange={(e) => handleTestimonialChange(index, 'type', e.target.value)}
                   className="px-3 py-2 border rounded text-sm">
                   <option value="collector">Collector</option>
@@ -75,7 +102,7 @@ const TestimonialsEditor = ({ data, onChange, onSave, saving }) => {
                   <option value={1}>1 Star</option>
                 </select>
               </div>
-              {testimonial.image && (
+              {testimonial.image && testimonial.image !== '/api/placeholder/100/100' && (
                 <img src={testimonial.image} alt={testimonial.name} className="w-16 h-16 object-cover rounded-full border"
                   onError={(e) => { e.target.src = '/api/placeholder/100/100'; }} />
               )}

@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import connectDB from './src/config/dbConfig.js';
 import app from './src/app.js';
 import { initializeAuctionSockets } from './src/sockets/auctionSocket.js';
+import { validateCloudinaryConfig } from './src/services/uploadService.js';
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +31,9 @@ initializeAuctionSockets(io);
 // Connect to database first, then start server
 const startServer = async () => {
   try {
+    // Ensure Cloudinary has the credentials it needs before serving uploads
+    validateCloudinaryConfig();
+    
     // Wait for database connection
     await connectDB();
     

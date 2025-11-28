@@ -265,11 +265,43 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Delete role-specific profile
+    // Collect image URLs to delete from Cloudinary
+    const imageUrls = [];
+    if (user.profileImage) {
+      imageUrls.push(user.profileImage);
+    }
+
+    // Delete role-specific profile and collect associated images
     if (user.role === 'artisan') {
-      await Artisan.findOneAndDelete({ userId: user._id });
+      const artisan = await Artisan.findOne({ userId: user._id });
+      if (artisan) {
+        if (artisan.profilePhotoUrl) {
+          imageUrls.push(artisan.profilePhotoUrl);
+        }
+        if (artisan.story?.photos && Array.isArray(artisan.story.photos)) {
+          imageUrls.push(...artisan.story.photos);
+        }
+        await Artisan.findOneAndDelete({ userId: user._id });
+      }
     } else if (user.role === 'collector') {
-      await Collector.findOneAndDelete({ userId: user._id });
+      const collector = await Collector.findOne({ userId: user._id });
+      if (collector) {
+        if (collector.profilePhotoUrl) {
+          imageUrls.push(collector.profilePhotoUrl);
+        }
+        await Collector.findOneAndDelete({ userId: user._id });
+      }
+    }
+
+    // Delete images from Cloudinary (non-blocking)
+    if (imageUrls.length > 0) {
+      try {
+        const { deleteImages } = await import('../../services/uploadService.js');
+        await deleteImages(imageUrls);
+      } catch (error) {
+        console.error('Error deleting images from Cloudinary:', error);
+        // Continue with deletion even if image cleanup fails
+      }
     }
 
     // Delete user

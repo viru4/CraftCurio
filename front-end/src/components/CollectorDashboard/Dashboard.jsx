@@ -51,17 +51,19 @@ const Dashboard = ({
     sortBy,
   });
 
-  // Debug logging
+  // Debug logging (only in development)
   useEffect(() => {
-    console.log('Dashboard Debug:', {
-      collector,
-      collectorId: collector?._id,
-      collectibles,
-      collectiblesCount: collectibles?.length,
-      isLoading,
-      error,
-      pagination
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Dashboard Debug:', {
+        collector,
+        collectorId: collector?._id,
+        collectibles,
+        collectiblesCount: collectibles?.length,
+        isLoading,
+        error,
+        pagination
+      });
+    }
   }, [collector, collectibles, isLoading, error, pagination]);
 
   // Listen to refreshTrigger from context

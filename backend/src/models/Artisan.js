@@ -62,4 +62,13 @@ const artisanSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+// Indexes for better query performance
+// Note: id field already has unique: true which creates an index
+artisanSchema.index({ userId: 1 });
+artisanSchema.index({ verified: 1 });
+artisanSchema.index({ craftSpecialization: 1 });
+artisanSchema.index({ createdAt: -1 });
+artisanSchema.index({ likes: -1, views: -1 });
+artisanSchema.index({ name: 'text', briefBio: 'text', fullBio: 'text' }); // Text search index
+
 export default mongoose.model('Artisan', artisanSchema);

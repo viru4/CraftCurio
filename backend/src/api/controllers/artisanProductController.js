@@ -2,6 +2,14 @@ import { randomUUID } from 'crypto';
 import mongoose from 'mongoose';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
 
+/**
+ * Helper function to check if string is a valid ObjectId
+ */
+const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
 const toPositiveInt = (value, fallback) => {
   const parsed = parseInt(value, 10);
   if (Number.isFinite(parsed) && parsed > 0) {
@@ -37,7 +45,7 @@ export const getArtisanProducts = async (req, res) => {
     
     if (category) {
       // Check if category is an ObjectId or string name
-      if (mongoose.Types.ObjectId.isValid(category)) {
+      if (isValidObjectId(category)) {
         filter.category = category;
       } else {
         filter.category = { $regex: category, $options: 'i' };
@@ -187,9 +195,9 @@ export const getArtisanProductById = async (req, res) => {
     let artisanProduct = null;
     
     // Check if ID is a valid MongoDB ObjectId format
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
+    const isObjectId = isValidObjectId(id);
     
-    if (isValidObjectId) {
+    if (isObjectId) {
       // Try MongoDB _id first if it's a valid ObjectId format
       artisanProduct = await ArtisanProduct.findById(id);
       
@@ -354,21 +362,48 @@ export const deleteArtisanProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find and delete product by MongoDB _id or custom id field
-    let artisanProduct = await ArtisanProduct.findByIdAndDelete(id);
+    // Find product by MongoDB _id or custom id field
+    let artisanProduct = await ArtisanProduct.findById(id);
     if (!artisanProduct) {
-      artisanProduct = await ArtisanProduct.findOneAndDelete({ id });
+      artisanProduct = await ArtisanProduct.findOne({ id });
     }
 
     if (!artisanProduct) {
       return res.status(404).json({ error: 'Artisan product not found' });
     }
 
+    // Collect all image URLs to delete from Cloudinary
+    const imageUrls = [];
+    if (artisanProduct.images && Array.isArray(artisanProduct.images)) {
+      imageUrls.push(...artisanProduct.images);
+    }
+    if (artisanProduct.productStory?.storyMediaUrls && Array.isArray(artisanProduct.productStory.storyMediaUrls)) {
+      imageUrls.push(...artisanProduct.productStory.storyMediaUrls);
+    }
+    if (artisanProduct.artisanInfo?.profilePhotoUrl) {
+      imageUrls.push(artisanProduct.artisanInfo.profilePhotoUrl);
+    }
+
+    // Delete images from Cloudinary (non-blocking)
+    if (imageUrls.length > 0) {
+      try {
+        const { deleteImages } = await import('../../services/uploadService.js');
+        await deleteImages(imageUrls);
+      } catch (error) {
+        console.error('Error deleting images from Cloudinary:', error);
+        // Continue with deletion even if image cleanup fails
+      }
+    }
+
+    // Delete product from database
+    await ArtisanProduct.findByIdAndDelete(artisanProduct._id);
+
     res.status(200).json({
       message: 'Artisan product deleted successfully',
       data: artisanProduct
     });
   } catch (error) {
+    console.error('Error deleting artisan product:', error);
     res.status(500).json({ error: error.message });
   }
 };

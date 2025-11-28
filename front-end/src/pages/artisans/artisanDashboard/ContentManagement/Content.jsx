@@ -143,8 +143,14 @@ const Content = () => {
       const storyData = {
         fullBio: storyContent,
         story: {
-          photos: photos.filter(p => p.url && !p.url.startsWith('blob:')).map(p => p.url),
-          handwrittenNotes: handwrittenNotes.filter(n => n.url && !n.url.startsWith('blob:')).map(n => n.url),
+          photos: photos
+            .map(item => (typeof item === 'string' ? { url: item } : item))
+            .filter(p => p?.url && !String(p.url).startsWith('blob:'))
+            .map(p => p.url),
+          handwrittenNotes: handwrittenNotes
+            .map(item => (typeof item === 'string' ? { url: item } : item))
+            .filter(n => n?.url && !String(n.url).startsWith('blob:'))
+            .map(n => n.url),
           quotes: quotes.filter(q => q.trim() !== ''),
           culturalContext,
           challenges: challenges.filter(c => c.trim() !== ''),

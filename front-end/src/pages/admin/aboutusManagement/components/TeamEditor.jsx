@@ -1,6 +1,7 @@
 import React from 'react';
 import { Save, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImageUpload from '@/components/common/ImageUpload';
 
 const TeamEditor = ({ data, onChange, onSave, saving }) => {
   const handleChange = (field, value) => {
@@ -114,10 +115,42 @@ const TeamEditor = ({ data, onChange, onSave, saving }) => {
               </div>
               
               <div>
-                <label className="block text-xs font-medium text-stone-600 mb-1">Image URL</label>
-                <input type="text" value={member.image || ''} onChange={(e) => handleMemberChange(index, 'image', e.target.value)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm" placeholder="/images/team/john.jpg" />
-                {member.image && (
+                <label className="block text-xs font-medium text-stone-600 mb-1">Profile Image</label>
+                
+                {/* Cloudinary Upload Component */}
+                <div className="mb-2">
+                  <ImageUpload
+                    onUploadComplete={(url) => {
+                      handleMemberChange(index, 'image', url);
+                    }}
+                    onUploadError={(error) => {
+                      console.error('Upload error:', error);
+                      alert('Failed to upload image. Please try again.');
+                    }}
+                    multiple={false}
+                    currentImages={member.image ? [member.image] : []}
+                    onRemoveImage={() => handleMemberChange(index, 'image', '/api/placeholder/300/300')}
+                    label="Upload Profile Image"
+                    folder="about-us/team"
+                    showPreview={true}
+                  />
+                </div>
+                
+                {/* Manual URL Input (Fallback) */}
+                <div>
+                  <label className="block text-xs font-medium text-stone-500 mb-1">
+                    Or enter URL manually:
+                  </label>
+                  <input 
+                    type="text" 
+                    value={member.image || ''} 
+                    onChange={(e) => handleMemberChange(index, 'image', e.target.value)}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm" 
+                    placeholder="https://res.cloudinary.com/..." 
+                  />
+                </div>
+                
+                {member.image && member.image !== '/api/placeholder/300/300' && (
                   <div className="mt-2 relative w-24 h-24">
                     <img 
                       src={member.image} 

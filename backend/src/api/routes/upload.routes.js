@@ -15,14 +15,33 @@ const router = express.Router();
  * @access Private - Authenticated users only
  */
 router.post('/single', authenticate, (req, res, next) => {
-    const folder = req.body.folder || 'craftcurio';
+    const folder = req.body?.folder ||
+        req.query?.folder ||
+        req.headers['x-upload-folder'] ||
+        'craftcurio';
 
     uploadSingle('image', folder)(req, res, (err) => {
         if (err) {
             console.error('Upload error:', err);
+            
+            // Handle specific error types
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    error: 'File too large',
+                    message: 'File size exceeds 10MB limit'
+                });
+            }
+            
+            if (err.message && err.message.includes('Unsupported file type')) {
+                return res.status(400).json({
+                    error: 'Invalid file type',
+                    message: err.message
+                });
+            }
+            
             return res.status(400).json({
                 error: 'File upload failed',
-                message: err.message
+                message: err.message || 'An error occurred during upload'
             });
         }
 
@@ -35,6 +54,7 @@ router.post('/single', authenticate, (req, res, next) => {
 
         // Return the Cloudinary URL
         res.status(200).json({
+            success: true,
             message: 'File uploaded successfully',
             url: req.file.path,
             publicId: req.file.filename,
@@ -51,15 +71,41 @@ router.post('/single', authenticate, (req, res, next) => {
  * @access Private - Authenticated users only
  */
 router.post('/multiple', authenticate, (req, res, next) => {
-    const folder = req.body.folder || 'craftcurio';
-    const maxCount = parseInt(req.body.maxCount) || 10;
+    const folder = req.body?.folder ||
+        req.query?.folder ||
+        req.headers['x-upload-folder'] ||
+        'craftcurio';
+    const maxCount = parseInt(req.body?.maxCount || req.query?.maxCount) || 10;
 
     uploadMultiple('images', maxCount, folder)(req, res, (err) => {
         if (err) {
             console.error('Upload error:', err);
+            
+            // Handle specific error types
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    error: 'File too large',
+                    message: 'One or more files exceed 10MB limit'
+                });
+            }
+            
+            if (err.code === 'LIMIT_FILE_COUNT') {
+                return res.status(400).json({
+                    error: 'Too many files',
+                    message: `Maximum ${maxCount} files allowed`
+                });
+            }
+            
+            if (err.message && err.message.includes('Unsupported file type')) {
+                return res.status(400).json({
+                    error: 'Invalid file type',
+                    message: err.message
+                });
+            }
+            
             return res.status(400).json({
                 error: 'File upload failed',
-                message: err.message
+                message: err.message || 'An error occurred during upload'
             });
         }
 
@@ -80,6 +126,7 @@ router.post('/multiple', authenticate, (req, res, next) => {
         }));
 
         res.status(200).json({
+            success: true,
             message: `${req.files.length} file(s) uploaded successfully`,
             count: req.files.length,
             files: uploadedFiles

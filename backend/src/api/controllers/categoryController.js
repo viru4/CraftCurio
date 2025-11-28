@@ -7,7 +7,10 @@ export const getCategories = async (req, res) => {
     const { type } = req.query;
     
     if (type === 'collectible') {
-      const categories = await CollectibleCategory.find().sort({ name: 1 });
+      const categories = await CollectibleCategory.find()
+        .select('name description image')
+        .sort({ name: 1 })
+        .lean();
       return res.status(200).json({
         message: 'Collectible categories retrieved successfully',
         count: categories.length,
@@ -16,7 +19,10 @@ export const getCategories = async (req, res) => {
     }
     
     if (type === 'artisan') {
-      const categories = await ArtisanProductCategory.find().sort({ name: 1 });
+      const categories = await ArtisanProductCategory.find()
+        .select('name description image')
+        .sort({ name: 1 })
+        .lean();
       return res.status(200).json({
         message: 'Artisan categories retrieved successfully',
         count: categories.length,
@@ -26,8 +32,8 @@ export const getCategories = async (req, res) => {
     
     // If no type specified, return both
     const [collectibleCategories, artisanCategories] = await Promise.all([
-      CollectibleCategory.find().sort({ name: 1 }),
-      ArtisanProductCategory.find().sort({ name: 1 })
+      CollectibleCategory.find().select('name description image').sort({ name: 1 }).lean(),
+      ArtisanProductCategory.find().select('name description image').sort({ name: 1 }).lean()
     ]);
     
     res.status(200).json({

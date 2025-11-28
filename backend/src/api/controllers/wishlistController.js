@@ -4,6 +4,14 @@ import Collectible from '../../models/Collectible.js';
 import mongoose from 'mongoose';
 
 /**
+ * Helper function to check if string is a valid ObjectId
+ */
+const isValidObjectId = (id) => {
+  if (!id || typeof id !== 'string') return false;
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
+/**
  * Get user's wishlist with populated product details
  */
 export const getWishlist = async (req, res) => {
@@ -83,26 +91,26 @@ export const addToWishlist = async (req, res) => {
 
     // Verify product exists - handle both MongoDB ObjectId and custom string IDs
     let product = null;
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(productId);
+    const isObjectId = isValidObjectId(productId);
     
     try {
       if (productType === 'artisan-product') {
         // Try MongoDB _id first if it's a valid ObjectId
-        if (isValidObjectId) {
-          product = await ArtisanProduct.findById(productId);
+        if (isObjectId) {
+          product = await ArtisanProduct.findById(productId).lean();
         }
         // If not found, try custom 'id' field
         if (!product) {
-          product = await ArtisanProduct.findOne({ id: productId });
+          product = await ArtisanProduct.findOne({ id: productId }).lean();
         }
       } else if (productType === 'collectible') {
         // Try MongoDB _id first if it's a valid ObjectId
-        if (isValidObjectId) {
-          product = await Collectible.findById(productId);
+        if (isObjectId) {
+          product = await Collectible.findById(productId).lean();
         }
         // If not found, try custom 'id' field
         if (!product) {
-          product = await Collectible.findOne({ id: productId });
+          product = await Collectible.findOne({ id: productId }).lean();
         }
       }
     } catch (error) {
@@ -188,9 +196,9 @@ export const removeFromWishlist = async (req, res) => {
     // Handle both MongoDB ObjectId and custom string IDs
     // Try to find and convert custom ID to MongoDB _id if needed
     let standardizedProductId = productId;
-    const isValidObjectId = mongoose.Types.ObjectId.isValid(productId);
+    const isObjectId = isValidObjectId(productId);
     
-    if (!isValidObjectId) {
+    if (!isObjectId) {
       // It's a custom ID, need to find the MongoDB _id
       const collectible = await Collectible.findOne({ id: productId });
       const artisanProduct = await ArtisanProduct.findOne({ id: productId });

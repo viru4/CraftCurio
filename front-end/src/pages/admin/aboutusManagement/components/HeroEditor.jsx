@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Save } from 'lucide-react';
+import { Save, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImageUpload from '@/components/common/ImageUpload';
 
 /**
  * Hero Section Editor Component
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 const HeroEditor = ({ data, onChange, onSave, saving }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const handleChange = (field, value) => {
     // Reset image error when URL changes
@@ -93,18 +95,43 @@ const HeroEditor = ({ data, onChange, onSave, saving }) => {
       {/* Hero Image */}
       <div>
         <label className="block text-sm font-semibold text-stone-700 mb-2">
-          Hero Image URL
+          Hero Image
         </label>
-        <input
-          type="text"
-          value={data.image || ''}
-          onChange={(e) => handleChange('image', e.target.value)}
-          className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-transparent"
-          placeholder="/images/hero-banner.jpg"
-        />
-        <p className="text-sm text-stone-500 mt-1">
-          URL or path to the hero image (recommended: 1200x800px)
-        </p>
+        
+        {/* Cloudinary Upload Component */}
+        <div className="mb-3">
+          <ImageUpload
+            onUploadComplete={(url) => {
+              handleChange('image', url);
+              setUploadingImage(false);
+            }}
+            onUploadError={(error) => {
+              console.error('Upload error:', error);
+              alert('Failed to upload image. Please try again.');
+              setUploadingImage(false);
+            }}
+            multiple={false}
+            currentImages={data.image ? [data.image] : []}
+            onRemoveImage={() => handleChange('image', '')}
+            label="Upload Hero Image"
+            folder="about-us/hero"
+            showPreview={true}
+          />
+        </div>
+        
+        {/* Manual URL Input (Fallback) */}
+        <div>
+          <label className="block text-xs font-medium text-stone-600 mb-1">
+            Or enter image URL manually:
+          </label>
+          <input
+            type="text"
+            value={data.image || ''}
+            onChange={(e) => handleChange('image', e.target.value)}
+            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-600 focus:border-transparent text-sm"
+            placeholder="https://res.cloudinary.com/..."
+          />
+        </div>
         
         {/* Image Preview */}
         {data.image && (

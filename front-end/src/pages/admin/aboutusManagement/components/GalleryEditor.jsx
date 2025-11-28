@@ -1,6 +1,7 @@
 import React from 'react';
 import { Save, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImageUpload from '@/components/common/ImageUpload';
 
 const GalleryEditor = ({ data, onChange, onSave, saving }) => {
   const handleChange = (field, value) => onChange({ ...data, [field]: value });
@@ -49,8 +50,39 @@ const GalleryEditor = ({ data, onChange, onSave, saving }) => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <input type="text" value={image.src || ''} onChange={(e) => handleImageChange(index, 'src', e.target.value)}
-                className="w-full px-3 py-2 border rounded text-sm" placeholder="Image URL" />
+              
+              {/* Cloudinary Upload Component */}
+              <div>
+                <label className="block text-xs font-medium text-stone-600 mb-1">Upload Image</label>
+                <ImageUpload
+                  onUploadComplete={(url) => {
+                    handleImageChange(index, 'src', url);
+                  }}
+                  onUploadError={(error) => {
+                    console.error('Upload error:', error);
+                    alert('Failed to upload image. Please try again.');
+                  }}
+                  multiple={false}
+                  currentImages={image.src ? [image.src] : []}
+                  onRemoveImage={() => handleImageChange(index, 'src', '')}
+                  label="Upload"
+                  folder="about-us/gallery"
+                  showPreview={false}
+                />
+              </div>
+              
+              {/* Manual URL Input (Fallback) */}
+              <div>
+                <label className="block text-xs font-medium text-stone-500 mb-1">Or enter URL manually:</label>
+                <input 
+                  type="text" 
+                  value={image.src || ''} 
+                  onChange={(e) => handleImageChange(index, 'src', e.target.value)}
+                  className="w-full px-3 py-2 border rounded text-sm" 
+                  placeholder="https://res.cloudinary.com/..." 
+                />
+              </div>
+              
               <input type="text" value={image.title || ''} onChange={(e) => handleImageChange(index, 'title', e.target.value)}
                 className="w-full px-3 py-2 border rounded text-sm" placeholder="Title" />
               <input type="text" value={image.alt || ''} onChange={(e) => handleImageChange(index, 'alt', e.target.value)}

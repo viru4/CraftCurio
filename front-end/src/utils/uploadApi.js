@@ -3,7 +3,16 @@
  * Functions for handling file uploads to the backend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const getApiBaseUrl = () => {
+    const raw = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const normalized = raw.replace(/\/+$/, '');
+    if (normalized.endsWith('/api')) {
+        return normalized;
+    }
+    return `${normalized}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Upload a single image file

@@ -290,20 +290,22 @@ export const getLiveAuctions = async (req, res) => {
       .populate('owner', 'name profilePhotoUrl')
       .lean();
 
-    // Update auction statuses for scheduled auctions that should be live
-    for (const auction of auctions) {
-      if (auction.auction.auctionStatus === 'scheduled' && new Date(auction.auction.startTime) <= now) {
-        await updateAuctionStatus(auction._id);
-      }
-    }
+    // Update auction statuses for scheduled auctions that should be live (parallel execution)
+    const statusUpdatePromises = auctions
+      .filter(auction => auction.auction?.auctionStatus === 'scheduled' && new Date(auction.auction.startTime) <= now)
+      .map(auction => updateAuctionStatus(auction._id));
+    
+    await Promise.all(statusUpdatePromises);
 
-    // Refetch to get updated statuses
-    const updatedAuctions = await Collectible.find(query)
-      .sort(sort)
-      .skip(skip)
-      .limit(limitNum)
-      .populate('owner', 'name profilePhotoUrl')
-      .lean();
+    // Only refetch if we updated any statuses
+    const updatedAuctions = statusUpdatePromises.length > 0
+      ? await Collectible.find(query)
+          .sort(sort)
+          .skip(skip)
+          .limit(limitNum)
+          .populate('owner', 'name profilePhotoUrl')
+          .lean()
+      : auctions;
 
     const total = await Collectible.countDocuments(query);
 
