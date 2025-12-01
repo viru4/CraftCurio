@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
  */
 const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = false }) => {
   const navigate = useNavigate();
-  
+
   if (!artisanInfo) return null;
 
   const handleArtisanClick = () => {
@@ -42,7 +42,7 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
               {artisanInfo.briefBio}
             </p>
           )}
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               handleArtisanClick();
@@ -51,6 +51,23 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
           >
             View Profile & Items
           </button>
+          {artisanInfo.userId && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/artisan/messages', {
+                  state: {
+                    recipientId: artisanInfo.userId,
+                    recipientName: artisanInfo.name,
+                    recipientImage: artisanInfo.profilePhotoUrl
+                  }
+                });
+              }}
+              className="ml-3 text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors"
+            >
+              Message
+            </button>
+          )}
         </div>
       </div>
     );
@@ -81,7 +98,7 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
                 <span className="text-xs font-medium">Verified Artisan</span>
               </div>
             )}
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleArtisanClick();
@@ -90,6 +107,23 @@ const ArtisanProfileCard = ({ artisanInfo, isMobile = false, showInSidebar = fal
             >
               View Profile & Items
             </button>
+            {artisanInfo.userId && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/artisan/messages', {
+                    state: {
+                      recipientId: artisanInfo.userId,
+                      recipientName: artisanInfo.name,
+                      recipientImage: artisanInfo.profilePhotoUrl
+                    }
+                  });
+                }}
+                className="block text-sm font-medium text-stone-500 hover:text-stone-700 transition-colors mt-2"
+              >
+                Message Artisan
+              </button>
+            )}
           </div>
         </div>
       </div>

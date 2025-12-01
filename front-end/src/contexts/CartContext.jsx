@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { API_BASE_URL, API_ENDPOINTS } from '@/utils/api';
 
 const CartContext = createContext(null);
@@ -93,8 +93,6 @@ export const CartProvider = ({ children }) => {
         throw new Error('Please sign in to add items to your cart');
       }
 
-      console.log('Adding to cart:', product);
-
       // Make API call first to ensure backend succeeds
       const response = await makeAuthRequest(API_ENDPOINTS.cart, {
         method: 'POST',
@@ -109,8 +107,6 @@ export const CartProvider = ({ children }) => {
           quantity: 1,
         }),
       });
-
-      console.log('Cart API response:', response);
 
       // After successful API call, fetch the updated cart
       const cartData = await makeAuthRequest(API_ENDPOINTS.cart);
@@ -229,7 +225,7 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const value = {
+  const value = useMemo(() => ({
     cartItems,
     addToCart,
     removeFromCart,
@@ -239,7 +235,7 @@ export const CartProvider = ({ children }) => {
     getCartCount,
     getCartTotal,
     loading,
-  };
+  }), [cartItems, loading, addToCart, removeFromCart, updateQuantity, clearCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

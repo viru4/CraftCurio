@@ -6,7 +6,15 @@ import { useMemo } from 'react';
  * Displays list of conversations with search functionality
  * Shows user avatar, name, last message preview, and timestamp
  */
-const ConversationsList = ({ conversations, activeConversation, onSelectConversation, searchQuery, onSearchChange }) => {
+const ConversationsList = ({ 
+  conversations, 
+  activeConversation, 
+  onSelectConversation, 
+  searchQuery, 
+  onSearchChange,
+  onlineUsers = new Set(),
+  typingUsers = {}
+}) => {
   
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
@@ -14,8 +22,8 @@ const ConversationsList = ({ conversations, activeConversation, onSelectConversa
     
     const query = searchQuery.toLowerCase();
     return conversations.filter(conv => 
-      conv.user.name.toLowerCase().includes(query) ||
-      conv.lastMessage?.toLowerCase().includes(query)
+      conv?.user?.name?.toLowerCase().includes(query) ||
+      conv?.lastMessage?.toLowerCase().includes(query)
     );
   }, [conversations, searchQuery]);
 
@@ -62,54 +70,61 @@ const ConversationsList = ({ conversations, activeConversation, onSelectConversa
           </div>
         ) : (
           <div className="divide-y divide-stone-200 dark:divide-stone-700">
-            {filteredConversations.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation.id)}
-                className={`w-full p-3 sm:p-4 flex items-start gap-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors ${
-                  activeConversation === conversation.id 
-                    ? 'bg-[#ec6d13]/10 dark:bg-[#ec6d13]/20' 
-                    : ''
-                }`}
-              >
-                {/* User Avatar */}
-                <div className="relative flex-shrink-0">
-                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-[#ec6d13] to-[#d87a5b] flex items-center justify-center text-white font-semibold">
-                    {conversation.user.name.charAt(0).toUpperCase()}
-                  </div>
-                  {conversation.user.online && (
-                    <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white dark:border-stone-900 rounded-full" />
-                  )}
-                </div>
-
-                {/* Conversation Info */}
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-baseline justify-between gap-2 mb-1">
-                    <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
-                      {conversation.user.name}
-                    </h3>
-                    <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">
-                      {formatTimestamp(conversation.lastMessageTime)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs text-stone-600 dark:text-stone-400 truncate">
-                      {conversation.isTyping ? (
-                        <span className="italic text-[#ec6d13]">typing...</span>
-                      ) : (
-                        conversation.lastMessage || 'No messages yet'
-                      )}
-                    </p>
-                    {conversation.unreadCount > 0 && (
-                      <span className="flex-shrink-0 h-5 w-5 rounded-full bg-[#ec6d13] text-white text-xs flex items-center justify-center font-semibold">
-                        {conversation.unreadCount}
-                      </span>
+            {filteredConversations
+              .filter(conversation => conversation && conversation.user) // Filter out invalid conversations
+              .map((conversation) => {
+              const isOnline = onlineUsers.has(conversation.user?.id || conversation.user?._id);
+              const isTyping = typingUsers[conversation.id] && Object.values(typingUsers[conversation.id]).some(v => v);
+              
+              return (
+                <button
+                  key={conversation.id}
+                  onClick={() => onSelectConversation(conversation.id)}
+                  className={`w-full p-3 sm:p-4 flex items-start gap-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors ${
+                    activeConversation === conversation.id 
+                      ? 'bg-[#ec6d13]/10 dark:bg-[#ec6d13]/20' 
+                      : ''
+                  }`}
+                >
+                  {/* User Avatar */}
+                  <div className="relative flex-shrink-0">
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-[#ec6d13] to-[#d87a5b] flex items-center justify-center text-white font-semibold">
+                      {conversation.user.name.charAt(0).toUpperCase()}
+                    </div>
+                    {isOnline && (
+                      <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white dark:border-stone-900 rounded-full" />
                     )}
                   </div>
-                </div>
-              </button>
-            ))}
+
+                  {/* Conversation Info */}
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-baseline justify-between gap-2 mb-1">
+                      <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">
+                        {conversation.user.name}
+                      </h3>
+                      <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">
+                        {formatTimestamp(conversation.lastMessageTime)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs text-stone-600 dark:text-stone-400 truncate">
+                        {isTyping ? (
+                          <span className="italic text-[#ec6d13]">typing...</span>
+                        ) : (
+                          conversation.lastMessage || 'No messages yet'
+                        )}
+                      </p>
+                      {conversation.unreadCount > 0 && (
+                        <span className="flex-shrink-0 h-5 w-5 rounded-full bg-[#ec6d13] text-white text-xs flex items-center justify-center font-semibold">
+                          {conversation.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

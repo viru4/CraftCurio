@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * ProductPriceCard Component
@@ -10,16 +11,19 @@ import React from 'react';
  * @param {Function} onAddToCart - Callback for add to cart button
  * @param {boolean} isMobile - Whether to show mobile layout
  * @param {boolean} isCollectible - Whether this is a collectible (shows quantity selector)
+ * @param {Object} artisanInfo - Artisan information for messaging
  */
-const ProductPriceCard = ({ 
-  price = 0, 
+const ProductPriceCard = ({
+  price = 0,
   availability = true,
   isInWishlist = false,
   onToggleWishlist,
   onAddToCart,
   isMobile = false,
-  isCollectible = false
+  isCollectible = false,
+  artisanInfo = null
 }) => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = React.useState(1);
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
@@ -50,7 +54,7 @@ const ProductPriceCard = ({
           {isCollectible ? (
             <div className="flex items-center gap-3">
               <div className="flex items-center rounded-lg border border-stone-300">
-                <button 
+                <button
                   onClick={decrementQuantity}
                   className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors disabled:opacity-50"
                   disabled={quantity <= 1}
@@ -59,7 +63,7 @@ const ProductPriceCard = ({
                   -
                 </button>
                 <span className="px-3 py-2 text-stone-900 font-medium min-w-[2.5rem] text-center">{quantity}</span>
-                <button 
+                <button
                   onClick={incrementQuantity}
                   className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors"
                   aria-label="Increase quantity"
@@ -67,7 +71,7 @@ const ProductPriceCard = ({
                   +
                 </button>
               </div>
-              <button 
+              <button
                 onClick={handleAddToCart}
                 className="flex-1 rounded-lg bg-orange-500 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!availability}
@@ -82,7 +86,7 @@ const ProductPriceCard = ({
           ) : (
             <>
               {/* Add to Cart Button for Artisan Products */}
-              <button 
+              <button
                 onClick={handleAddToCart}
                 className="w-full rounded-lg bg-orange-500 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!availability}
@@ -93,26 +97,41 @@ const ProductPriceCard = ({
                   <span>Add to Cart</span>
                 </span>
               </button>
-              
-              {/* Buy Now Button for Artisan Products */}
-              <button 
-                className="w-full rounded-lg bg-stone-900 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-stone-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!availability}
-                aria-label="Buy now"
-              >
-                Buy Now
-              </button>
+
+
             </>
           )}
-          
+
+          {/* Message Seller Button - Shown for both types if userId exists */}
+          {artisanInfo?.userId && (
+            <button
+              onClick={() => {
+                console.log('🔔 Message button clicked with artisanInfo:', artisanInfo);
+                const params = new URLSearchParams({
+                  tab: 'messages',
+                  recipientId: artisanInfo.userId,
+                  recipientName: artisanInfo.name,
+                  recipientImage: artisanInfo.profilePhotoUrl || ''
+                });
+                console.log('📤 Navigating to:', `/profile?${params.toString()}`);
+                navigate(`/profile?${params.toString()}`);
+              }}
+              className="w-full rounded-lg border border-stone-300 bg-white px-6 py-3 text-base font-bold text-stone-700 shadow-sm hover:bg-stone-50 transition-colors"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <span className="material-symbols-outlined">chat</span>
+                <span>{isCollectible ? 'Message Seller' : 'Message Artisan'}</span>
+              </span>
+            </button>
+          )}
+
           {/* Wishlist Button - Always shown */}
-          <button 
+          <button
             onClick={onToggleWishlist}
-            className={`w-full rounded-lg border px-6 py-3 text-base font-bold shadow-sm transition-colors ${
-              isInWishlist 
-                ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
-                : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
-            }`}
+            className={`w-full rounded-lg border px-6 py-3 text-base font-bold shadow-sm transition-colors ${isInWishlist
+              ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
+              : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
+              }`}
             aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           >
             <span className="flex items-center justify-center gap-2">
@@ -147,7 +166,7 @@ const ProductPriceCard = ({
         {isCollectible && (
           <div className="flex items-center gap-4 sm:col-span-2">
             <div className="flex items-center rounded-lg border border-stone-300">
-              <button 
+              <button
                 onClick={decrementQuantity}
                 className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors disabled:opacity-50"
                 disabled={quantity <= 1}
@@ -156,7 +175,7 @@ const ProductPriceCard = ({
                 -
               </button>
               <span className="px-3 py-2 text-stone-900 font-medium min-w-[2.5rem] text-center">{quantity}</span>
-              <button 
+              <button
                 onClick={incrementQuantity}
                 className="px-3 py-2 text-stone-600 hover:text-stone-900 transition-colors"
                 aria-label="Increase quantity"
@@ -166,8 +185,8 @@ const ProductPriceCard = ({
             </div>
           </div>
         )}
-        
-        <button 
+
+        <button
           onClick={handleAddToCart}
           className={`flex items-center justify-center gap-2 rounded-md h-12 px-6 bg-orange-500 text-white text-base font-bold shadow-sm hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isCollectible ? 'sm:col-span-2' : ''}`}
           disabled={!availability}
@@ -176,24 +195,36 @@ const ProductPriceCard = ({
           <span className="material-symbols-outlined">add_shopping_cart</span>
           <span className="truncate">Add to Cart</span>
         </button>
-        
-        {!isCollectible && (
-          <button 
-            className="flex items-center justify-center rounded-md h-12 px-6 bg-stone-900 text-white text-base font-bold shadow-sm hover:bg-stone-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!availability}
-            aria-label="Buy now"
+
+
+
+        {/* Message Seller Button - Mobile */}
+        {artisanInfo?.userId && (
+          <button
+            onClick={() => {
+              console.log('🔔 Mobile message button clicked with artisanInfo:', artisanInfo);
+              const params = new URLSearchParams({
+                tab: 'messages',
+                recipientId: artisanInfo.userId,
+                recipientName: artisanInfo.name,
+                recipientImage: artisanInfo.profilePhotoUrl || ''
+              });
+              console.log('📤 Navigating to:', `/profile?${params.toString()}`);
+              navigate(`/profile?${params.toString()}`);
+            }}
+            className="flex items-center justify-center rounded-md h-12 px-6 border border-stone-300 bg-white text-stone-700 text-base font-bold shadow-sm hover:bg-stone-50 transition-colors"
           >
-            Buy Now
+            <span className="material-symbols-outlined">chat</span>
+            <span className="ml-2">{isCollectible ? 'Message Seller' : 'Message Artisan'}</span>
           </button>
         )}
-        
-        <button 
+
+        <button
           onClick={onToggleWishlist}
-          className={`sm:col-span-2 flex items-center justify-center gap-2 rounded-md h-12 px-6 border text-base font-bold shadow-sm transition-colors ${
-            isInWishlist 
-              ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
-              : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
-          }`}
+          className={`sm:col-span-2 flex items-center justify-center gap-2 rounded-md h-12 px-6 border text-base font-bold shadow-sm transition-colors ${isInWishlist
+            ? 'border-red-500 bg-red-50 text-red-600 hover:bg-red-100'
+            : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
+            }`}
           aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <span className="material-symbols-outlined" style={isInWishlist ? { fontVariationSettings: "'FILL' 1" } : {}}>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { API_BASE_URL, API_ENDPOINTS } from '@/utils/api';
 
 const WishlistContext = createContext(null);
@@ -102,8 +102,6 @@ export const WishlistProvider = ({ children }) => {
         throw new Error('Please sign in to add items to your wishlist');
       }
 
-      console.log('Adding to wishlist:', product);
-
       // Optimistically update UI
       const newItem = { 
         id: product.id,
@@ -126,20 +124,30 @@ export const WishlistProvider = ({ children }) => {
         productId: product.id,
         productType: product.type || 'artisan-product',
       };
-      console.log('Sending to API:', requestBody);
       
       const response = await makeAuthRequest(API_ENDPOINTS.wishlist, {
         method: 'POST',
         body: JSON.stringify(requestBody),
       });
 
-      console.log('API Response:', response);
-
       // Refetch wishlist to ensure consistency with backend
       const updatedWishlist = await makeAuthRequest(API_ENDPOINTS.wishlist);
       setWishlistItems(updatedWishlist.data.items || []);
       
     } catch (error) {
+      // Handle "already in wishlist" error gracefully
+      if (error.message === 'Item already in wishlist') {
+        // Refetch to ensure UI is in sync
+        try {
+          const updatedWishlist = await makeAuthRequest(API_ENDPOINTS.wishlist);
+          setWishlistItems(updatedWishlist.data.items || []);
+        } catch (fetchError) {
+          // If refetch fails, keep optimistic update
+          console.error('Error refetching wishlist:', fetchError);
+        }
+        return; // Don't throw error for duplicate items
+      }
+      
       console.error('Error adding to wishlist:', error);
       // Revert on error
       setWishlistItems(previousItems);
@@ -232,7 +240,7 @@ export const WishlistProvider = ({ children }) => {
     return wishlistItems.length;
   };
 
-  const value = {
+  const value = useMemo(() => ({
     wishlistItems,
     addToWishlist,
     removeFromWishlist,
@@ -241,7 +249,7 @@ export const WishlistProvider = ({ children }) => {
     isInWishlist,
     getWishlistCount,
     loading,
-  };
+  }), [wishlistItems, loading, addToWishlist, removeFromWishlist, toggleWishlist, clearWishlist]);
 
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
 };

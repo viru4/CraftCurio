@@ -21,28 +21,28 @@ const toPositiveInt = (value, fallback) => {
 // GET /api/artisan-products - Get all artisan products
 export const getArtisanProducts = async (req, res) => {
   try {
-    const { 
-      category, 
-      featured, 
-      popular, 
-      recent, 
+    const {
+      category,
+      featured,
+      popular,
+      recent,
       search,
       status,
       artisan,
-      limit = 50, 
+      limit = 50,
       page = 1,
       sort = 'createdAt',
       order = 'desc'
     } = req.query;
-    
+
     // Build filter object
     const filter = {};
-    
+
     // Filter by artisan if provided
     if (artisan) {
       filter['artisanInfo.id'] = artisan;
     }
-    
+
     if (category) {
       // Check if category is an ObjectId or string name
       if (isValidObjectId(category)) {
@@ -51,23 +51,23 @@ export const getArtisanProducts = async (req, res) => {
         filter.category = { $regex: category, $options: 'i' };
       }
     }
-    
+
     if (status) {
       filter.status = status;
     }
-    
+
     if (featured === 'true') {
       filter.featured = true;
     }
-    
+
     if (popular === 'true') {
       filter.popular = true;
     }
-    
+
     if (recent === 'true') {
       filter.recent = true;
     }
-    
+
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -76,16 +76,16 @@ export const getArtisanProducts = async (req, res) => {
         { tags: { $in: [new RegExp(search, 'i')] } }
       ];
     }
-    
+
     // Calculate pagination
     const pageNum = toPositiveInt(page, 1);
     const limitNum = Math.min(toPositiveInt(limit, 50), 100);
     const skip = (pageNum - 1) * limitNum;
-    
+
     // Build sort object
     const sortObj = {};
     sortObj[sort] = order === 'desc' ? -1 : 1;
-    
+
     // Execute query with pagination
     const [artisanProducts, totalCount] = await Promise.all([
       ArtisanProduct.find(filter)
@@ -193,29 +193,27 @@ export const getArtisanProductById = async (req, res) => {
   try {
     const { id } = req.params;
     let artisanProduct = null;
-    
+
     // Check if ID is a valid MongoDB ObjectId format
     const isObjectId = isValidObjectId(id);
-    
+
     if (isObjectId) {
       // Try MongoDB _id first if it's a valid ObjectId format
       artisanProduct = await ArtisanProduct.findById(id);
-      
+
       if (artisanProduct) {
         await artisanProduct.populate([
-          { path: 'artisanInfo.id', select: 'name email profilePhotoUrl briefBio verified createdAt' },
           { path: 'reviews.user', select: 'name email' }
         ]);
       }
     }
-    
+
     // If not found by _id or not a valid ObjectId, try custom 'id' field
     if (!artisanProduct) {
       artisanProduct = await ArtisanProduct.findOne({ id })
-        .populate('artisanInfo.id', 'name email profilePhotoUrl briefBio verified createdAt')
         .populate('reviews.user', 'name email');
     }
-    
+
     if (!artisanProduct) {
       return res.status(404).json({ error: 'Artisan product not found' });
     }
@@ -239,12 +237,33 @@ export const getArtisanProductById = async (req, res) => {
     }
 
     if (productObj.artisanInfo) {
+      // Manually fetch artisan to get userId since population doesn't work on string IDs
+      let artisanUserId = null;
+      if (productObj.artisanInfo.id) {
+        try {
+          const { default: Artisan } = await import('../../models/Artisan.js');
+          let artisanDoc = await Artisan.findOne({ id: productObj.artisanInfo.id }).select('userId');
+
+          // If not found by custom id, try by _id if it looks like an ObjectId
+          if (!artisanDoc && isValidObjectId(productObj.artisanInfo.id)) {
+            artisanDoc = await Artisan.findById(productObj.artisanInfo.id).select('userId');
+          }
+
+          if (artisanDoc) {
+            artisanUserId = artisanDoc.userId;
+          }
+        } catch (err) {
+          console.error('Error fetching artisan details:', err);
+        }
+      }
+
       productObj.artisanInfo = {
         id: productObj.artisanInfo.id || null,
         name: productObj.artisanInfo.name || '',
         profilePhotoUrl: productObj.artisanInfo.profilePhotoUrl || '',
         briefBio: productObj.artisanInfo.briefBio || '',
-        verified: productObj.artisanInfo.verified || false
+        verified: productObj.artisanInfo.verified || false,
+        userId: artisanUserId
       };
     }
 
@@ -258,7 +277,7 @@ export const getArtisanProductById = async (req, res) => {
 export const createArtisanProduct = async (req, res) => {
   try {
     const artisanProductData = { ...req.body };
-    
+
     if (!artisanProductData.title || !artisanProductData.description || !artisanProductData.category) {
       return res.status(400).json({ error: 'Title, description, and category are required.' });
     }
@@ -278,14 +297,14 @@ export const createArtisanProduct = async (req, res) => {
     if (typeof artisanProductData.price !== 'number' || !Number.isFinite(artisanProductData.price)) {
       return res.status(400).json({ error: 'Price must be a valid number.' });
     }
-    
+
     artisanProductData.id = artisanProductData.id
       ? String(artisanProductData.id).trim()
       : `art-${randomUUID()}`;
 
     const artisanProduct = new ArtisanProduct(artisanProductData);
     const savedArtisanProduct = await artisanProduct.save();
-    
+
     res.status(201).json({
       message: 'Artisan product created successfully',
       data: savedArtisanProduct
@@ -304,16 +323,16 @@ export const likeArtisanProduct = async (req, res) => {
     if (!artisanProduct) {
       return res.status(404).json({ error: 'Artisan product not found' });
     }
-    
+
     // Increment likes atomically to prevent race conditions
     await ArtisanProduct.updateOne(
       { _id: artisanProduct._id },
       { $inc: { likes: 1 } }
     );
-    
+
     // Fetch updated product
     const updatedProduct = await ArtisanProduct.findById(artisanProduct._id);
-    
+
     res.status(200).json({
       message: 'Artisan product liked successfully',
       data: updatedProduct

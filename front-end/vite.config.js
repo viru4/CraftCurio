@@ -11,6 +11,8 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig(({ mode }) => {
   const isHttpsHosted = process.env.VITE_HMR_WSS === '1' || mode === 'production';
+  const isDev = mode === 'development';
+  
   return {
     plugins: [react(), tailwind()],
     server: {
@@ -38,11 +40,21 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             // Separate vendor chunks for better caching
-            vendor: ['react', 'react-dom'],
-            router: ['react-router-dom'],
-            ui: ['lucide-react', '@radix-ui/react-avatar', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-            forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-            utils: ['axios', 'date-fns', 'socket.io-client']
+            'react-vendor': ['react', 'react-dom'],
+            'router': ['react-router-dom'],
+            'ui-components': [
+              'lucide-react', 
+              '@radix-ui/react-avatar', 
+              '@radix-ui/react-dialog', 
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-navigation-menu',
+              '@radix-ui/react-select',
+              '@radix-ui/react-slot'
+            ],
+            'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+            'utils': ['axios', 'date-fns'],
+            'socket': ['socket.io-client'],
+            'carousel': ['embla-carousel', 'embla-carousel-react']
           }
         }
       },
@@ -52,10 +64,31 @@ export default defineConfig(({ mode }) => {
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: true, // Remove console.log in production
-          drop_debugger: true
+          drop_console: mode === 'production', // Remove console.log in production only
+          drop_debugger: true,
+          pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
         }
+      },
+      // Enable CSS code splitting
+      cssCodeSplit: true,
+      // Sourcemaps for production debugging (can be disabled for smaller builds)
+      sourcemap: isDev,
+      // Optimize dependencies
+      commonjsOptions: {
+        include: [/node_modules/],
+        transformMixedEsModules: true
       }
+    },
+    // Optimize dependency pre-bundling
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        'axios',
+        'socket.io-client'
+      ],
+      exclude: ['@tailwindcss/vite']
     }
   };
 });

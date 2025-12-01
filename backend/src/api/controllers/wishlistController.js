@@ -31,13 +31,13 @@ export const getWishlist = async (req, res) => {
     const populatedItems = await Promise.all(
       wishlist.items.map(async (item) => {
         let product = null;
-        
+
         if (item.productType === 'artisan-product') {
           product = await ArtisanProduct.findById(item.productId)
-            .select('title price image category artisan description');
+            .select('title price images category artisan description');
         } else if (item.productType === 'collectible') {
           product = await Collectible.findById(item.productId)
-            .select('title price image category artisan description');
+            .select('title price image images category artisan description');
         }
 
         if (!product) {
@@ -92,7 +92,7 @@ export const addToWishlist = async (req, res) => {
     // Verify product exists - handle both MongoDB ObjectId and custom string IDs
     let product = null;
     const isObjectId = isValidObjectId(productId);
-    
+
     try {
       if (productType === 'artisan-product') {
         // Try MongoDB _id first if it's a valid ObjectId
@@ -197,13 +197,13 @@ export const removeFromWishlist = async (req, res) => {
     // Try to find and convert custom ID to MongoDB _id if needed
     let standardizedProductId = productId;
     const isObjectId = isValidObjectId(productId);
-    
+
     if (!isObjectId) {
       // It's a custom ID, need to find the MongoDB _id
       const collectible = await Collectible.findOne({ id: productId });
       const artisanProduct = await ArtisanProduct.findOne({ id: productId });
       const product = collectible || artisanProduct;
-      
+
       if (product) {
         standardizedProductId = product._id.toString();
       }

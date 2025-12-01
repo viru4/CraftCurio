@@ -1,47 +1,59 @@
-import React from 'react'
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
+
+// Eagerly load critical pages
 import Landing from '@/pages/Landing'
-import ProductDetails from '@/pages/ProductDetails'
-import Cart from '@/pages/Cart'
-import Wishlist from '@/pages/Wishlist'
-import CheckOut from '@/pages/Order/CheckOut'
-import OrderConfirmation from '@/pages/Order/OrderConfirmation'
-import OrderDetails from '@/pages/Order/OrderDetails'
-import MyOrders from '@/pages/Order/MyOrders'
 import SignInPage from '@/pages/auth/SignIn'
 import SignUpPage from '@/pages/auth/SignUp'
-import SellerRegistration from '@/pages/auth/SellerRegistration'
-import Collectibles from '@/pages/Collectibles/Collectibles'
-import ArtisansProducts from '@/pages/artisans/ArtisansProducts'
-import ArtisanStories from '@/pages/artisans/ArtisanStories'
-import ArtisanStoryDetail from '@/pages/artisans/ArtisanStoryDetail'
-import AboutUs from '@/pages/AboutUs'
-import Auctions from '@/pages/Auctions/Auctions'
-import CollectorDashboard from '@/pages/CollectorDashboardPage'
-import ArtisanDashboard from '@/pages/artisans/artisanDashboard/ArtisanDashboard'
-import ArtisanProfile from '@/pages/artisans/artisanDashboard/profile/Profile'
-import ArtisanProductsManagement from '@/pages/artisans/artisanDashboard/Products/ArtisanProducts'
-import AddProduct from '@/pages/artisans/artisanDashboard/Products/AddProduct'
-import Content from '@/pages/artisans/artisanDashboard/ContentManagement/Content'
-import Message from '@/pages/artisans/artisanDashboard/messaging/Message'
-import Orders from '@/pages/artisans/artisanDashboard/Orders/Orders'
-import Reviews from '@/pages/artisans/artisanDashboard/Reviews/Reviews'
-import Profile from '@/pages/UserProfile/Profile'
-import Admin from '@/pages/admin/Admin'
-import Products from '@/pages/admin/Products'
-import EditProduct from '@/pages/admin/EditProduct'
-import Users from '@/pages/admin/Users/Users'
-import AdminContent from '@/pages/admin/content&stories/AdminContent'
-import VerificationManagement from '@/pages/admin/Users/components/VerificationManagement'
-import AdminOrders from '@/pages/admin/Orders/AdminOrders'
 import AdminLogin from '@/pages/admin/auth/AdminLogin'
-import AboutUsManagement from '@/pages/admin/aboutusManagement/AboutUsManagement'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import ProtectedAdminRoute from '@/components/ProtectedAdminRoute'
+
+// Lazy load non-critical pages
+const ProductDetails = lazy(() => import('@/pages/ProductDetails'))
+const Cart = lazy(() => import('@/pages/Cart'))
+const Wishlist = lazy(() => import('@/pages/Wishlist'))
+const CheckOut = lazy(() => import('@/pages/Order/CheckOut'))
+const OrderConfirmation = lazy(() => import('@/pages/Order/OrderConfirmation'))
+const OrderDetails = lazy(() => import('@/pages/Order/OrderDetails'))
+const MyOrders = lazy(() => import('@/pages/Order/MyOrders'))
+const SellerRegistration = lazy(() => import('@/pages/auth/SellerRegistration'))
+const Collectibles = lazy(() => import('@/pages/Collectibles/Collectibles'))
+const ArtisansProducts = lazy(() => import('@/pages/artisans/ArtisansProducts'))
+const ArtisanStories = lazy(() => import('@/pages/artisans/ArtisanStories'))
+const ArtisanStoryDetail = lazy(() => import('@/pages/artisans/ArtisanStoryDetail'))
+const AboutUs = lazy(() => import('@/pages/AboutUs'))
+const Auctions = lazy(() => import('@/pages/Auctions/Auctions'))
+const CollectorDashboard = lazy(() => import('@/pages/CollectorDashboardPage'))
+const ArtisanDashboard = lazy(() => import('@/pages/artisans/artisanDashboard/ArtisanDashboard'))
+const ArtisanProfile = lazy(() => import('@/pages/artisans/artisanDashboard/profile/Profile'))
+const ArtisanProductsManagement = lazy(() => import('@/pages/artisans/artisanDashboard/Products/ArtisanProducts'))
+const AddProduct = lazy(() => import('@/pages/artisans/artisanDashboard/Products/AddProduct'))
+const Content = lazy(() => import('@/pages/artisans/artisanDashboard/ContentManagement/Content'))
+const Message = lazy(() => import('@/pages/artisans/artisanDashboard/messaging/Message'))
+const Orders = lazy(() => import('@/pages/artisans/artisanDashboard/Orders/Orders'))
+const Reviews = lazy(() => import('@/pages/artisans/artisanDashboard/Reviews/Reviews'))
+const Profile = lazy(() => import('@/pages/UserProfile/Profile'))
+const Admin = lazy(() => import('@/pages/admin/Admin'))
+const Products = lazy(() => import('@/pages/admin/Products'))
+const EditProduct = lazy(() => import('@/pages/admin/EditProduct'))
+const Users = lazy(() => import('@/pages/admin/Users/Users'))
+const AdminContent = lazy(() => import('@/pages/admin/content&stories/AdminContent'))
+const VerificationManagement = lazy(() => import('@/pages/admin/Users/components/VerificationManagement'))
+const AdminOrders = lazy(() => import('@/pages/admin/Orders/AdminOrders'))
+const AboutUsManagement = lazy(() => import('@/pages/admin/aboutusManagement/AboutUsManagement'))
+const ProtectedRoute = lazy(() => import('@/components/ProtectedRoute').then(m => ({ default: m.ProtectedRoute })))
+const ProtectedAdminRoute = lazy(() => import('@/components/ProtectedAdminRoute'))
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+)
 
 export default function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/product/:type/:id" element={<ProductDetails />} />
       <Route path="/cart" element={<Cart />} />
@@ -81,6 +93,7 @@ export default function AppRoutes() {
       <Route path="/admin/content" element={<ProtectedAdminRoute><AdminContent /></ProtectedAdminRoute>} />
       <Route path="/admin/about-us" element={<ProtectedAdminRoute><AboutUsManagement /></ProtectedAdminRoute>} />
       <Route path="/admin/*" element={<Admin />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   )
 }

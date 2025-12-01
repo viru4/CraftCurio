@@ -5,6 +5,7 @@ import connectDB from './src/config/dbConfig.js';
 import app from './src/app.js';
 import { initializeAuctionSockets } from './src/sockets/auctionSocket.js';
 import { validateCloudinaryConfig } from './src/services/uploadService.js';
+import { initializeChatSockets } from './src/sockets/chatSocket.js';
 
 // Load environment variables
 dotenv.config();
@@ -28,15 +29,18 @@ const io = new Server(httpServer, {
 // Initialize auction socket handlers
 initializeAuctionSockets(io);
 
+// Initialize chat socket handlers
+initializeChatSockets(io);
+
 // Connect to database first, then start server
 const startServer = async () => {
   try {
     // Ensure Cloudinary has the credentials it needs before serving uploads
     validateCloudinaryConfig();
-    
+
     // Wait for database connection
     await connectDB();
-    
+
     // Start server only after successful DB connection
     httpServer.listen(port, () => {
       console.log(`🚀 Server is running on port ${port}`);
@@ -44,6 +48,7 @@ const startServer = async () => {
       console.log(`📊 Database: MongoDB Connected`);
       console.log(`⚡ Socket.io: Real-time features enabled`);
       console.log(`🔨 Auction System: Active`);
+      console.log(`💬 Chat System: Active`);
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);

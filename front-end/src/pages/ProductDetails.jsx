@@ -42,19 +42,19 @@ const ProductDetails = () => {
       try {
         setLoading(true);
         // Determine API endpoint based on type
-        const endpoint = isCollectible 
+        const endpoint = isCollectible
           ? `${API_BASE_URL}/api/collectibles/${id}`
           : `${API_BASE_URL}/api/artisan-products/${id}`;
-        
+
         const response = await fetch(endpoint);
-        
+
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`Product not found (${response.status}): ${errorText}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Normalize data structure for collectibles
         let normalizedProduct = data.data;
         if (isCollectible) {
@@ -67,14 +67,14 @@ const ProductDetails = () => {
             // Add empty structures for optional fields
             rating: data.data.rating || { average: 0, count: 0 },
             reviews: data.data.reviews || [],
-            artisanInfo: null, // Collectibles don't have artisan info
+            artisanInfo: data.data.owner || null, // Pass owner as artisanInfo for collectibles
             craftMethod: data.data.craftMethod || null,
             provenance: data.data.provenance || null,
             history: data.data.history || null,
             productStory: data.data.productStory || null
           };
         }
-        
+
         setProduct(normalizedProduct);
       } catch (err) {
         console.error('Error fetching product:', err);
@@ -103,8 +103,8 @@ const ProductDetails = () => {
     const wishlistProduct = {
       id: product.id,
       name: product.title,
-      price: typeof product.price === 'string' 
-        ? parseFloat(product.price.replace(/[^0-9.]/g, '')) 
+      price: typeof product.price === 'string'
+        ? parseFloat(product.price.replace(/[^0-9.]/g, ''))
         : product.price,
       image: product.images?.[0] || product.image,
       artisan: product.artisanInfo?.name || product.artisan || 'Artisan',
@@ -129,8 +129,8 @@ const ProductDetails = () => {
     const cartProduct = {
       id: product.id,
       name: product.title,
-      price: typeof product.price === 'string' 
-        ? parseFloat(product.price.replace(/[^0-9.]/g, '')) 
+      price: typeof product.price === 'string'
+        ? parseFloat(product.price.replace(/[^0-9.]/g, ''))
         : product.price,
       image: product.images?.[0] || product.image,
       artisan: product.artisanInfo?.name || product.artisan || 'Artisan',
@@ -170,7 +170,7 @@ const ProductDetails = () => {
         <div className="flex flex-col items-center justify-center py-20">
           <h1 className="text-2xl font-bold text-stone-900 mb-4">Product Not Found</h1>
           <p className="text-stone-600 mb-6">{error}</p>
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="px-6 py-3 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors"
           >
@@ -198,7 +198,7 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen bg-stone-50">
       <Navbar />
-      
+
       {/* Success Alert */}
       {showAlert && (
         <div className="fixed top-24 right-4 z-50 animate-slide-in-right">
@@ -210,7 +210,7 @@ const ProductDetails = () => {
               <p className="font-semibold">Added to cart!</p>
               <p className="text-sm text-green-100">{product?.title}</p>
             </div>
-            <button 
+            <button
               onClick={() => setShowAlert(false)}
               className="ml-4 hover:bg-green-600 rounded p-1 transition-colors"
             >
@@ -221,11 +221,11 @@ const ProductDetails = () => {
           </div>
         </div>
       )}
-      
+
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           {/* Breadcrumb */}
-          <BreadcrumbNavigation 
+          <BreadcrumbNavigation
             category={product.category}
             productTitle={product.title}
           />
@@ -272,7 +272,7 @@ const ProductDetails = () => {
                   </div>
                 )}
 
-                {/* Price and Action Buttons */}
+                {/* Price and Action Buttons - Mobile */}
                 <ProductPriceCard
                   price={product.price || 0}
                   availability={product.availability}
@@ -281,6 +281,7 @@ const ProductDetails = () => {
                   onAddToCart={handleAddToCart}
                   isMobile={true}
                   isCollectible={isCollectible}
+                  artisanInfo={product.artisanInfo}
                 />
 
                 {/* Description for Collectibles */}
@@ -304,7 +305,7 @@ const ProductDetails = () => {
 
                 {/* Artisan Profile Mobile - Only for artisan products */}
                 {!isCollectible && product.artisanInfo && (
-                  <ArtisanProfileCard 
+                  <ArtisanProfileCard
                     artisanInfo={product.artisanInfo}
                     isMobile={true}
                   />
@@ -321,7 +322,7 @@ const ProductDetails = () => {
                     {product.category}
                   </a>
                 )}
-                
+
                 {/* Title and Description */}
                 <div>
                   <h1 className="text-3xl xl:text-4xl font-black text-stone-900 tracking-tighter leading-tight">
@@ -353,6 +354,7 @@ const ProductDetails = () => {
                   onAddToCart={handleAddToCart}
                   isMobile={false}
                   isCollectible={isCollectible}
+                  artisanInfo={product.artisanInfo}
                 />
 
                 {/* Description for Collectibles */}
@@ -397,7 +399,7 @@ const ProductDetails = () => {
                           </div>
                           <p className="text-stone-700 text-sm">"{review.reviewText || 'Excellent quality and fast shipping!'}"
                           </p>
-                          <p className="text-xs text-stone-500">- {review.userName || 'Anonymous'} on {review.reviewDate ? new Date(review.reviewDate).toLocaleDateString() : 'Recently'}</p>
+                          <p className="text-xs text-stone-500 mt-1">- {review.userName || 'Anonymous'} on {review.reviewDate ? new Date(review.reviewDate).toLocaleDateString() : 'Recently'}</p>
                         </div>
                       ))}
                     </div>
@@ -409,7 +411,7 @@ const ProductDetails = () => {
 
                 {/* Artisan Profile - Only for artisan products */}
                 {!isCollectible && product.artisanInfo && (
-                  <ArtisanProfileCard 
+                  <ArtisanProfileCard
                     artisanInfo={product.artisanInfo}
                     showInSidebar={true}
                   />

@@ -5,3 +5,4 @@ export { default as AddressForm } from './AddressForm';
 export { default as SecuritySettings } from './SecuritySettings';
 export { default as AccountSettings } from './AccountSettings';
 export { default as PaymentBilling } from './PaymentBilling';
+export { default as UserMessages } from './UserMessages';

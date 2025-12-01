@@ -1,0 +1,18 @@
+Connecting to MongoDB...
+Connected.
+
+--- Users ---
+Sample User:
+_id: 692583766f9b79238b11403a (Type: object, Constructor: ObjectId)
+
+--- Artisans ---
+Sample Artisan:
+_id: 692583766f9b79238b11403d (Type: object, Constructor: ObjectId)
+id: artisan1 (Type: string)
+userId: 692583766f9b79238b11403a (Type: object, Constructor: ObjectId)
+
+--- Collectors ---
+Sample Collector:
+_id: 6925995bee4d6162c9d6cf8d (Type: object, Constructor: ObjectId)
+id: collector-001 (Type: string)
+userId: 6925995bee4d6162c9d6cf88 (Type: object, Constructor: ObjectId)

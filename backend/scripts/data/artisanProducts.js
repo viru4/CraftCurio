@@ -9,6 +9,7 @@ export const artisanProducts = [
     currency: "INR",
     rating: { average: 4.8, count: 23 },
     artisanInfo: {
+      id: "artisan1",
       name: "Priya Textiles",
       verified: true
     },
@@ -46,6 +47,7 @@ export const artisanProducts = [
     currency: "INR",
     rating: { average: 4.6, count: 18 },
     artisanInfo: {
+      id: "artisan2",
       name: "Clay Crafts Studio",
       verified: true
     },
@@ -82,6 +84,7 @@ export const artisanProducts = [
     currency: "INR",
     rating: { average: 4.9, count: 31 },
     artisanInfo: {
+      id: "artisan3",
       name: "Heritage Jewelry Co.",
       verified: true
     },
@@ -119,7 +122,7 @@ export const artisanProducts = [
     currency: "INR",
     rating: { average: 4.7, count: 22 },
     artisanInfo: {
-
+      id: "artisan4",
       name: "Wooden Wonders",
       verified: true
     },
@@ -156,7 +159,7 @@ export const artisanProducts = [
     currency: "INR",
     rating: { average: 4.5, count: 16 },
     artisanInfo: {
-
+      id: "artisan5",
       name: "Natural Dyes Co.",
       verified: true
     },

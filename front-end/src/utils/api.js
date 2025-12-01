@@ -78,27 +78,25 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Unauthorized - redirect to login
-          console.error('Unauthorized access. Please login again.');
-          localStorage.removeItem('authToken');
-          window.location.href = '/login';
+          // Unauthorized - redirect to login (only in production or when appropriate)
+          if (import.meta.env.PROD) {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login';
+          }
           break;
         case 403:
-          console.error('Access forbidden:', data.message || data.error);
+          // Access forbidden - handled by calling code
           break;
         case 404:
-          console.error('Resource not found:', data.message || data.error);
+          // Resource not found - handled by calling code
           break;
         case 500:
-          console.error('Server error:', data.message || data.error);
+          // Server error - handled by calling code
           break;
         default:
-          console.error('API Error:', data.message || data.error);
+          // Generic error - handled by calling code
+          break;
       }
-    } else if (error.request) {
-      console.error('No response from server. Check your connection.');
-    } else {
-      console.error('Request error:', error.message);
     }
 
     return Promise.reject(error);

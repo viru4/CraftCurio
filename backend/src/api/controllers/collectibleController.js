@@ -42,7 +42,7 @@ export const createCollectible = async (req, res) => {
     if (!collectibleData.owner && userId) {
       // Find or create collector profile
       let collector = await Collector.findOne({ userId });
-      
+
       if (!collector) {
         // Create collector profile if it doesn't exist
         console.log('Creating collector profile for user:', userId);
@@ -59,7 +59,7 @@ export const createCollectible = async (req, res) => {
         await collector.save();
         console.log('Collector profile created:', collector._id);
       }
-      
+
       collectibleData.owner = collector._id;
     }
 
@@ -275,14 +275,14 @@ export const getCollectibleById = async (req, res) => {
     if (isObjectId) {
       // Try MongoDB _id first if it's a valid ObjectId format
       collectible = await Collectible.findById(id)
-        .populate('owner', 'name profilePhotoUrl location email')
+        .populate('owner', 'name profilePhotoUrl location email userId')
         .lean();
     }
 
     // If not found by _id or not a valid ObjectId, try custom 'id' field
     if (!collectible) {
       collectible = await Collectible.findOne({ id })
-        .populate('owner', 'name profilePhotoUrl location email')
+        .populate('owner', 'name profilePhotoUrl location email userId')
         .lean();
     }
 
@@ -297,7 +297,7 @@ export const getCollectibleById = async (req, res) => {
         await updateAuctionStatus(collectibleDoc._id);
         // Refetch with updated status
         collectible = await Collectible.findById(collectibleDoc._id)
-          .populate('owner', 'name profilePhotoUrl location email')
+          .populate('owner', 'name profilePhotoUrl location email userId')
           .lean();
       }
     }
@@ -310,7 +310,7 @@ export const getCollectibleById = async (req, res) => {
     collectible.views = (collectible.views || 0) + 1;
 
     // Add auction stats if applicable
-    const response = collectible.toObject();
+    const response = collectible;
     if (collectible.saleType === 'auction') {
       response.stats = getAuctionStats(collectible);
     }

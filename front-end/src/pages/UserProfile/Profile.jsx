@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ProfileSidebar,
   ProfileHeader,
@@ -8,21 +8,22 @@ import {
   AddressForm,
   SecuritySettings,
   AccountSettings,
-  PaymentBilling
+  PaymentBilling,
+  UserMessages
 } from './components';
 
 // Helper to refresh auth context
 const refreshAuthContext = async () => {
   const token = localStorage.getItem('token');
   if (!token) return;
-  
+
   try {
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -39,7 +40,14 @@ const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile');
+  const location = useLocation();
+  
+  // Get tab from URL search params
+  const searchParams = new URLSearchParams(location.search);
+  const tabFromUrl = searchParams.get('tab');
+  const initialTab = tabFromUrl || 'profile';
+  
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Profile data state
@@ -65,6 +73,19 @@ const Profile = () => {
   });
 
   const [passwordError, setPasswordError] = useState('');
+
+  // Update URL when activeTab changes (without causing re-render loops)
+  useEffect(() => {
+    const currentParams = new URLSearchParams(location.search);
+    const currentTab = currentParams.get('tab');
+    
+    // Only update URL if the tab actually changed
+    if (currentTab !== activeTab) {
+      const newParams = new URLSearchParams(location.search);
+      newParams.set('tab', activeTab);
+      navigate(`/profile?${newParams.toString()}`, { replace: true });
+    }
+  }, [activeTab, navigate]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -341,6 +362,10 @@ const Profile = () => {
 
             {activeTab === 'payment' && (
               <PaymentBilling profileData={profileData} />
+            )}
+
+            {activeTab === 'messages' && (
+              <UserMessages key={new URLSearchParams(location.search).get('recipientId') || 'messages'} />
             )}
           </div>
         </main>

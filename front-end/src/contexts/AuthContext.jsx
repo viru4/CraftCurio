@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -63,7 +63,6 @@ export const AuthProvider = ({ children }) => {
           if (!response.ok) {
             // Only logout if we get an explicit auth error (401/403)
             if (response.status === 401 || response.status === 403) {
-              console.warn('Token expired or invalid, logging out');
               setUser(null);
               setToken(null);
               localStorage.removeItem('token');
@@ -111,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     token,
     loading,
@@ -123,7 +122,7 @@ export const AuthProvider = ({ children }) => {
     isArtisan: user?.role === 'artisan',
     isCollector: user?.role === 'collector',
     isAdmin: user?.role === 'admin',
-  };
+  }), [user, token, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -26,6 +26,12 @@ export const getConversations = async (req, res) => {
           p => p._id.toString() !== userId.toString()
         );
 
+        // Skip if no other participant found (shouldn't happen but safeguard)
+        if (!otherParticipant) {
+          console.warn('⚠️ Conversation has no other participant:', conv._id);
+          return null;
+        }
+
         // Get last message text
         const lastMessageText = conv.lastMessage ? conv.lastMessage.text : '';
 
@@ -35,19 +41,21 @@ export const getConversations = async (req, res) => {
         return {
           id: conv._id,
           user: {
+            _id: otherParticipant._id,
             id: otherParticipant._id,
             name: otherParticipant.name,
             email: otherParticipant.email,
             role: otherParticipant.role,
             online: false // TODO: Implement online status with Socket.IO
           },
+          participants: conv.participants,
           lastMessage: lastMessageText,
           lastMessageTime: conv.lastMessageTime,
           unreadCount: unreadCount,
           isTyping: false // TODO: Implement with Socket.IO
         };
       })
-    );
+    ).then(results => results.filter(conv => conv !== null));
 
     res.json({
       success: true,
@@ -144,6 +152,10 @@ export const getMessages = async (req, res) => {
   }
 };
 
+import Notification from '../../models/Notification.js';
+import { isUserOnline, getChatNamespace } from '../../sockets/chatSocket.js';
+import { sendEmail } from '../../services/emailService.js';
+
 /**
  * Send a new message
  * @route POST /api/messages
@@ -177,6 +189,14 @@ export const sendMessage = async (req, res) => {
         return res.status(404).json({
           success: false,
           message: 'Conversation not found'
+        });
+      }
+
+      // Permission Check: Ensure sender is a participant
+      if (!conversation.participants.includes(senderId)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Unauthorized: You are not a participant in this conversation'
         });
       }
     } else {
@@ -215,20 +235,63 @@ export const sendMessage = async (req, res) => {
     // Populate sender info
     await message.populate('senderId', 'name');
 
-    // TODO: Emit Socket.IO event for real-time delivery
-    // io.to(recipientId).emit('new-message', formattedMessage);
+    const formattedMessage = {
+      id: message._id,
+      conversationId: message.conversationId,
+      senderId: message.senderId._id,
+      text: message.text,
+      timestamp: message.createdAt,
+      read: message.read,
+      reactions: message.reactions || []
+    };
+
+    // Emit Socket.IO event for real-time delivery
+    const chatNamespace = getChatNamespace();
+    if (chatNamespace) {
+      chatNamespace.to(recipientId2.toString()).emit('newMessage', formattedMessage);
+    }
+
+    // Offline Notification Logic
+    if (!isUserOnline(recipientId2)) {
+      // Create in-app notification
+      await Notification.create({
+        userId: recipientId2,
+        type: 'message',
+        title: `New message from ${req.user.name}`,
+        message: text.length > 50 ? text.substring(0, 50) + '...' : text,
+        relatedId: conversation._id
+      });
+
+      // Send email notification
+      const recipientUser = await User.findById(recipientId2);
+      if (recipientUser && recipientUser.email) {
+        await sendEmail({
+          to: recipientUser.email,
+          subject: `New message from ${req.user.name} on CraftCurio`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ea580c;">New Message</h2>
+              <p>Hello ${recipientUser.name},</p>
+              <p>You have received a new message from <strong>${req.user.name}</strong>:</p>
+              <blockquote style="background: #f5f5f4; border-left: 4px solid #ea580c; padding: 10px; margin: 20px 0;">
+                ${text}
+              </blockquote>
+              <p>
+                <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/artisan/messages" 
+                   style="background-color: #ea580c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                  Reply Now
+                </a>
+              </p>
+            </div>
+          `
+        });
+      }
+    }
 
     res.status(201).json({
       success: true,
-      message: {
-        id: message._id,
-        conversationId: message.conversationId,
-        senderId: message.senderId._id,
-        text: message.text,
-        timestamp: message.createdAt,
-        read: message.read,
-        reactions: message.reactions || []
-      }
+      message: formattedMessage,
+      conversationId: conversation._id
     });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -268,8 +331,20 @@ export const deleteMessage = async (req, res) => {
 
     await message.softDelete();
 
-    // TODO: Emit Socket.IO event
-    // io.to(conversationId).emit('message-deleted', { messageId });
+    // Emit Socket.IO event
+    const chatNamespace = getChatNamespace();
+    if (chatNamespace) {
+      // Get conversation to notify both participants
+      const conversation = await Conversation.findById(message.conversationId);
+      if (conversation) {
+        conversation.participants.forEach(participantId => {
+          chatNamespace.to(participantId.toString()).emit('messageDeleted', { 
+            messageId,
+            conversationId: message.conversationId 
+          });
+        });
+      }
+    }
 
     res.json({
       success: true,
@@ -322,8 +397,15 @@ export const reactToMessage = async (req, res) => {
 
     await message.addReaction(emoji);
 
-    // TODO: Emit Socket.IO event
-    // io.to(conversationId).emit('message-reaction', { messageId, emoji });
+    // Emit Socket.IO event
+    const chatNamespace = getChatNamespace();
+    if (chatNamespace) {
+      chatNamespace.to(message.conversationId.toString()).emit('messageReaction', { 
+        messageId, 
+        emoji,
+        reactions: message.reactions
+      });
+    }
 
     res.json({
       success: true,
@@ -381,6 +463,19 @@ export const markAsRead = async (req, res) => {
     // Reset unread count
     conversation.unreadCount.set(userId.toString(), 0);
     await conversation.save();
+
+    // Emit event to sender that messages were read
+    const otherParticipant = conversation.participants.find(
+      p => p.toString() !== userId.toString()
+    );
+
+    const chatNamespace = getChatNamespace();
+    if (chatNamespace) {
+      chatNamespace.to(otherParticipant.toString()).emit('messagesRead', {
+        conversationId,
+        readBy: userId
+      });
+    }
 
     res.json({
       success: true,

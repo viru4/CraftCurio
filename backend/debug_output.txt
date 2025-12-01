@@ -1,0 +1,38 @@
+Attempting to connect to MongoDB...
+Connected to MongoDB
+
+--- Collectible ---
+ID: 69259ab4ee4d6162c9d6cfc7
+Title: Vintage Embroidered Silk Wall Hanging
+Owner: {
+  "_id": "6925995bee4d6162c9d6cf8d",
+  "id": "collector-001",
+  "userId": "6925995bee4d6162c9d6cf88",
+  "name": "collector",
+  "interests": [],
+  "listedCollectibles": [
+    "69259ab4ee4d6162c9d6cfc7",
+    "69269dce88513f8f1ba22078",
+    "6926adf43fd65cf3bdfe1dd0"
+  ],
+  "wishlist": [],
+  "purchaseHistory": [],
+  "activeBids": [],
+  "wonAuctions": [],
+  "createdAt": "2025-11-25T11:56:11.681Z",
+  "updatedAt": "2025-11-25T11:56:11.681Z",
+  "__v": 0
+}
+Owner UserID: 6925995bee4d6162c9d6cf88
+
+--- Artisan Product ---
+ID: 69258e91e836cf1f4167785b
+Title: Hand-Painted Rajasthan Blue Pottery Vase
+ArtisanInfo: {
+  "id": "artisan1",
+  "name": "Virendra Kumar",
+  "profilePhotoUrl": "https://res.cloudinary.com/dauc4umm5/image/upload/v1764349634/craftcurio/1764349632956-646460121.jpg",
+  "briefBio": "Third-generation Jaipur potter bringing ancient blue pottery to a modern audience.",
+  "verified": true
+}
+Artisan UserID (Manual Lookup): 692583766f9b79238b11403a

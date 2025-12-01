@@ -14,7 +14,8 @@ const ChatArea = ({
   onSendMessage, 
   onDeleteMessage,
   onReactToMessage,
-  onTyping 
+  onTyping,
+  isTyping = false
 }) => {
   const [messageText, setMessageText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -142,6 +143,18 @@ const ChatArea = ({
     );
   }
 
+  // Safety check for conversation.user
+  if (!conversation.user) {
+    console.error('Conversation missing user object:', conversation);
+    return (
+      <div className="flex items-center justify-center h-full bg-stone-50 dark:bg-stone-900">
+        <div className="text-center">
+          <p className="text-sm text-red-500">Error: Invalid conversation data</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-white dark:bg-stone-900">
       {/* Chat Header */}
@@ -259,7 +272,7 @@ const ChatArea = ({
         ))}
 
         {/* Typing Indicator */}
-        {conversation.isTyping && (
+        {isTyping && (
           <div className="flex items-end gap-2">
             <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[#ec6d13] to-[#d87a5b] flex items-center justify-center text-white text-xs font-semibold">
               {conversation.user.name.charAt(0).toUpperCase()}
