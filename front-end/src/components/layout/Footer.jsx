@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -8,15 +9,16 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white">Shop</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-[var(--primary-color)] transition-colors">Collectibles</a></li>
-              <li><a href="#" className="hover:text-[var(--primary-color)] transition-colors">Artisan Products</a></li>
-              <li><a href="#" className="hover:text-[var(--primary-color)] transition-colors">Featured Items</a></li>
+              <li><Link to="/collectibles" className="hover:text-[var(--primary-color)] transition-colors">Collectibles</Link></li>
+              <li><Link to="/artisans" className="hover:text-[var(--primary-color)] transition-colors">Artisan Products</Link></li>
+              <li><Link to="#" className="hover:text-[var(--primary-color)] transition-colors">Featured Items</Link></li>
+              <li><Link to="/auctions" className="hover:text-[var(--primary-color)] transition-colors">Auctions</Link></li>
             </ul>
           </div>
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white">About</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-[var(--primary-color)] transition-colors">About Us</a></li>
+              <li><Link to="/about-us" className="hover:text-[var(--primary-color)] transition-colors">About Us</Link></li>
               <li><a href="#" className="hover:text-[var(--primary-color)] transition-colors">Our Artisans</a></li>
               <li><a href="#" className="hover:text-[var(--primary-color)] transition-colors">Careers</a></li>
             </ul>
