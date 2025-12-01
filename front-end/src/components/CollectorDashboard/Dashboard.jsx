@@ -22,6 +22,8 @@ const Dashboard = ({
     sortBy,
     setSortBy,
     collector, // ADDED HERE
+    collectorLoading, // ADDED HERE - to show loading state
+    collectorError, // ADDED HERE - to show error state
     refreshTrigger, // ADDED HERE for triggering refetch
   } = useCollectorContext();
 
@@ -47,24 +49,26 @@ const Dashboard = ({
     page: 1,
     limit: 20,
     saleType: activeTab === 'direct' ? 'direct' : activeTab === 'auction' ? 'auction' : undefined,
-    status: filterStatus,
+    status: filterStatus === 'all' ? undefined : filterStatus, // Don't pass 'all', use undefined instead
     sortBy,
   });
 
   // Debug logging (only in development)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Dashboard Debug:', {
-        collector,
-        collectorId: collector?._id,
-        collectibles,
-        collectiblesCount: collectibles?.length,
-        isLoading,
-        error,
-        pagination
-      });
-    }
-  }, [collector, collectibles, isLoading, error, pagination]);
+    console.log('Dashboard Debug:', {
+      hasCollector: !!collector,
+      collectorId: collector?._id,
+      collectorUserId: collector?.userId,
+      collectiblesCount: collectibles?.length,
+      isLoading,
+      isCollectorLoading: collectorLoading,
+      error,
+      collectorError,
+      pagination,
+      activeTab,
+      filterStatus
+    });
+  }, [collector, collectibles, isLoading, error, pagination, activeTab, filterStatus, collectorLoading, collectorError]);
 
   // Listen to refreshTrigger from context
   useEffect(() => {
@@ -197,6 +201,26 @@ const Dashboard = ({
         {/* Listings Tabs Content */}
         {(activeTab === 'direct' || activeTab === 'auction') && (
           <>
+            {/* Collector Profile Loading State */}
+            {collectorLoading && !collector && (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+                <p className="mt-4 text-gray-600">Loading your profile...</p>
+              </div>
+            )}
+
+            {/* Collector Profile Error State */}
+            {collectorError && !collector && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                <p className="font-bold">Error loading collector profile</p>
+                <p>{collectorError}</p>
+                <p className="mt-2 text-sm">Please refresh the page or contact support if the issue persists.</p>
+              </div>
+            )}
+
+            {/* Only show filters and content when collector is loaded */}
+            {collector && (
+              <>
             {/* Filters and Search */}
             <div className="bg-white rounded-lg shadow p-4 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -338,6 +362,8 @@ const Dashboard = ({
                   </button>
                 )}
               </div>
+            )}
+          </>
             )}
           </>
         )}

@@ -22,8 +22,8 @@ export const CollectorProvider = ({ children, collectorId }) => {
   // Dashboard state
   const [activeTab, setActiveTab] = useState('direct'); // 'direct', 'auctions', 'add'
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'sold', 'inactive'
-  const [sortBy, setSortBy] = useState('newest'); // 'newest', 'price-high', 'price-low', 'popular'
+  const [filterStatus, setFilterStatus] = useState(''); // '', 'active', 'sold', 'inactive' - empty string means all
+  const [sortBy, setSortBy] = useState('createdAt:desc'); // API format: 'field:order'
 
   // Refresh trigger for listings
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -76,8 +76,8 @@ export const CollectorProvider = ({ children, collectorId }) => {
    */
   const resetFilters = useCallback(() => {
     setSearchQuery('');
-    setFilterStatus('all');
-    setSortBy('newest');
+    setFilterStatus(''); // Empty string for 'all'
+    setSortBy('createdAt:desc');
   }, []);
 
   /**

@@ -23,7 +23,7 @@ const CollectorDashboardContent = () => {
   // Hooks for CRUD operations
   const { create: createCollectible, loading: isCreating, error: createError } = useCreateCollectible();
   const { update: updateCollectible, loading: isUpdating, error: updateError } = useUpdateCollectible();
-  const { delete: deleteCollectible, loading: isDeleting } = useDeleteCollectible();
+  const { remove: deleteCollectible, loading: isDeleting } = useDeleteCollectible();
 
   // Protect the route
   useEffect(() => {

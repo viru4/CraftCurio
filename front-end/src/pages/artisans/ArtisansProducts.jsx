@@ -140,11 +140,6 @@ const ArtisansProducts = () => {
     return shuffled.slice(0, count);
   };
 
-  const handleProductClick = (item) => {
-    console.log('Artisan product clicked:', item.title);
-    // This could navigate to a product detail page or open a modal
-  };
-
   const handlePopularSearchClick = (searchTerm) => {
     handlePopularTagClick(searchTerm, () => {
       scrollToFilteredItems();
@@ -275,7 +270,6 @@ const ArtisansProducts = () => {
         items={getFilteredItems()}
         searchQuery={getTrimmedQuery()}
         selectedCategory={selectedCategory}
-        onProductClick={handleProductClick}
         isVisible={true}
         totalProductCount={artisanProducts.length}
         initialDisplayCount={12}
@@ -288,7 +282,6 @@ const ArtisansProducts = () => {
         title="Featured Artisan Products"
         description="Handpicked exceptional handcrafted items from our most talented artisans"
         items={getFeaturedItems()}
-        onProductClick={handleProductClick}
         backgroundColor="bg-white"
         productType="artisan-product"
       />
@@ -298,7 +291,6 @@ const ArtisansProducts = () => {
         title="Popular Artisan Items"
         description="Most loved handcrafted pieces by our community of art enthusiasts"
         items={getPopularItems()}
-        onProductClick={handleProductClick}
         backgroundColor="bg-stone-50"
         productType="artisan-product"
       />
@@ -308,7 +300,6 @@ const ArtisansProducts = () => {
         title="Recent Artisan Creations"
         description="Fresh handcrafted arrivals from talented artisans worldwide"
         items={getRecentItems()}
-        onProductClick={handleProductClick}
         backgroundColor="bg-white"
         productType="artisan-product"
       />

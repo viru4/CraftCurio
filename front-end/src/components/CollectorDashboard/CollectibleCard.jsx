@@ -156,7 +156,7 @@ const CollectibleCard = ({
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm text-gray-600">Current Bid:</span>
                 <span className="text-lg font-bold text-orange-600">
-                  ${auction?.currentBid?.toFixed(2) || collectible.price?.toFixed(2)}
+                  ₹{auction?.currentBid?.toFixed(2) || collectible.price?.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
@@ -167,7 +167,7 @@ const CollectibleCard = ({
                 <div className="flex justify-between items-center text-sm mt-1">
                   <span className="text-gray-500">Buy Now:</span>
                   <span className="text-green-600 font-semibold">
-                    ${auction.buyNowPrice.toFixed(2)}
+                    ₹{auction.buyNowPrice.toFixed(2)}
                   </span>
                 </div>
               )}
@@ -176,7 +176,7 @@ const CollectibleCard = ({
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Price:</span>
               <span className="text-xl font-bold text-green-600">
-                ${collectible.price?.toFixed(2)}
+                ₹{collectible.price?.toFixed(2)}
               </span>
             </div>
           )}

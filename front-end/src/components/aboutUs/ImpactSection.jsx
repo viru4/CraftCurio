@@ -125,7 +125,7 @@ const ImpactSection = ({ data }) => {
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-orange-600 rounded-lg flex items-center justify-center">
-                      <initiative.icon className="w-6 h-6 text-white" />
+                      <IconComponent className="w-6 h-6 text-white" />
                     </div>
                     <h4 className="text-xl font-bold text-stone-800">
                       {initiative.title}

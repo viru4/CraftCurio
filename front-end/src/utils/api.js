@@ -262,7 +262,9 @@ export const cancelAuction = async (id) => {
  * @returns {Promise<Object>} Collector's listings
  */
 export const getCollectorListings = async (collectorId, params = {}) => {
+  console.log('API: getCollectorListings called with:', { collectorId, params });
   const response = await api.get(`/collectibles/collector/${collectorId}/listings`, { params });
+  console.log('API: getCollectorListings response:', response.data);
   return response.data;
 };
 

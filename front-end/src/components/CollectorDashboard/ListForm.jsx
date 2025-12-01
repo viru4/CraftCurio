@@ -410,7 +410,7 @@ const ListForm = ({
           <h3 className="text-lg font-semibold text-gray-800 mb-3">Direct Sale Details</h3>
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price ($) <span className="text-red-500">*</span>
+              Price (₹) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -437,7 +437,7 @@ const ListForm = ({
           {/* Starting Bid */}
           <div>
             <label htmlFor="startingBid" className="block text-sm font-medium text-gray-700 mb-1">
-              Starting Bid ($) <span className="text-red-500">*</span>
+              Starting Bid (₹) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -457,7 +457,7 @@ const ListForm = ({
           {/* Reserve Price */}
           <div>
             <label htmlFor="reservePrice" className="block text-sm font-medium text-gray-700 mb-1">
-              Reserve Price ($) <span className="text-gray-500">(Optional)</span>
+              Reserve Price (₹) <span className="text-gray-500">(Optional)</span>
             </label>
             <input
               type="number"
@@ -478,7 +478,7 @@ const ListForm = ({
           {/* Buy Now Price */}
           <div>
             <label htmlFor="buyNowPrice" className="block text-sm font-medium text-gray-700 mb-1">
-              Buy Now Price ($) <span className="text-gray-500">(Optional)</span>
+              Buy Now Price (₹) <span className="text-gray-500">(Optional)</span>
             </label>
             <input
               type="number"

@@ -160,11 +160,6 @@ const Collectibles = () => {
     return shuffled.slice(0, count);
   };
 
-  const handleProductClick = (item) => {
-    console.log('Product clicked:', item.title);
-    // This could navigate to a product detail page or open a modal
-  };
-
   const handlePopularSearchClick = (searchTerm) => {
     handlePopularTagClick(searchTerm, () => {
       scrollToFilteredItems();
@@ -303,7 +298,6 @@ const Collectibles = () => {
         items={getFilteredItems()}
         searchQuery={getTrimmedQuery()}
         selectedCategory={selectedCategory}
-        onProductClick={handleProductClick}
         isVisible={true}
         totalProductCount={collectibleItems.length}
         initialDisplayCount={12}
@@ -316,7 +310,6 @@ const Collectibles = () => {
         title="Featured Collectibles"
         description="Handpicked rare finds from our curated collection of exceptional items"
         items={getFeaturedItems()}
-        onProductClick={handleProductClick}
         backgroundColor="bg-white"
         productType="collectible"
       />
@@ -326,7 +319,6 @@ const Collectibles = () => {
         title="Popular Items"
         description="Most loved pieces by our community of collectors and enthusiasts"
         items={getPopularItems()}
-        onProductClick={handleProductClick}
         backgroundColor="bg-stone-50"
         productType="collectible"
       />
@@ -336,7 +328,6 @@ const Collectibles = () => {
         title="Recent Items"
         description="Fresh arrivals from talented artisans and collectors worldwide"
         items={getRecentItems()}
-        onProductClick={handleProductClick}
         backgroundColor="bg-white"
         productType="collectible"
       />

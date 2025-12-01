@@ -170,17 +170,27 @@ export const useCollectorListings = (collectorId, initialFilters = {}) => {
     totalPages: 0,
   });
 
+  // Sync external filter changes with internal state
+  useEffect(() => {
+    setFilters(initialFilters);
+  }, [initialFilters.saleType, initialFilters.status, initialFilters.sortBy, initialFilters.page, initialFilters.limit]);
+
   /**
    * Fetch collector listings
    */
   const fetchListings = useCallback(async (params = {}) => {
-    if (!collectorId) return;
+    if (!collectorId) {
+      console.log('useCollectorListings: No collectorId, skipping fetch');
+      return;
+    }
 
+    console.log('useCollectorListings: Fetching with params:', { collectorId, filters, params });
     setLoading(true);
     setError(null);
 
     try {
       const mergedParams = { ...filters, ...params };
+      console.log('useCollectorListings: Merged params:', mergedParams);
       const response = await getCollectorListings(collectorId, mergedParams);
 
       setListings(response.data || []);
@@ -190,9 +200,10 @@ export const useCollectorListings = (collectorId, initialFilters = {}) => {
         total: 0,
         totalPages: 0,
       });
+      console.log('useCollectorListings: Fetch successful, listings count:', response.data?.length);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch listings');
-      console.error('Error fetching listings:', err);
+      console.error('useCollectorListings: Error fetching listings:', err);
     } finally {
       setLoading(false);
     }
@@ -219,7 +230,7 @@ export const useCollectorListings = (collectorId, initialFilters = {}) => {
       fetchListings();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectorId]);
+  }, [collectorId, filters]); // Also watch filters for changes
 
   return {
     listings,
