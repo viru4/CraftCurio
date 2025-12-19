@@ -9,10 +9,13 @@ This is a modern, responsive React frontend for the CraftCurio collector dashboa
 ### Core Functionality
 - ✅ **Dual Sale Types**: Support for direct sale and auction listings
 - ✅ **Real-Time Auctions**: Live bid updates, countdown timers, and status changes via Socket.io
+- ✅ **Payment Gateway**: Razorpay integration for secure payments (Card/UPI/Wallet)
+- ✅ **Auction Management**: Post-auction dashboard for tracking orders and payments
 - ✅ **CRUD Operations**: Complete create, read, update, delete functionality for collectibles
 - ✅ **Advanced Filtering**: Search, status filtering, and sorting (by date, price, views, title)
 - ✅ **Responsive Design**: Mobile-first design with Tailwind CSS
 - ✅ **State Management**: Global state with React Context API
+- ✅ **Notifications**: Real-time in-app notifications for auction events
 
 ### Auction Features
 - Live countdown timers with real-time updates
@@ -28,6 +31,7 @@ This is a modern, responsive React frontend for the CraftCurio collector dashboa
 - **Vite**: Build tool and dev server
 - **Axios**: HTTP client with interceptors
 - **Socket.io-client**: Real-time WebSocket communication
+- **Razorpay Checkout**: Payment gateway integration
 - **Tailwind CSS**: Utility-first CSS framework
 - **PropTypes**: Runtime type checking
 
@@ -42,16 +46,26 @@ front-end/src/
 │       ├── Dashboard.jsx            # Main dashboard with tabs
 │       ├── AuctionPage.jsx          # Live auction viewing/bidding
 │       └── index.js                 # Component exports
+├── pages/
+│   ├── CollectorDashboardPage.jsx   # Main page integration
+│   ├── collector/
+│   │   └── components/
+│   │       ├── AuctionManagement.jsx    # Post-auction management (NEW)
+│   │       ├── AuctionCard.jsx          # Auction status display (NEW)
+│   │       ├── OrderDetailsModal.jsx    # Order details & payment (NEW)
+│   │       └── NotificationPanel.jsx    # Notifications panel (NEW)
+│   └── Order/
+│       ├── CheckOut.jsx             # Checkout with Razorpay
+│       └── OrderConfirmation.jsx    # Order success page
 ├── contexts/
 │   └── CollectorContext.jsx         # Global state management
 ├── hooks/
 │   ├── useCollectibles.js           # Hooks for collectibles CRUD
-│   └── useAuction.js                # Hooks for auction operations
+│   ├── useAuction.js                # Hooks for auction operations
+│   └── useRazorpay.js               # Payment processing hook (NEW)
 ├── utils/
 │   ├── api.js                       # Axios instance and API functions
 │   └── socket.js                    # Socket.io client wrapper
-├── pages/
-│   └── CollectorDashboardPage.jsx   # Main page integration
 └── App.jsx                          # Root component
 ```
 
@@ -658,10 +672,22 @@ VITE_SOCKET_URL=https://api.craftcurio.com
 
 ## Future Enhancements
 
+### Recently Added ✅
+- [x] Razorpay payment gateway integration
+- [x] Auction management dashboard
+- [x] Post-auction order tracking
+- [x] Payment processing with multiple methods
+- [x] Real-time notification system
+- [x] Order details modal with payment
+- [x] Currency localization (INR)
+
 ### Planned Features
+- [ ] Payment timeout automation
+- [ ] Shipping status tracking
+- [ ] Review and rating system
 - [ ] Image upload (instead of URL)
 - [ ] Multiple images per collectible
-- [ ] Notification system (toast notifications)
+- [ ] Toast notification system
 - [ ] User profile management
 - [ ] Bid history page
 - [ ] Wishlist functionality

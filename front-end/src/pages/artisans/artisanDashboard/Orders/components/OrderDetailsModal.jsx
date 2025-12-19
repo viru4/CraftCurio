@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Package, MapPin, CreditCard, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { formatDate, formatDateTime } from '../../../../../lib/date';
 
 const OrderDetailsModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
   const [newStatus, setNewStatus] = useState(order?.orderStatus || '');
@@ -266,14 +267,14 @@ const OrderDetailsModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
                 <div className="flex justify-between">
                   <span className="text-[#9a6c4c] dark:text-[#a88e79]">Order Placed:</span>
                   <span className="text-[#1b130d] dark:text-[#f3ece7]">
-                    {new Date(order.createdAt).toLocaleString()}
+                    {formatDateTime(order.createdAt)}
                   </span>
                 </div>
                 {order.deliveredAt && (
                   <div className="flex justify-between">
                     <span className="text-[#9a6c4c] dark:text-[#a88e79]">Delivered:</span>
                     <span className="text-[#1b130d] dark:text-[#f3ece7]">
-                      {new Date(order.deliveredAt).toLocaleString()}
+                      {formatDateTime(order.deliveredAt)}
                     </span>
                   </div>
                 )}
@@ -281,7 +282,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
                   <div className="flex justify-between">
                     <span className="text-[#9a6c4c] dark:text-[#a88e79]">Estimated Delivery:</span>
                     <span className="text-[#1b130d] dark:text-[#f3ece7]">
-                      {new Date(order.estimatedDelivery).toLocaleDateString()}
+                      {formatDate(order.estimatedDelivery)}
                     </span>
                   </div>
                 )}

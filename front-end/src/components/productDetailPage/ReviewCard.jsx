@@ -1,5 +1,6 @@
 import React from 'react';
 import StarRating from './StarRating';
+import { formatDate } from '../../lib/date';
 
 /**
  * ReviewCard Component
@@ -31,7 +32,7 @@ const ReviewCard = ({ review }) => {
               </div>
             </div>
             <p className="text-sm text-stone-500">
-              {review.date ? new Date(review.date).toLocaleDateString() : 'No date'}
+              {formatDate(review.date)}
             </p>
           </div>
           <p className="text-stone-600 mt-3 text-sm lg:text-base">

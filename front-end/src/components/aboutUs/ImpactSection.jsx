@@ -29,7 +29,7 @@ const ImpactSection = ({ data }) => {
     },
     {
       icon: "DollarSign",
-      value: "$2M+",
+      value: "₹2M+",
       label: "Artisan Earnings",
       description: "Direct income to skilled craftspeople"
     },

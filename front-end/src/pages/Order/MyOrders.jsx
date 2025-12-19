@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { formatDate } from '../../lib/date';
 
 const MyOrders = () => {
   const { user, loading: authLoading } = useAuth();
@@ -59,14 +60,6 @@ const MyOrders = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   const formatCurrency = (amount) => {

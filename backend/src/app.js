@@ -26,6 +26,8 @@ import reviewRoutes from './api/routes/reviews.js';
 import questionRoutes from './api/routes/questions.js';
 import aboutUsRoutes from './api/routes/aboutUsRoutes.js';
 import uploadRoutes from './api/routes/upload.routes.js';
+import notificationRoutes from './api/routes/notifications.js';
+import paymentRoutes from './api/routes/payments.js';
 
 const app = express();
 
@@ -132,6 +134,8 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/about-us', aboutUsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {

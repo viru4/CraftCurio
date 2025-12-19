@@ -106,9 +106,17 @@ const Navbar = () => {
                   className="flex items-center gap-2 p-2 rounded-full hover:bg-stone-100 transition-colors"
                   aria-label="User menu"
                 >
-                  <div className="h-10 w-10 rounded-full bg-[var(--primary-color)] flex items-center justify-center text-white font-semibold">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                  {user?.profileImage ? (
+                    <img 
+                      src={user.profileImage} 
+                      alt={user?.name || 'User'} 
+                      className="h-10 w-10 rounded-full object-cover border-2 border-[var(--primary-color)]"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-[var(--primary-color)] flex items-center justify-center text-white font-semibold">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                  )}
                 </button>
                 {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-stone-200 py-2 z-50">

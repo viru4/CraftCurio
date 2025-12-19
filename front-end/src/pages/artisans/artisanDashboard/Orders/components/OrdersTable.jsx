@@ -1,4 +1,5 @@
 import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDate } from '../../../../../lib/date';
 
 const OrdersTable = ({ orders, pagination, onViewDetails, onPageChange }) => {
   const getStatusColor = (status) => {
@@ -99,7 +100,7 @@ const OrdersTable = ({ orders, pagination, onViewDetails, onPageChange }) => {
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-[#9a6c4c] dark:text-[#a88e79]">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {formatDate(order.createdAt)}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-center">
@@ -127,7 +128,7 @@ const OrdersTable = ({ orders, pagination, onViewDetails, onPageChange }) => {
                   #{order.orderNumber}
                 </h3>
                 <p className="text-xs text-[#9a6c4c] dark:text-[#a88e79]">
-                  {new Date(order.createdAt).toLocaleDateString()}
+                  {formatDate(order.createdAt)}
                 </p>
               </div>
               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.orderStatus)}`}>

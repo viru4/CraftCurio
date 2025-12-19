@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { formatDateTime } from '@/lib/date';
 import AdminSidebar from './components/AdminSidebar';
 import MobileSidebar from './components/MobileSidebar';
 import AdminHeader from './components/AdminHeader';
@@ -25,12 +26,18 @@ const Admin = () => {
       try {
         setLoading(true);
         
+        const token = localStorage.getItem('token');
+
         // Fetch multiple data sources in parallel
-        const [dbStatsRes, ordersRes, productsRes, collectiblesRes, usersRes] = await Promise.all([
-          fetch(`${API_ENDPOINTS.seed}/stats`),
+        const [dbStatsRes, ordersRes, productsRes, collectiblesRes, collectorsRes] = await Promise.all([
+          fetch(`${API_ENDPOINTS.seed}/stats`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }),
           fetch(`${API_ENDPOINTS.orders}/all`, {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Authorization': `Bearer ${token}`
             }
           }),
           fetch(API_ENDPOINTS.artisanProducts),
@@ -38,33 +45,50 @@ const Admin = () => {
           fetch(`${API_ENDPOINTS.collectors}`)
         ]);
 
-        const dbStats = await dbStatsRes.json();
-        const ordersData = await ordersRes.json();
-        const productsData = await productsRes.json();
-        const collectiblesData = await collectiblesRes.json();
-        const usersData = await usersRes.json();
+        const dbStatsJson = await dbStatsRes.json().catch(() => ({}));
+        const ordersJson = await ordersRes.json().catch(() => ({}));
+        const productsJson = await productsRes.json().catch(() => ({}));
+        const collectiblesJson = await collectiblesRes.json().catch(() => ({}));
+        const collectorsJson = await collectorsRes.json().catch(() => ({}));
 
-        // Calculate total sales from orders
-        const totalSales = ordersData.orders?.reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0;
+        // Real data shapes:
+        // - /orders/all -> { success, data: { orders, stats, pagination } }
+        const ordersData = ordersJson?.data || {};
+        const orders = Array.isArray(ordersData.orders) ? ordersData.orders : [];
+        const orderStats = ordersData.stats || {};
+
+        // Calculate total sales from orders (prefer backend stats if present)
+        const totalSales =
+          typeof orderStats.totalRevenue === 'number'
+            ? orderStats.totalRevenue
+            : orders.reduce((sum, order) => sum + (order.total || 0), 0);
         
-        // Count pending products (assuming 'pending' status)
-        const pendingProducts = productsData.products?.filter(p => p.status === 'pending').length || 0;
-        const pendingCollectibles = collectiblesData.collectibles?.filter(c => c.status === 'pending').length || 0;
+        // /artisan-products -> { data: [...], totalCount, ... }
+        const artisanProducts = Array.isArray(productsJson.data) ? productsJson.data : (productsJson.products || []);
+        const pendingProducts = artisanProducts.filter(p => p.status === 'pending').length;
+
+        // /collectibles -> { data: [...], total, ... }
+        const collectibles = Array.isArray(collectiblesJson.data) ? collectiblesJson.data : (collectiblesJson.collectibles || []);
+        const pendingCollectibles = collectibles.filter(c => c.status === 'pending').length;
         const totalPending = pendingProducts + pendingCollectibles;
         
-        // Get total users/collectors count
-        const totalUsers = usersData.collectors?.length || dbStats.data?.collectors || 0;
+        // /collectors -> { success, data: [...], pagination: { totalItems } }
+        const collectors = Array.isArray(collectorsJson.data) ? collectorsJson.data : (collectorsJson.collectors || []);
+        const collectorsTotal =
+          collectorsJson.pagination?.totalItems ?? collectors.length;
+
+        const dbStats = dbStatsJson?.data || {};
 
         // Update stats with real data
         setStats({
           totalSales: { 
-            value: `$${totalSales.toLocaleString()}`, 
-            change: '+5.2%', 
+            value: `₹${totalSales.toLocaleString()}`, 
+            change: '+5.2%', // placeholder trend; could be driven by orderStats.last30Days
             isPositive: true 
           },
           newUsers: { 
-            value: totalUsers.toString(), 
-            change: '+12.0%', 
+            value: String(collectorsTotal || dbStats.collectors || 0), 
+            change: '+12.0%', // placeholder trend
             isPositive: true 
           },
           pendingApprovals: { 
@@ -73,14 +97,19 @@ const Admin = () => {
             isPositive: false 
           },
           openTickets: { 
-            value: ordersData.count?.toString() || '0', 
-            change: '+1.0%', 
+            // Treat "open tickets" as count of non-delivered, non-cancelled orders
+            value: String(
+              orders.filter(
+                o => o.orderStatus && o.orderStatus !== 'delivered' && o.orderStatus !== 'cancelled'
+              ).length
+            ),
+            change: '+1.0%', // placeholder trend
             isPositive: true 
           }
         });
 
         // Create recent activity from orders
-        const recentActivities = ordersData.orders?.slice(0, 5).map((order, index) => ({
+        const recentActivities = orders.slice(0, 5).map((order, index) => ({
           id: order._id || index,
           user: {
             name: order.user?.name || 'Unknown User',
@@ -88,8 +117,8 @@ const Admin = () => {
           },
           action: 'Placed order',
           actionType: 'success',
-          item: `Order #${order._id.slice(-6)} - $${order.totalAmount}`,
-          timestamp: new Date(order.createdAt).toLocaleString()
+          item: `Order #${order.orderNumber || (order._id || '').toString().slice(-6)} - ₹${(order.total || 0).toLocaleString()}`,
+          timestamp: formatDateTime(order.createdAt)
         })) || [];
 
         setActivities(recentActivities);

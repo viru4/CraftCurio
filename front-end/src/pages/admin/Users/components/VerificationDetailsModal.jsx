@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, XCircle, Download, ExternalLink, User, FileText, Award, Building } from 'lucide-react';
+import { formatDateTime } from '../../../../lib/date';
 
 const VerificationDetailsModal = ({ verification, onClose, onApprove, onReject }) => {
   const [action, setAction] = useState(null); // 'approve' or 'reject'
@@ -66,7 +67,7 @@ const VerificationDetailsModal = ({ verification, onClose, onApprove, onReject }
               <div>
                 <p className="text-sm text-blue-700 mb-1">Submitted On</p>
                 <p className="font-medium text-blue-900">
-                  {new Date(verification.createdAt).toLocaleString()}
+                  {formatDateTime(verification.createdAt)}
                 </p>
               </div>
             </div>
@@ -179,7 +180,7 @@ const VerificationDetailsModal = ({ verification, onClose, onApprove, onReject }
                 <p className={`text-sm mb-2 ${
                   verification.status === 'approved' ? 'text-green-700' : 'text-red-700'
                 }`}>
-                  Reviewed by: {verification.reviewedBy.email} on {new Date(verification.reviewedAt).toLocaleString()}
+                  Reviewed by: {verification.reviewedBy.email} on {formatDateTime(verification.reviewedAt)}
                 </p>
               )}
               {verification.adminComments && (

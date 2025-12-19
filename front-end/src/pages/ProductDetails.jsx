@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../utils/api';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useWishlist } from '../contexts/WishlistContext';
+import { formatDate } from '../lib/date';
 import {
   StarRating,
   ProductImageGallery,
@@ -399,7 +400,7 @@ const ProductDetails = () => {
                           </div>
                           <p className="text-stone-700 text-sm">"{review.reviewText || 'Excellent quality and fast shipping!'}"
                           </p>
-                          <p className="text-xs text-stone-500 mt-1">- {review.userName || 'Anonymous'} on {review.reviewDate ? new Date(review.reviewDate).toLocaleDateString() : 'Recently'}</p>
+                          <p className="text-xs text-stone-500 mt-1">- {review.userName || 'Anonymous'} on {review.reviewDate ? formatDate(review.reviewDate) : 'Recently'}</p>
                         </div>
                       ))}
                     </div>

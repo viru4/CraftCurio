@@ -1,6 +1,7 @@
 import { Send, Smile, Trash2, ThumbsUp, Check, CheckCheck } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import EmojiPicker from './EmojiPicker';
+import { formatDate } from '../../../../../lib/date';
 
 /**
  * ChatArea Component
@@ -108,11 +109,7 @@ const ChatArea = ({
     const groups = {};
     
     messages.forEach(message => {
-      const date = new Date(message.timestamp).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      const date = formatDate(message.timestamp);
       
       if (!groups[date]) {
         groups[date] = [];

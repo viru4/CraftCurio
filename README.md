@@ -23,11 +23,13 @@
 - **[Complete Frontend Guide](docs/FRONTEND_GUIDE.md)** - Full documentation
 - **[Backend Structure](docs/BACKEND_STRUCTURE.md)** - Folder overview
 - **[Database Scripts](docs/DATABASE_SCRIPTS.md)** - Seeding and management
+- **[Payment Gateway Setup](docs/RAZORPAY_SETUP.md)** - Razorpay integration guide
 
 ### 📚 Documentation
-- **[API Reference](docs/API_REFERENCE.md)** - All 19 REST endpoints
+- **[API Reference](docs/API_REFERENCE.md)** - All REST endpoints
 - **[Auction System](docs/AUCTION_SYSTEM.md)** - Auction logic & real-time features
 - **[Security Policy](docs/SECURITY.md)** - Security guidelines
+- **[Payment Quick Start](docs/PAYMENT_QUICKSTART.txt)** - Quick payment setup
 
 ### 🎯 Features at a Glance
 
@@ -35,8 +37,22 @@
 - Create fixed-price or auction listings
 - Real-time bidding with Socket.io
 - Countdown timers and reserve pricing
+- Automatic order creation for auction winners
 
-#### ✅ Admin & Artisan Features (New!)
+#### ✅ Payment Gateway Integration (New!)
+- **Razorpay Integration**: Secure payment processing for Indian market
+- **Multiple Payment Methods**: Cards, UPI, Net Banking, Wallets
+- **Auto Order Updates**: Payment status synced automatically
+- **Test Mode Support**: Free unlimited testing with test credentials
+
+#### ✅ Post-Auction Management (New!)
+- **Auction Management Dashboard**: Track active, ended, and won auctions
+- **Order Management**: View and manage auction orders
+- **Payment Processing**: Complete payments within 48-hour window
+- **Shipping Address**: Edit shipping details before payment
+- **Notifications**: Real-time alerts for auction events
+
+#### ✅ Admin & Artisan Features
 - **Verification Management**: Admin portal to review and approve artisan verification requests.
 - **Artisan Stories**: Rich profile pages with awards, certifications, and multimedia stories.
 - **Seller Registration**: Streamlined onboarding with progress bars and document uploads.
@@ -51,6 +67,7 @@
 - Socket.io 4.8 (real-time)
 - JWT authentication
 - Zod validation
+- Razorpay payment gateway
 
 **Frontend:**
 - React 18.2
@@ -58,6 +75,7 @@
 - Tailwind CSS
 - Axios (HTTP client)
 - Socket.io-client
+- Razorpay Checkout
 
 ---
 
@@ -73,7 +91,10 @@ npm install
 echo "PORT=8000
 MONGODB_URI=mongodb://localhost:27017/craftcurio
 JWT_SECRET=your_secret_key
-JWT_EXPIRES_IN=7d" > .env
+JWT_EXPIRES_IN=7d
+RAZORPAY_KEY_ID=rzp_test_your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret" > .env
 
 npm start
 ```
@@ -329,6 +350,8 @@ curl http://localhost:8000/api/collectibles
 | [FRONTEND_GUIDE.md](docs/FRONTEND_GUIDE.md) | Complete frontend docs |
 | [API_REFERENCE.md](docs/API_REFERENCE.md) | Backend API docs |
 | [AUCTION_SYSTEM.md](docs/AUCTION_SYSTEM.md) | Auction system details |
+| [RAZORPAY_SETUP.md](docs/RAZORPAY_SETUP.md) | Payment gateway integration |
+| [PAYMENT_QUICKSTART.txt](docs/PAYMENT_QUICKSTART.txt) | Quick payment setup guide |
 | [BACKEND_STRUCTURE.md](docs/BACKEND_STRUCTURE.md) | Backend folder structure |
 | [DATABASE_SCRIPTS.md](docs/DATABASE_SCRIPTS.md) | Database management scripts |
 
@@ -399,12 +422,24 @@ Copyright © 2024 CraftCurio. All rights reserved.
 
 ## 🎉 What's Next?
 
+### Recently Added:
+- [x] Razorpay payment gateway integration
+- [x] Auction management dashboard for collectors
+- [x] Post-auction order management
+- [x] Payment processing with multiple methods (Card/UPI/Wallet)
+- [x] Automatic order creation for auction winners
+- [x] Real-time notifications for auction events
+- [x] Currency localization (INR)
+
 ### Optional Enhancements:
+- [ ] Payment timeout automation (auto-cancel after 48 hours)
+- [ ] Shipping status tracking for sellers
+- [ ] Automated payment reminders
+- [ ] Review/rating system post-transaction
 - [ ] Image upload (currently URL-based)
 - [ ] Multiple images per item
 - [ ] Toast notifications
 - [ ] User profile editing
-- [ ] Favorites/Wishlist
 - [ ] Social media sharing
 - [ ] Dark mode
 - [ ] Advanced analytics

@@ -1,24 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CollectorProvider, useCollectorContext } from '../contexts/CollectorContext';
-import Dashboard from '../components/CollectorDashboard/Dashboard';
-import ListForm from '../components/CollectorDashboard/ListForm';
-import AuctionPage from '../components/CollectorDashboard/AuctionPage';
-import { useCreateCollectible, useUpdateCollectible, useDeleteCollectible } from '../hooks/useCollectibles';
-import { useAuth } from '../contexts/AuthContext';
-import Navbar from '../components/layout/Navbar';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { CollectorProvider, useCollectorContext } from '../../contexts/CollectorContext';
+import Dashboard from '../../components/CollectorDashboard/Dashboard';
+import ListForm from '../../components/CollectorDashboard/ListForm';
+import AuctionPage from '../../components/CollectorDashboard/AuctionPage';
+import AuctionManagement from './components/AuctionManagement';
+import { useCreateCollectible, useUpdateCollectible, useDeleteCollectible } from '../../hooks/useCollectibles';
+import { useAuth } from '../../contexts/AuthContext';
+import Navbar from '../../components/layout/Navbar';
 
 /**
  * CollectorDashboardContent - Inner component with access to CollectorContext
  */
 const CollectorDashboardContent = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { triggerRefresh } = useCollectorContext();
 
-  // View state management
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' | 'add' | 'edit' | 'auction'
+  // Get view from URL or default to 'dashboard'
+  const viewFromUrl = searchParams.get('view') || 'dashboard';
+  const [currentView, setCurrentView] = useState(viewFromUrl);
   const [selectedCollectible, setSelectedCollectible] = useState(null);
+
+  // Sync currentView with URL params
+  useEffect(() => {
+    const urlView = searchParams.get('view') || 'dashboard';
+    setCurrentView(urlView);
+  }, [searchParams]);
 
   // Hooks for CRUD operations
   const { create: createCollectible, loading: isCreating, error: createError } = useCreateCollectible();
@@ -53,18 +62,18 @@ const CollectorDashboardContent = () => {
   // Navigation handlers
   const handleAddNew = () => {
     setSelectedCollectible(null);
-    setCurrentView('add');
+    setSearchParams({ view: 'add' });
   };
 
   const handleEditItem = (collectible) => {
     setSelectedCollectible(collectible);
-    setCurrentView('edit');
+    setSearchParams({ view: 'edit' });
   };
 
   const handleViewAuction = (collectible) => {
     if (collectible.saleType === 'auction') {
       setSelectedCollectible(collectible);
-      setCurrentView('auction');
+      setSearchParams({ view: 'auction' });
     } else {
       // For direct sales, could open a detail view
       alert('Direct sale details coming soon!');
@@ -73,7 +82,11 @@ const CollectorDashboardContent = () => {
 
   const handleBackToDashboard = () => {
     setSelectedCollectible(null);
-    setCurrentView('dashboard');
+    setSearchParams({ view: 'dashboard' });
+  };
+
+  const handleOpenAuctionManagement = () => {
+    setSearchParams({ view: 'auction-management' });
   };
 
   // Form submission handlers
@@ -153,6 +166,13 @@ const CollectorDashboardContent = () => {
           />
         ) : null;
 
+      case 'auction-management':
+        return (
+          <AuctionManagement
+            onBack={handleBackToDashboard}
+          />
+        );
+
       case 'dashboard':
       default:
         return (
@@ -161,6 +181,7 @@ const CollectorDashboardContent = () => {
             onEditItem={handleEditItem}
             onViewItem={handleViewAuction}
             onDelete={handleDelete}
+            onOpenAuctionManagement={handleOpenAuctionManagement}
           />
         );
     }
@@ -173,8 +194,8 @@ const CollectorDashboardContent = () => {
 
       {/* Main Content Wrapper with Top Padding */}
       <div className="pt-20">
-        {/* Back Navigation (for non-dashboard views) */}
-        {currentView !== 'dashboard' && currentView !== 'auction' && (
+        {/* Back Navigation (for non-dashboard views except auction-management which has its own) */}
+        {currentView !== 'dashboard' && currentView !== 'auction' && currentView !== 'auction-management' && (
           <div className="bg-white border-b border-gray-200 px-4 py-3">
             <div className="max-w-7xl mx-auto">
               <button
@@ -191,7 +212,7 @@ const CollectorDashboardContent = () => {
         )}
 
         {/* Main Content */}
-        <div className={currentView === 'dashboard' ? '' : 'py-8'}>
+        <div className={currentView === 'dashboard' || currentView === 'auction-management' ? '' : 'py-8'}>
           {renderView()}
         </div>
 

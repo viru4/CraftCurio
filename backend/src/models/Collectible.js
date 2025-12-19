@@ -55,6 +55,12 @@ const collectibleSchema = new mongoose.Schema({
     required: false // Optional for backwards compatibility
   },
 
+  // Order reference (for auction wins)
+  orderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order'
+  },
+
   // Sale type: direct sale or auction
   saleType: { 
     type: String, 

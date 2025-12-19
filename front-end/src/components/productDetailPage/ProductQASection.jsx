@@ -284,7 +284,7 @@ const ProductQASection = ({ product }) => {
                     <p className="font-medium text-[#1b130d]">{question.user?.name || 'Anonymous'}</p>
                     <p className="text-sm text-[#6b5d54]">
                       <Calendar size={14} className="inline mr-1" />
-                      {format(new Date(question.createdAt), 'MMM dd, yyyy')}
+                      {formatDate(question.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -322,7 +322,7 @@ const ProductQASection = ({ product }) => {
                   </div>
                   <p className="text-sm text-[#6b5d54] leading-relaxed">{question.answer.comment}</p>
                   <p className="text-xs text-[#6b5d54] mt-2">
-                    {format(new Date(question.answer.answeredAt), 'MMM dd, yyyy')}
+                    {formatDate(question.answer.answeredAt)}
                   </p>
                 </div>
               )}

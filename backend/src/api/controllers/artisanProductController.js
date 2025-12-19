@@ -40,7 +40,23 @@ export const getArtisanProducts = async (req, res) => {
 
     // Filter by artisan if provided
     if (artisan) {
-      filter['artisanInfo.id'] = artisan;
+      // If caller passes a MongoDB ObjectId (likely User _id), resolve to artisan.id
+      let artisanIdentifier = artisan;
+
+      if (isValidObjectId(artisan)) {
+        try {
+          const { default: Artisan } = await import('../../models/Artisan.js');
+          const artisanDoc = await Artisan.findOne({ userId: artisan }).select('id');
+
+          if (artisanDoc?.id) {
+            artisanIdentifier = artisanDoc.id;
+          }
+        } catch (error) {
+          console.error('Error resolving artisan user to artisan id:', error);
+        }
+      }
+
+      filter['artisanInfo.id'] = artisanIdentifier;
     }
 
     if (category) {

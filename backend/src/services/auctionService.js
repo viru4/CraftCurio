@@ -1,6 +1,8 @@
 import Collectible from '../models/Collectible.js';
 import Collector from '../models/Collector.js';
+import Order from '../models/Order.js';
 import { sendEmail } from './emailService.js';
+import { createNotification, createBulkNotifications } from './notificationService.js';
 
 /**
  * Auction Service - Handles all auction-related business logic
@@ -42,11 +44,16 @@ export const validateBid = (collectible, bidderId, bidAmount) => {
   }
 
   // Validate minimum bid amount
-  const minimumBid = collectible.auction.currentBid + collectible.auction.minimumBidIncrement;
+  // Raw minimum = current bid + configured increment
+  const rawMinimumBid = collectible.auction.currentBid + collectible.auction.minimumBidIncrement;
+  // Round up to next whole currency unit so we don't show long decimals
+  const minimumBid = Math.ceil(rawMinimumBid);
+
   if (bidAmount < minimumBid) {
     return { 
       valid: false, 
-      error: `Bid must be at least $${minimumBid.toFixed(2)}` 
+      // Use a rounded, human‑friendly amount in the error
+      error: `Bid must be at least ₹${minimumBid}` 
     };
   }
 
@@ -116,6 +123,53 @@ export const finalizeAuction = async (collectibleId) => {
         }
       }
     });
+
+    // Create order for the auction winner
+    try {
+      const winnerBid = collectible.auction.bidHistory.find(
+        bid => bid.bidder.toString() === winner.toString()
+      );
+
+      const order = new Order({
+        user: winner,
+        items: [{
+          productId: collectible._id.toString(),
+          productType: 'collectible',
+          name: collectible.title,
+          price: winningBid,
+          quantity: 1,
+          image: collectible.image,
+          artisan: collectible.owner?.name || 'Unknown',
+          category: collectible.category
+        }],
+        shippingAddress: {
+          fullName: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: ''
+        }, // To be filled by winner
+        subtotal: winningBid,
+        shipping: 0,
+        tax: 0,
+        total: winningBid,
+        paymentMethod: 'pending',
+        paymentStatus: 'pending',
+        orderStatus: 'pending',
+        notes: `Auction win - Payment deadline: ${new Date(Date.now() + 48 * 60 * 60 * 1000).toLocaleString()}`
+      });
+
+      await order.save();
+      
+      // Link order to collectible
+      collectible.orderId = order._id;
+      
+      console.log(`✅ Order ${order.orderNumber} created for auction winner`);
+    } catch (orderError) {
+      console.error('Error creating order for auction:', orderError);
+      // Don't fail the auction finalization if order creation fails
+    }
   } else {
     collectible.auction.auctionStatus = 'ended';
     // Reserve not met or no bids
@@ -140,6 +194,7 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
   try {
     const ownerEmail = collectible.owner?.email;
     const ownerName = collectible.owner?.name || 'Seller';
+    const notifications = [];
 
     if (winner && meetsReserve) {
       // Notify winner
@@ -148,6 +203,7 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
       );
       
       if (winnerBid && winnerBid.bidderEmail) {
+        // Email notification
         await sendEmail({
           to: winnerBid.bidderEmail,
           subject: 'Congratulations! You won the auction',
@@ -155,13 +211,24 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
             <h2>Auction Won!</h2>
             <p>Congratulations! You have won the auction for "${collectible.title}".</p>
             <p><strong>Winning Bid:</strong> $${winningBid.toFixed(2)}</p>
-            <p>Please proceed with payment to complete your purchase.</p>
+            <p>Please proceed with payment within 48 hours to complete your purchase.</p>
+            <p><a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/collector-dashboard">View Order</a></p>
           `
+        });
+
+        // In-app notification for winner
+        notifications.push({
+          userId: winner,
+          type: 'auction',
+          title: '🎉 Auction Won!',
+          message: `Congratulations! You won the auction for "${collectible.title}" with a bid of $${winningBid.toFixed(2)}. Please complete payment within 48 hours.`,
+          relatedId: collectible._id
         });
       }
 
       // Notify seller
-      if (ownerEmail) {
+      if (ownerEmail && collectible.owner) {
+        // Email notification
         await sendEmail({
           to: ownerEmail,
           subject: 'Your auction has ended with a winner',
@@ -169,8 +236,18 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
             <h2>Auction Ended Successfully</h2>
             <p>Your auction for "${collectible.title}" has ended with a winning bid.</p>
             <p><strong>Final Bid:</strong> $${winningBid.toFixed(2)}</p>
-            <p>The buyer will contact you to arrange payment and delivery.</p>
+            <p><strong>Winner:</strong> ${winnerBid?.bidderName || 'Anonymous'}</p>
+            <p>The buyer will proceed with payment. You'll be notified once payment is completed.</p>
           `
+        });
+
+        // In-app notification for seller
+        notifications.push({
+          userId: collectible.owner._id,
+          type: 'auction',
+          title: '✅ Auction Sold!',
+          message: `Your auction for "${collectible.title}" ended successfully with a final bid of $${winningBid.toFixed(2)}.`,
+          relatedId: collectible._id
         });
       }
 
@@ -183,6 +260,7 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
 
       for (const bid of losingBidders) {
         if (bid.bidderEmail) {
+          // Email notification
           await sendEmail({
             to: bid.bidderEmail,
             subject: 'Auction ended - You were outbid',
@@ -193,12 +271,23 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
               <p>Thank you for participating!</p>
             `
           });
+
+          // In-app notification for losing bidders
+          notifications.push({
+            userId: bid.bidder,
+            type: 'auction',
+            title: 'Auction Ended',
+            message: `The auction for "${collectible.title}" has ended. You were outbid with a final price of $${winningBid.toFixed(2)}.`,
+            relatedId: collectible._id
+          });
         }
       }
     } else {
       // Reserve not met or no bids - notify seller
-      if (ownerEmail) {
+      if (ownerEmail && collectible.owner) {
         const reason = !meetsReserve ? 'reserve price was not met' : 'there were no bids';
+        
+        // Email notification
         await sendEmail({
           to: ownerEmail,
           subject: 'Your auction has ended without a sale',
@@ -210,7 +299,22 @@ const sendAuctionEndNotifications = async (collectible, winner, winningBid, meet
             <p>You can relist the item or adjust the reserve price.</p>
           `
         });
+
+        // In-app notification
+        notifications.push({
+          userId: collectible.owner._id,
+          type: 'auction',
+          title: 'Auction Ended - No Sale',
+          message: `Your auction for "${collectible.title}" ended without a sale. ${reason.charAt(0).toUpperCase() + reason.slice(1)}.`,
+          relatedId: collectible._id
+        });
       }
+    }
+
+    // Create all in-app notifications in bulk
+    if (notifications.length > 0) {
+      await createBulkNotifications(notifications);
+      console.log(`✅ Created ${notifications.length} in-app notifications for auction end`);
     }
   } catch (error) {
     console.error('Error sending auction end notifications:', error);

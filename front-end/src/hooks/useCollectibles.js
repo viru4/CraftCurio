@@ -184,6 +184,12 @@ export const useCollectorListings = (collectorId, initialFilters = {}) => {
       return;
     }
 
+    // Skip fetching if filters is null (indicates intentional skip, e.g., orders tab)
+    if (filters === null) {
+      console.log('useCollectorListings: Filters is null, skipping fetch');
+      return;
+    }
+
     console.log('useCollectorListings: Fetching with params:', { collectorId, filters, params });
     setLoading(true);
     setError(null);
@@ -226,7 +232,7 @@ export const useCollectorListings = (collectorId, initialFilters = {}) => {
 
   // Initial fetch
   useEffect(() => {
-    if (collectorId) {
+    if (collectorId && filters !== null) {
       fetchListings();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

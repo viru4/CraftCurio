@@ -720,6 +720,190 @@ socket.on('error', (data) => {
 
 ---
 
+## Payment API
+
+### Create Payment Order
+**POST** `/payments/create-order`
+
+Create a Razorpay order for payment processing.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "orderId": "507f1f77bcf86cd799439011",
+  "amount": 1500.00
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "razorpayOrderId": "order_KZ2XqZqZqZqZqZ",
+    "amount": 150000,
+    "currency": "INR",
+    "keyId": "rzp_test_XXXXXXXXXXXXXX"
+  }
+}
+```
+
+---
+
+### Verify Payment
+**POST** `/payments/verify`
+
+Verify payment signature after successful transaction.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "orderId": "507f1f77bcf86cd799439011",
+  "razorpay_order_id": "order_KZ2XqZqZqZqZqZ",
+  "razorpay_payment_id": "pay_KZ2XqZqZqZqZqZ",
+  "razorpay_signature": "signature_string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Payment verified successfully",
+  "data": {
+    "order": {
+      "_id": "507f1f77bcf86cd799439011",
+      "paymentStatus": "paid",
+      "orderStatus": "processing",
+      "paidAt": "2025-12-07T10:30:00.000Z"
+    }
+  }
+}
+```
+
+---
+
+### Record Payment Failure
+**POST** `/payments/failure`
+
+Record a failed payment attempt.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "orderId": "507f1f77bcf86cd799439011",
+  "error": {
+    "code": "BAD_REQUEST_ERROR",
+    "description": "Payment failed",
+    "source": "customer",
+    "step": "payment_authentication",
+    "reason": "payment_failed"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Payment failure recorded",
+  "data": {
+    "order": {
+      "_id": "507f1f77bcf86cd799439011",
+      "paymentStatus": "failed"
+    }
+  }
+}
+```
+
+---
+
+### Get Payment Details
+**GET** `/payments/:paymentId`
+
+Fetch details of a specific payment.
+
+**Authentication:** Required
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "pay_KZ2XqZqZqZqZqZ",
+    "amount": 150000,
+    "currency": "INR",
+    "status": "captured",
+    "method": "card",
+    "captured": true,
+    "created_at": 1638864000
+  }
+}
+```
+
+---
+
+### Process Refund (Admin Only)
+**POST** `/payments/refund`
+
+Process a refund for a payment.
+
+**Authentication:** Required (Admin role)
+
+**Request Body:**
+```json
+{
+  "paymentId": "pay_KZ2XqZqZqZqZqZ",
+  "amount": 1500.00
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Refund processed successfully",
+  "data": {
+    "id": "rfnd_KZ2XqZqZqZqZqZ",
+    "amount": 150000,
+    "currency": "INR",
+    "payment_id": "pay_KZ2XqZqZqZqZqZ",
+    "status": "processed"
+  }
+}
+```
+
+---
+
+### Payment Webhook
+**POST** `/payments/webhook`
+
+Webhook endpoint for Razorpay events (public endpoint, verified by signature).
+
+**Request Body:**
+```json
+{
+  "event": "payment.captured",
+  "payload": {
+    "payment": {
+      "entity": {
+        "id": "pay_KZ2XqZqZqZqZqZ",
+        "amount": 150000,
+        "status": "captured"
+      }
+    }
+  }
+}
+```
+
+---
+
 ## Error Responses
 
 All error responses follow this format:

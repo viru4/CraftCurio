@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MoreVertical, Eye, Edit, CheckCircle, Trash2 } from 'lucide-react';
+import { formatDate } from '@/lib/date';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '../../../lib/currency';
 
@@ -53,12 +54,6 @@ const ProductsTable = ({
     );
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
-
   const getProductImage = (product) => {
     if (product.images && product.images.length > 0) {
       return product.images[0];
@@ -73,13 +68,45 @@ const ProductsTable = ({
     return product.name || product.title || 'Unnamed Product';
   };
 
+  const looksLikeId = (value) => {
+    if (!value || typeof value !== 'string') return false;
+    const trimmed = value.trim();
+    // 24-char hex Mongo ObjectId
+    if (/^[0-9a-fA-F]{24}$/.test(trimmed)) return true;
+    // Generic UUID-like or opaque IDs - long, opaque strings with digits
+    if (trimmed.length > 20 && /[0-9]/.test(trimmed)) return true;
+    return false;
+  };
+
   const getArtisanName = (product) => {
+    // For artisan products, artisan info may be in `artisan` or `artisanInfo`
     if (product.artisan) {
-      return typeof product.artisan === 'object' 
-        ? product.artisan.name 
-        : product.artisan;
+      if (typeof product.artisan === 'object') {
+        return product.artisan.name || product.artisan.displayName || 'Unknown Artisan';
+      }
+      return looksLikeId(product.artisan) ? 'Unknown Artisan' : product.artisan;
     }
-    return 'Unknown Artisan';
+
+    if (product.artisanInfo) {
+      if (typeof product.artisanInfo === 'object') {
+        return product.artisanInfo.name || product.artisanInfo.displayName || 'Unknown Artisan';
+      }
+      return looksLikeId(product.artisanInfo) ? 'Unknown Artisan' : product.artisanInfo;
+    }
+
+    // For collectibles, seller/owner is usually in `owner`
+    if (product.owner) {
+      if (typeof product.owner === 'object') {
+        return product.owner.name || product.owner.displayName || 'Unknown Seller';
+      }
+      return looksLikeId(product.owner) ? 'Unknown Seller' : product.owner;
+    }
+
+    // Fallbacks
+    if (product.sellerName) return product.sellerName;
+    if (product.createdByName) return product.createdByName;
+
+    return 'Unknown Seller';
   };
 
   const getCategoryName = (product) => {
@@ -89,6 +116,35 @@ const ProductsTable = ({
         : product.category;
     }
     return 'Uncategorized';
+  };
+
+  const getSaleTypeBadge = (product) => {
+    const saleType = (product.saleType || 'direct').toLowerCase();
+
+    if (saleType === 'auction') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+          Auction
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+        Direct Sale
+      </span>
+    );
+  };
+
+  const getAuctionSummary = (product) => {
+    if (product.saleType !== 'auction' || !product.auction) return '—';
+
+    const { auction } = product;
+    const currentBid = auction.currentBid ?? 0;
+    const status = auction.auctionStatus || 'scheduled';
+    const totalBids = auction.totalBids ?? 0;
+
+    return `${status.charAt(0).toUpperCase() + status.slice(1)} · Current ₹${currentBid.toFixed(0)} · ${totalBids} bids`;
   };
 
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
@@ -132,8 +188,13 @@ const ProductsTable = ({
               <th className="px-6 py-3 min-w-[250px]" scope="col">Product</th>
               <th className="px-6 py-3 min-w-[150px]" scope="col">Artisan</th>
               <th className="px-6 py-3 min-w-[120px]" scope="col">Category</th>
+              {activeTab === 'collectible' && (
+                <th className="px-6 py-3 min-w-[120px]" scope="col">Type</th>
+              )}
               <th className="px-6 py-3 min-w-[100px]" scope="col">Status</th>
-              <th className="px-6 py-3 min-w-[100px]" scope="col">Price</th>
+              <th className="px-6 py-3 min-w-[140px]" scope="col">
+                {activeTab === 'collectible' ? 'Price / Auction' : 'Price'}
+              </th>
               <th className="px-6 py-3 min-w-[130px]" scope="col">Date Added</th>
               <th className="px-6 py-3 min-w-[100px]" scope="col">Actions</th>
             </tr>
@@ -165,8 +226,34 @@ const ProductsTable = ({
                 </th>
                 <td className="px-6 py-4 whitespace-nowrap">{getArtisanName(product)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{getCategoryName(product)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(product.status)}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{formatPrice(product.price || 0)}</td>
+                {activeTab === 'collectible' && (
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {getSaleTypeBadge(product)}
+                    {product.saleType === 'auction' && (
+                      <div className="mt-1 text-xs text-[#9a6c4c] dark:text-[#a18a7a]">
+                        {getAuctionSummary(product)}
+                      </div>
+                    )}
+                  </td>
+                )}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getStatusBadge(product.status)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {activeTab === 'collectible' && product.saleType === 'auction' && product.auction
+                    ? (
+                      <div className="flex flex-col">
+                        <span>{formatPrice(product.auction.currentBid ?? product.price ?? 0)}</span>
+                        {product.auction.buyNowPrice ? (
+                          <span className="text-xs text-[#9a6c4c] dark:text-[#a18a7a]">
+                            Buy Now: {formatPrice(product.auction.buyNowPrice)}
+                          </span>
+                        ) : null}
+                      </div>
+                    )
+                    : formatPrice(product.price || 0)
+                  }
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">{formatDate(product.createdAt || product.dateAdded)}</td>
                 <td className="px-6 py-4">
                   <div className="relative">

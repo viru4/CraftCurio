@@ -5,6 +5,7 @@ import {
   getOrderById, 
   updateOrderStatus,
   updatePaymentStatus,
+  updateOrderShippingAddress,
   cancelOrder,
   getAllOrders,
   getArtisanOrders,
@@ -28,6 +29,7 @@ router.get('/all', authenticate, requireRole('admin'), getAllOrders);
 router.get('/:id', authenticate, getOrderById);
 router.patch('/:id/status', authenticate, requireRole('admin'), updateOrderStatus);
 router.patch('/:id/payment', authenticate, requireRole('admin'), updatePaymentStatus);
+router.patch('/:id/shipping-address', authenticate, updateOrderShippingAddress);
 router.patch('/:id/cancel', authenticate, cancelOrder);
 
 export default router;

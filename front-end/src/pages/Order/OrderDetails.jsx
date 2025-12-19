@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Package, Download, HelpCircle, Truck } from 'lucide-react';
 import { formatPrice } from '@/lib/currency';
+import { formatDate } from '@/lib/date';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -138,11 +139,7 @@ const OrderDetails = () => {
                 Order #{order.orderNumber || order._id?.slice(-8)}
               </h1>
               <p className="text-stone-600 dark:text-stone-400 text-base">
-                Placed on {new Date(order.createdAt).toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
+                Placed on {formatDate(order.createdAt)}
               </p>
             </div>
             <div className="flex flex-shrink-0 gap-3">

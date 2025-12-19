@@ -1,4 +1,5 @@
 import { MoreHorizontal } from 'lucide-react';
+import { formatDate } from '../../../../lib/date';
 
 const UserTableRow = ({ user, isSelected, onSelect, onAction }) => {
   const getRoleBadge = (role) => {
@@ -28,12 +29,6 @@ const UserTableRow = ({ user, isSelected, onSelect, onAction }) => {
     if (!user.isVerified) return 'Pending Approval';
     if (user.isActive) return 'Active';
     return 'Inactive';
-  };
-
-  const formatDate = (date) => {
-    if (!date) return 'N/A';
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
   };
 
   return (

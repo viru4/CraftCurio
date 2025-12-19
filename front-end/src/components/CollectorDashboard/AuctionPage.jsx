@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useAuction, usePlaceBid, useBuyNow } from '../../hooks/useAuction';
 import { formatTimeRemainingString } from '../../utils/socket';
 import { useAuth } from '../../contexts/AuthContext';
+import { formatDateTime } from '../../lib/date';
 
 /**
  * AuctionPage Component - Live auction viewing and bidding interface
@@ -24,7 +25,8 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
   useEffect(() => {
     if (auction) {
       const minBid = calculateMinimumBid();
-      setBidAmount(minBid.toFixed(2));
+      // Store as plain string without decimals since we now round to whole rupees
+      setBidAmount(minBid.toString());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auction?.auction?.currentBid]);
@@ -36,8 +38,10 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
     const currentBid = auction.auction.currentBid || auction.auction.startingBid || 0;
     const increment = currentBid * 0.05; // 5% increment
     const minIncrement = Math.max(10, increment); // At least ₹10
-    
-    return currentBid + minIncrement;
+    const rawMinBid = currentBid + minIncrement;
+
+    // Round up to the next whole rupee so we don't get long decimals
+    return Math.ceil(rawMinBid);
   };
 
   // Handle bid placement
@@ -289,17 +293,17 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
                     Your Bid Amount (₹)
                   </label>
                   <input
-                    type="number"
+                  type="number"
                     id="bidAmount"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
-                    step="0.01"
+                  step="1"
                     min={calculateMinimumBid()}
                     className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
                     disabled={isPlacingBid}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Minimum bid: ₹{calculateMinimumBid().toFixed(2)}
+                  Minimum bid: ₹{calculateMinimumBid().toFixed(0)}
                   </p>
                 </div>
 
@@ -355,7 +359,7 @@ const AuctionPage = ({ auctionId, onClose, onBuySuccess }) => {
                               {bid.bidder?.name || 'Anonymous'}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {new Date(bid.timestamp).toLocaleString()}
+                              {formatDateTime(bid.timestamp)}
                             </p>
                           </div>
                           <p className={`text-lg font-bold ${index === 0 ? 'text-orange-600' : 'text-gray-600'}`}>

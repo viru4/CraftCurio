@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { formatDate } from '@/lib/date';
 import AdminSidebar from '../components/AdminSidebar';
 import MobileSidebar from '../components/MobileSidebar';
 import AdminHeader from '../components/AdminHeader';
@@ -174,7 +175,7 @@ const AdminOrders = () => {
     const rows = orders.map(order => [
       order.orderNumber,
       order.shippingAddress.fullName,
-      new Date(order.createdAt).toLocaleDateString(),
+      formatDate(order.createdAt),
       `₹${order.total.toFixed(2)}`,
       order.orderStatus,
       order.paymentStatus

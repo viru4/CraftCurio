@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Star, ThumbsUp, User, Calendar, MessageSquare, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDate } from '../../lib/date';
 import { useAuth } from '../../contexts/AuthContext';
 import { API_BASE_URL } from '../../utils/api';
 
@@ -24,11 +24,7 @@ const ProductReviewsSection = ({ product }) => {
 
   const [formErrors, setFormErrors] = useState({});
 
-  useEffect(() => {
-    fetchReviews();
-  }, [product._id, currentPage]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(
@@ -46,7 +42,11 @@ const ProductReviewsSection = ({ product }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [product._id, currentPage]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   const validateForm = () => {
     const errors = {};
@@ -349,7 +349,7 @@ const ProductReviewsSection = ({ product }) => {
                       {renderStars(review.rating)}
                       <span className="text-sm text-[#6b5d54]">
                         <Calendar size={14} className="inline mr-1" />
-                        {format(new Date(review.createdAt), 'MMM dd, yyyy')}
+                        {formatDate(review.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -375,7 +375,7 @@ const ProductReviewsSection = ({ product }) => {
                   </p>
                   <p className="text-sm text-[#6b5d54]">{review.artisanReply.comment}</p>
                   <p className="text-xs text-[#6b5d54] mt-2">
-                    {format(new Date(review.artisanReply.repliedAt), 'MMM dd, yyyy')}
+                    {formatDate(review.artisanReply.repliedAt)}
                   </p>
                 </div>
               )}

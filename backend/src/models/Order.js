@@ -57,8 +57,8 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: { 
     type: String,
-    enum: ['card', 'paypal', 'cod'],
-    default: 'card'
+    enum: ['card', 'paypal', 'cod', 'razorpay', 'pending'],
+    default: 'pending'
   },
   paymentStatus: { 
     type: String, 
@@ -70,6 +70,10 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'], 
     default: 'pending' 
   },
+  // Razorpay payment fields
+  razorpayOrderId: { type: String },
+  razorpayPaymentId: { type: String },
+  paidAt: { type: Date },
   notes: { type: String },
   trackingNumber: { type: String },
   estimatedDelivery: { type: Date },

@@ -44,7 +44,7 @@ const ActivityFeed = ({ activities = [] }) => {
     },
     {
       type: 'sale',
-      message: 'Sale: Woven Blanket for $75',
+      message: 'Sale: Woven Blanket for ₹75',
       time: '3 hours ago',
       icon: DollarSign,
       iconBg: 'bg-green-100',

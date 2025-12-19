@@ -57,9 +57,9 @@ const TimelineSection = ({ data }) => {
       year: "2023",
       month: "May",
       title: "Major Milestone",
-      description: "Supported over 500 artisans and facilitated $1M+ in sales",
+      description: "Supported over 500 artisans and facilitated ₹1M+ in sales",
       icon: "TrendingUp",
-      stats: "$1M+ in artisan earnings"
+      stats: "₹1M+ in artisan earnings"
     },
     {
       year: "2024",

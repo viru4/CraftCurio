@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, CheckCircle, XCircle, Search, Filter, Download, Clock, Shield } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '@/utils/api';
+import { formatDate } from '@/lib/date';
 import VerificationDetailsModal from './VerificationDetailsModal';
 
 const VerificationManagement = () => {
@@ -305,7 +306,7 @@ const VerificationManagement = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {new Date(verification.createdAt).toLocaleDateString()}
+                        {formatDate(verification.createdAt)}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(verification.status)}`}>

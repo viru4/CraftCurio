@@ -1,0 +1,72 @@
+┌─────────────────────────────────────────────────────────────┐
+│         🎉 RAZORPAY PAYMENT GATEWAY - QUICK START 🎉        │
+└─────────────────────────────────────────────────────────────┘
+
+📝 STEP 1: GET API KEYS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Visit: https://dashboard.razorpay.com/
+2. Sign up (it's free!)
+3. Go to: Settings → API Keys
+4. Click "Generate Test Keys"
+5. Copy both keys
+
+⚙️ STEP 2: CONFIGURE BACKEND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Add to backend/.env:
+
+RAZORPAY_KEY_ID=rzp_test_XXXXXXXXXXXXXX
+RAZORPAY_KEY_SECRET=YYYYYYYYYYYYYYYY
+RAZORPAY_WEBHOOK_SECRET=ZZZZZZZZZZZZZZZZ
+
+🧪 STEP 3: TEST WITH THESE CREDENTIALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Success Payment:
+   Card: 4111 1111 1111 1111
+   CVV: 123
+   Expiry: 12/25
+   UPI: success@razorpay
+
+❌ Failure Payment:
+   Card: 4000 0000 0000 0002
+
+🚀 STEP 4: START YOUR SERVERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Terminal 1 (Backend):
+$ cd backend
+$ npm start
+
+Terminal 2 (Frontend):
+$ cd front-end
+$ npm run dev
+
+🎯 WHERE TO TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Regular Checkout:
+   Add items to cart → Checkout → Select Razorpay → Place Order
+
+2. Auction Orders:
+   Collector Dashboard → Auction Management → Orders Tab → Pay Now
+
+✨ FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Card payments (Visa, Mastercard, RuPay, Amex)
+✅ UPI (Google Pay, PhonePe, Paytm)
+✅ Net Banking (all banks)
+✅ Wallets (Paytm, PhonePe, etc.)
+✅ Automatic signature verification
+✅ Order status updates
+✅ Refund support (admin)
+
+💰 COST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test Mode: FREE (unlimited testing)
+Live Mode: 2% per transaction
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Full guide: RAZORPAY_SETUP.md
+Razorpay docs: https://razorpay.com/docs/
+
+🎊 YOU'RE ALL SET!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Your CraftCurio app now accepts payments! 🚀

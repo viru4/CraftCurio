@@ -279,6 +279,129 @@ export const getCollectorDetails = async (collectorId) => {
 };
 
 // ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+/**
+ * Get user notifications
+ * @param {Object} params - Query parameters (unreadOnly, limit, skip, type)
+ * @returns {Promise<Object>} Notifications data
+ */
+export const getNotifications = async (params = {}) => {
+  const response = await api.get('/notifications', { params });
+  return response.data;
+};
+
+/**
+ * Mark notification as read
+ * @param {String} notificationId - Notification ID
+ * @returns {Promise<Object>} Updated notification
+ */
+export const markNotificationAsRead = async (notificationId) => {
+  const response = await api.patch(`/notifications/${notificationId}/read`);
+  return response.data;
+};
+
+/**
+ * Mark all notifications as read
+ * @returns {Promise<Object>} Result
+ */
+export const markAllNotificationsAsRead = async () => {
+  const response = await api.patch('/notifications/read-all');
+  return response.data;
+};
+
+/**
+ * Delete notification
+ * @param {String} notificationId - Notification ID
+ * @returns {Promise<Object>} Result
+ */
+export const deleteNotification = async (notificationId) => {
+  const response = await api.delete(`/notifications/${notificationId}`);
+  return response.data;
+};
+
+// ============================================================================
+// ORDERS
+// ============================================================================
+
+/**
+ * Get user orders
+ * @returns {Promise<Object>} Orders data
+ */
+export const getUserOrders = async () => {
+  const response = await api.get('/orders');
+  return response.data;
+};
+
+/**
+ * Get order by ID
+ * @param {String} orderId - Order ID
+ * @returns {Promise<Object>} Order details
+ */
+export const getOrderById = async (orderId) => {
+  const response = await api.get(`/orders/${orderId}`);
+  return response.data;
+};
+
+/**
+ * Update order shipping address
+ * @param {String} orderId - Order ID
+ * @param {Object} shippingAddress - Shipping address data
+ * @returns {Promise<Object>} Updated order
+ */
+export const updateOrderShippingAddress = async (orderId, shippingAddress) => {
+  const response = await api.patch(`/orders/${orderId}/shipping-address`, { shippingAddress });
+  return response.data;
+};
+
+// ============================================================================
+// PAYMENT APIs
+// ============================================================================
+
+/**
+ * Create Razorpay order
+ * @param {String} orderId - Order ID
+ * @param {Number} amount - Amount in rupees
+ * @returns {Promise<Object>} Razorpay order details
+ */
+export const createPaymentOrder = async (orderId, amount) => {
+  const response = await api.post('/payments/create-order', { orderId, amount });
+  return response.data;
+};
+
+/**
+ * Verify payment after transaction
+ * @param {Object} paymentData - Payment verification data
+ * @returns {Promise<Object>} Verification result
+ */
+export const verifyPayment = async (paymentData) => {
+  const response = await api.post('/payments/verify', paymentData);
+  return response.data;
+};
+
+/**
+ * Record payment failure
+ * @param {String} orderId - Order ID
+ * @param {Object} error - Error details
+ * @returns {Promise<Object>} Result
+ */
+export const recordPaymentFailure = async (orderId, error) => {
+  const response = await api.post('/payments/failure', { orderId, error });
+  return response.data;
+};
+
+/**
+ * Get payment details
+ * @param {String} paymentId - Razorpay payment ID
+ * @returns {Promise<Object>} Payment details
+ */
+export const getPaymentDetails = async (paymentId) => {
+  const response = await api.get(`/payments/${paymentId}`);
+  return response.data;
+};
+
+// ============================================================================
 // AUTHENTICATION (if needed)
 // ============================================================================
 

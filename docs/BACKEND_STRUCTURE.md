@@ -15,10 +15,11 @@ This document explains the purpose of each folder and key file in the backend of
   - `Artisan.js` — Profile and details related to artisans.
   - `ArtisanProduct.js` — Schema for artisan handmade products.
   - `Collectible.js` — Schema for collectible items like antiques, trading cards.
-  - `Order.js` — Order placement, status, and tracking information.
+  - `Order.js` — Order placement, status, tracking, and payment information.
   - `Message.js` — Schema for user messaging and chat.
   - `Verification.js` — Documents and statuses for authenticity checks.
   - `Event.js` — Details of live auctions and community events.
+  - `Notification.js` — In-app notification system for users.
 
 ### `controllers/`
 
@@ -27,10 +28,22 @@ This document explains the purpose of each folder and key file in the backend of
 - **Contents:** Functions and modules managing core backend features:
   - User authentication and profile management
   - Product and collectible CRUD (Create, Read, Update, Delete) operations
-  - Order and payment processing
+  - Order and payment processing (Razorpay integration)
   - Messaging and chat handling
   - Verification workflows
   - Event management
+  - Notification management
+  - Auction management and bidding
+
+### `services/`
+
+- **Purpose:** Contains business logic separated from controllers for better code organization and reusability.
+
+- **Contents:** Service modules for:
+  - `auctionService.js` — Auction logic, bid validation, winner calculation
+  - `paymentService.js` — Razorpay payment processing, order creation, verification
+  - `notificationService.js` — In-app notification creation and management
+  - `emailService.js` — Email notification sending
 
 ### `routes/`
 
@@ -42,6 +55,9 @@ This document explains the purpose of each folder and key file in the backend of
   - `products.js` — Artisan product-related routes
   - `collectibles.js` — Collectible-specific endpoints
   - `orders.js` — Customer orders and tracking routes
+  - `payments.js` — Payment processing endpoints (NEW)
+  - `notifications.js` — Notification management routes (NEW)
+  - `auction.js` — Auction bidding and management routes
   - Others as needed (messages, events)
 
 ### `middleware/`
@@ -83,6 +99,8 @@ This document explains the purpose of each folder and key file in the backend of
   - Server port number
   - API keys or third-party service credentials
   - JWT secret keys
+  - Razorpay API keys (Key ID, Key Secret, Webhook Secret)
+  - Email service credentials
 
 ### `package.json`
 

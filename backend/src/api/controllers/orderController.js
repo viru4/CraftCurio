@@ -1,5 +1,6 @@
 import Order from '../../models/Order.js';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
+import Artisan from '../../models/Artisan.js';
 
 // Create new order
 export const createOrder = async (req, res) => {
@@ -94,8 +95,9 @@ export const getOrderById = async (req, res) => {
       });
     }
 
-    // Check if user owns this order
-    if (order.user._id.toString() !== req.user.id) {
+    // Check if user is allowed to view this order
+    // Buyers can see their own orders; admins and artisans can see orders relevant to them
+    if (order.user._id.toString() !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'artisan') {
       return res.status(403).json({ 
         success: false,
         message: 'Not authorized to view this order' 
@@ -188,6 +190,46 @@ export const updatePaymentStatus = async (req, res) => {
       success: false,
       message: 'Failed to update payment status',
       error: error.message 
+    });
+  }
+};
+
+// Update order shipping address
+export const updateOrderShippingAddress = async (req, res) => {
+  try {
+    const { shippingAddress } = req.body;
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Check if user owns this order
+    if (order.user.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this order'
+      });
+    }
+
+    order.shippingAddress = shippingAddress;
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Shipping address updated successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Update shipping address error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update shipping address',
+      error: error.message
     });
   }
 };
@@ -364,9 +406,37 @@ export const getArtisanOrders = async (req, res) => {
   try {
     const { status, search, dateFrom, dateTo, page = 1, limit = 10 } = req.query;
 
-    // Find all products belonging to this artisan
-    const artisanProducts = await ArtisanProduct.find({ artisan: req.user.id }).select('_id');
+    // Resolve artisan identity
+    // req.user.id is the User _id; map it to the corresponding Artisan record
+    let artisanIds = [];
+
+    try {
+      const artisanDocs = await Artisan.find({ userId: req.user.id }).select('id');
+      artisanIds = artisanDocs.map(a => a.id);
+    } catch (err) {
+      console.error('Error resolving artisan from user:', err);
+    }
+
+    if (artisanIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        orders: [],
+        total: 0,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: 0
+      });
+    }
+
+    // Find all products belonging to this artisan (by artisanInfo.id)
+    const artisanProducts = await ArtisanProduct.find({ 'artisanInfo.id': { $in: artisanIds } }).select('_id id');
     const artisanProductIds = artisanProducts.map(p => p._id.toString());
+    const artisanProductCustomIds = artisanProducts
+      .map(p => p.id)
+      .filter((val) => !!val)
+      .map((val) => val.toString());
+
+    const productIdSet = [...new Set([...artisanProductIds, ...artisanProductCustomIds])];
 
     if (artisanProductIds.length === 0) {
       return res.status(200).json({
@@ -381,8 +451,9 @@ export const getArtisanOrders = async (req, res) => {
 
     // Build query to find orders containing artisan's products
     const query = {
-      'items.productId': { $in: artisanProductIds },
-      'items.productType': 'artisan'
+      'items.productId': { $in: productIdSet },
+      // For artisan products in orders, productType is stored as 'artisan-product'
+      'items.productType': 'artisan-product'
     };
 
     // Add status filter

@@ -9,6 +9,7 @@ const Dashboard = ({
   onEditItem,
   onViewItem,
   onDelete,
+  onOpenAuctionManagement,
 }) => {
 
   // Step 1: Add collector and refreshTrigger to the destructured values from useCollectorContext()
@@ -147,8 +148,22 @@ const Dashboard = ({
       {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-3xl font-bold text-gray-900">Collector Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage your collectibles and auctions</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Collector Dashboard</h1>
+              <p className="text-gray-600 mt-1">Manage your collectibles and auctions</p>
+            </div>
+            {/* Auction Management Button */}
+            <button
+              onClick={onOpenAuctionManagement}
+              className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Auction Management</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -377,6 +392,7 @@ Dashboard.propTypes = {
   onEditItem: PropTypes.func.isRequired,
   onViewItem: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onOpenAuctionManagement: PropTypes.func.isRequired,
 };
 
 export default Dashboard;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRazorpay } from '@/hooks/useRazorpay';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Lock, ArrowRight, CreditCard } from 'lucide-react';
@@ -9,13 +10,15 @@ import { Lock, ArrowRight, CreditCard } from 'lucide-react';
 const CheckOut = () => {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+  const { processPayment, loading: paymentLoading } = useRazorpay();
   
   const [currentStep, setCurrentStep] = useState(1); // 1: Shipping, 2: Payment, 3: Review
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState({
-    paymentMethod: 'card',
+    paymentMethod: 'razorpay',
     cardNumber: '',
     cardName: '',
     expiryDate: '',
@@ -136,13 +139,56 @@ const CheckOut = () => {
         throw new Error(data.message || 'Failed to create order');
       }
 
-      // Clear cart after successful order
-      clearCart();
-      
-      // Navigate to order confirmation page
-      navigate(`/order-confirmation/${data.order._id}`, {
-        state: { order: data.order }
-      });
+      // Store created order
+      setCreatedOrder(data.order);
+
+      // If payment method is Razorpay, initiate payment
+      if (paymentInfo.paymentMethod === 'razorpay') {
+        await processPayment({
+          orderId: data.order._id,
+          amount: total,
+          name: user?.name || shippingInfo.fullName,
+          email: user?.email || '',
+          phone: user?.phone || '',
+          description: `Order #${data.order.orderNumber}`,
+          onSuccess: (updatedOrder) => {
+            console.log('Payment successful:', updatedOrder);
+            // Clear cart after successful payment
+            clearCart();
+            // Navigate to order confirmation page
+            navigate(`/order-confirmation/${data.order._id}`, {
+              state: { order: updatedOrder }
+            });
+          },
+          onFailure: (error) => {
+            console.error('Payment failed:', error);
+
+            let userMessage = 'Payment failed. Please try again or use a different payment method.';
+            if (error && error.description) {
+              userMessage = `Payment failed: ${error.description}. Please try again or use a different payment method.`;
+            } else if (error && error.reason) {
+              // Fallback to reason if description is missing
+              userMessage = `Payment failed: ${error.reason}. Please try again or use a different payment method.`;
+            }
+
+            // Display user-friendly error message
+            // TODO: Replace alert with a modal or toast notification for better UX
+            alert(userMessage);
+
+            // TODO: Log this error to your backend for monitoring and debugging
+            // Example: sendErrorToBackend('/api/log-payment-failure', error);
+
+            // Navigate to orders page even if payment fails
+            navigate('/profile?section=orders');
+          }
+        });
+      } else {
+        // For other payment methods (COD, etc.)
+        clearCart();
+        navigate(`/order-confirmation/${data.order._id}`, {
+          state: { order: data.order }
+        });
+      }
 
     } catch (error) {
       console.error('Order creation error:', error);
@@ -400,6 +446,26 @@ const CheckOut = () => {
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
                           <label className={`flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            paymentInfo.paymentMethod === 'razorpay' 
+                              ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/10' 
+                              : 'border-[#e7d9cf] hover:border-[var(--primary-color)]/50'
+                          }`}>
+                            <input
+                              type="radio"
+                              name="paymentMethod"
+                              value="razorpay"
+                              checked={paymentInfo.paymentMethod === 'razorpay'}
+                              onChange={handlePaymentInputChange}
+                              className="sr-only"
+                            />
+                            <div className="text-center">
+                              <CreditCard className="h-6 w-6 mx-auto mb-2" />
+                              <span className="text-sm font-medium">Razorpay</span>
+                              <p className="text-xs text-gray-500 mt-1">Card/UPI/Wallet</p>
+                            </div>
+                          </label>
+
+                          <label className={`flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             paymentInfo.paymentMethod === 'card' 
                               ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/10' 
                               : 'border-[#e7d9cf] hover:border-[var(--primary-color)]/50'
@@ -594,7 +660,12 @@ const CheckOut = () => {
                       <div className="bg-white border border-[#e7d9cf] rounded-lg p-6">
                         <h3 className="text-lg font-bold text-[#1b130d] mb-4">Payment Method</h3>
                         <div className="text-sm text-[#9a6c4c]">
-                          <p className="font-semibold text-[#1b130d] capitalize">{paymentInfo.paymentMethod}</p>
+                          <p className="font-semibold text-[#1b130d] capitalize">
+                            {paymentInfo.paymentMethod === 'razorpay' ? 'Razorpay (Card/UPI/Wallet)' : paymentInfo.paymentMethod}
+                          </p>
+                          {paymentInfo.paymentMethod === 'razorpay' && (
+                            <p className="mt-2 text-xs text-gray-500">Payment will be processed securely via Razorpay</p>
+                          )}
                           {paymentInfo.paymentMethod === 'card' && paymentInfo.cardNumber && (
                             <p className="mt-2">**** **** **** {paymentInfo.cardNumber.slice(-4)}</p>
                           )}
@@ -643,11 +714,23 @@ const CheckOut = () => {
                         <button
                           type="button"
                           onClick={handlePlaceOrder}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || paymentLoading}
                           className="flex items-center justify-center gap-2 w-full sm:w-auto rounded-lg bg-[var(--primary-color)] px-8 py-4 text-center text-base font-bold text-white shadow-sm transition-all hover:bg-[var(--primary-color)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {isSubmitting ? 'Placing Order...' : 'Place Order'}
-                          {!isSubmitting && <Lock className="h-5 w-5" />}
+                          {(isSubmitting || paymentLoading) ? (
+                            <>
+                              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              Place Order
+                              <Lock className="h-5 w-5" />
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>

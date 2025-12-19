@@ -194,7 +194,7 @@ const OrderConfirmation = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#9a6c4c]">Order Date:</span>
                   <span className="text-sm text-[#1b130d] font-medium">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {formatDate(order.createdAt)}
                   </span>
                 </div>
               </div>
