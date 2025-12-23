@@ -5,7 +5,8 @@ import {
   getLiveAuctions,
   getAuctionDetails,
   cancelAuction,
-  manuallyFinalizeAuction
+  manuallyFinalizeAuction,
+  relistAuction
 } from '../controllers/auctionController.js';
 import { authenticate, optionalAuth } from '../../middleware/authMiddleware.js';
 import { validateBody, validateObjectId, schemas } from '../../middleware/validation.js';
@@ -82,6 +83,19 @@ router.post(
   authenticate,
   validateObjectId('id'),
   manuallyFinalizeAuction
+);
+
+/**
+ * @route   POST /api/auction/:id/relist
+ * @desc    Relist an ended/unsold auction with new dates and optional updated pricing
+ * @access  Private (Owner only)
+ * @body    { startTime: Date, endTime: Date, startingBid?: Number, reservePrice?: Number, minimumBidIncrement?: Number }
+ */
+router.post(
+  '/:id/relist',
+  authenticate,
+  validateObjectId('id'),
+  relistAuction
 );
 
 export default router;

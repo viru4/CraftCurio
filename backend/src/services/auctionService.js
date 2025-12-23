@@ -1,6 +1,7 @@
 import Collectible from '../models/Collectible.js';
 import Collector from '../models/Collector.js';
 import Order from '../models/Order.js';
+import User from '../models/User.js';
 import { sendEmail } from './emailService.js';
 import { createNotification, createBulkNotifications } from './notificationService.js';
 
@@ -130,6 +131,36 @@ export const finalizeAuction = async (collectibleId) => {
         bid => bid.bidder.toString() === winner.toString()
       );
 
+      // Fetch winner's saved addresses
+      const winnerUser = await User.findById(winner).select('savedAddresses');
+      let shippingAddress = {
+        fullName: winnerBid?.bidderName || '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: ''
+      };
+
+      // Use default address or first saved address if available
+      if (winnerUser && winnerUser.savedAddresses && winnerUser.savedAddresses.length > 0) {
+        const defaultAddress = winnerUser.savedAddresses.find(addr => addr.isDefault);
+        const addressToUse = defaultAddress || winnerUser.savedAddresses[0];
+        
+        shippingAddress = {
+          fullName: addressToUse.fullName,
+          address: addressToUse.address,
+          city: addressToUse.city,
+          state: addressToUse.state,
+          zipCode: addressToUse.zipCode,
+          country: addressToUse.country
+        };
+        
+        console.log(`📦 Using ${defaultAddress ? 'default' : 'first saved'} address for order`);
+      } else {
+        console.log('ℹ️ No saved addresses found for winner, order created with empty address');
+      }
+
       const order = new Order({
         user: winner,
         items: [{
@@ -142,14 +173,7 @@ export const finalizeAuction = async (collectibleId) => {
           artisan: collectible.owner?.name || 'Unknown',
           category: collectible.category
         }],
-        shippingAddress: {
-          fullName: '',
-          address: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          country: ''
-        }, // To be filled by winner
+        shippingAddress,
         subtotal: winningBid,
         shipping: 0,
         tax: 0,
@@ -165,9 +189,13 @@ export const finalizeAuction = async (collectibleId) => {
       // Link order to collectible
       collectible.orderId = order._id;
       
-      console.log(`✅ Order ${order.orderNumber} created for auction winner`);
+      console.log(`✅ Order ${order.orderNumber} created for auction winner (User: ${winner})`);
+      console.log(`   Order ID: ${order._id}`);
+      console.log(`   Order Number: ${order.orderNumber}`);
+      console.log(`   Total: ₹${winningBid}`);
     } catch (orderError) {
-      console.error('Error creating order for auction:', orderError);
+      console.error('❌ Error creating order for auction:', orderError.message);
+      console.error('   Full error:', orderError);
       // Don't fail the auction finalization if order creation fails
     }
   } else {

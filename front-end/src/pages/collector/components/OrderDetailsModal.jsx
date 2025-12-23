@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { updateOrderShippingAddress } from '../../../utils/api';
+import { updateOrderShippingAddress, getSavedAddresses, addAddress, deleteAddress } from '../../../utils/api';
 import { useRazorpay } from '../../../hooks/useRazorpay';
 import { useAuth } from '../../../contexts/AuthContext';
 import { formatDate } from '../../../lib/date';
@@ -21,9 +21,23 @@ const OrderDetailsModal = ({ order, onClose, onRefresh }) => {
     zipCode: '',
     country: ''
   });
+  const [savedAddresses, setSavedAddresses] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [paymentError, setPaymentError] = useState(null);
+
+  useEffect(() => {
+    fetchSavedAddresses();
+  }, []);
+
+  const fetchSavedAddresses = async () => {
+    try {
+      const response = await getSavedAddresses();
+      setSavedAddresses(response.addresses || []);
+    } catch (err) {
+      console.error('Error fetching saved addresses:', err);
+    }
+  };
 
   const handleAddressChange = (field, value) => {
     setShippingAddress(prev => ({ ...prev, [field]: value }));
@@ -33,7 +47,18 @@ const OrderDetailsModal = ({ order, onClose, onRefresh }) => {
     setIsSaving(true);
     setError(null);
     try {
+      // Save to order
       await updateOrderShippingAddress(order._id, shippingAddress);
+      
+      // Save to user's address book
+      try {
+        await addAddress(shippingAddress);
+        await fetchSavedAddresses();
+      } catch (addressErr) {
+        console.error('Error saving to address book:', addressErr);
+        // Don't fail the whole operation if address book save fails
+      }
+      
       setIsEditingAddress(false);
       onRefresh();
       alert('Shipping address updated successfully!');
@@ -42,6 +67,29 @@ const OrderDetailsModal = ({ order, onClose, onRefresh }) => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDeleteAddress = async (addressId) => {
+    if (!confirm('Are you sure you want to delete this address?')) return;
+    
+    try {
+      await deleteAddress(addressId);
+      await fetchSavedAddresses();
+    } catch (err) {
+      alert('Failed to delete address');
+      console.error('Delete address error:', err);
+    }
+  };
+
+  const handleSelectAddress = (address) => {
+    setShippingAddress({
+      fullName: address.fullName,
+      address: address.address,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      country: address.country
+    });
   };
 
   const handlePayment = async () => {
@@ -263,6 +311,48 @@ const OrderDetailsModal = ({ order, onClose, onRefresh }) => {
                     Cancel
                   </button>
                 </div>
+
+                {/* Saved Addresses */}
+                {savedAddresses.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-300">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Saved Addresses</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {savedAddresses.map((addr) => (
+                        <div
+                          key={addr._id}
+                          className="relative bg-white border border-gray-200 rounded-lg p-3 hover:border-orange-300 transition-colors cursor-pointer group"
+                          onClick={() => handleSelectAddress(addr)}
+                        >
+                          <div className="pr-8">
+                            <p className="font-semibold text-sm text-gray-900">{addr.fullName}</p>
+                            <p className="text-xs text-gray-600 mt-1">{addr.address}</p>
+                            <p className="text-xs text-gray-600">
+                              {addr.city}, {addr.state} {addr.zipCode}
+                            </p>
+                            <p className="text-xs text-gray-600">{addr.country}</p>
+                            {addr.isDefault && (
+                              <span className="inline-block mt-1 px-2 py-0.5 bg-orange-100 text-orange-800 text-xs font-medium rounded">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteAddress(addr._id);
+                            }}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Delete address"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="bg-gray-50 rounded-lg p-4">

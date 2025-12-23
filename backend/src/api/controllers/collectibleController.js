@@ -336,7 +336,13 @@ export const updateCollectible = async (req, res) => {
     const updateData = req.validatedBody || req.body;
     const userId = req.user?._id || req.user?.id;
 
-    // Find collectible
+    // Log incoming update request for debugging
+    console.log('=== UPDATE COLLECTIBLE REQUEST ===');
+    console.log('Collectible ID:', id);
+    console.log('User ID:', userId);
+    console.log('Raw Update Data:', JSON.stringify(updateData, null, 2));
+
+    // Find collectible first to check ownership and current state
     let collectible = await Collectible.findById(id);
     if (!collectible) {
       collectible = await Collectible.findOne({ id });
@@ -346,50 +352,224 @@ export const updateCollectible = async (req, res) => {
       return res.status(404).json({ error: 'Collectible not found' });
     }
 
-    // Check ownership
-    if (collectible.owner && collectible.owner.toString() !== userId.toString() && req.user?.role !== 'admin') {
-      return res.status(403).json({
-        error: 'Access denied',
-        message: 'You do not have permission to update this listing'
-      });
-    }
+    console.log('Current collectible saleType:', collectible.saleType);
 
-    // Prevent certain updates for active auctions with bids
-    if (collectible.saleType === 'auction' &&
-      collectible.auction.bidHistory.length > 0 &&
-      collectible.auction.auctionStatus === 'live') {
-
-      const restrictedFields = ['price', 'auction.startTime', 'auction.endTime', 'auction.reservePrice'];
-      const attemptedChanges = restrictedFields.filter(field => updateData[field] !== undefined);
-
-      if (attemptedChanges.length > 0) {
-        return res.status(400).json({
-          error: 'Cannot modify key auction parameters after bids have been placed'
+    // Check ownership - need to find collector by userId
+    if (collectible.owner && req.user?.role !== 'admin') {
+      const collector = await Collector.findOne({ userId });
+      
+      if (!collector || collector._id.toString() !== collectible.owner.toString()) {
+        return res.status(403).json({
+          error: 'Access denied',
+          message: 'You do not have permission to update this listing'
         });
       }
     }
 
-    // Update fields
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] !== undefined && key !== '_id' && key !== 'owner') {
-        if (key === 'auction' && collectible.auction) {
-          // Merge auction updates
-          Object.assign(collectible.auction, updateData[key]);
-        } else {
-          collectible[key] = updateData[key];
+    // Prevent certain updates for active auctions with bids
+    if (collectible.saleType === 'auction' &&
+      collectible.auction?.bidHistory?.length > 0 &&
+      collectible.auction.auctionStatus === 'live') {
+
+      const restrictedFields = ['price', 'auction.startTime', 'auction.endTime', 'auction.reservePrice'];
+      const attemptedChanges = restrictedFields.filter(field => {
+        if (field.includes('.')) {
+          const [parent, child] = field.split('.');
+          return updateData[parent]?.[child] !== undefined;
         }
+        return updateData[field] !== undefined;
+      });
+
+      if (attemptedChanges.length > 0) {
+        return res.status(400).json({
+          error: 'Cannot modify key auction parameters after bids have been placed',
+          restrictedFields: attemptedChanges
+        });
+      }
+    }
+
+    // Whitelist of allowed fields for update
+    const allowedFields = [
+      'title',
+      'description',
+      'price',
+      'category',
+      'image',
+      'images',
+      'featured',
+      'popular',
+      'recent',
+      'targetSection',
+      'buttonText',
+      'history',
+      'provenance',
+      'productStory',
+      'specifications',
+      'manufacturer',
+      'serialNumber',
+      'editionNumber',
+      'saleType',
+      'auction',
+      'promoted',
+      'promotionEndDate',
+      'shippingInfo',
+      'availability',
+      'authenticityCertificateUrl',
+      'status',
+      'tags'
+    ];
+
+    // Build sanitized update object from whitelist
+    const update = {};
+    
+    allowedFields.forEach(field => {
+      if (updateData[field] !== undefined) {
+        update[field] = updateData[field];
       }
     });
 
-    const updatedCollectible = await collectible.save();
+    // Special handling: Remove auction field if saleType is 'direct'
+    const targetSaleType = update.saleType || collectible.saleType;
+    if (targetSaleType === 'direct') {
+      delete update.auction;
+      console.log('Removed auction field for direct sale');
+    }
+
+    // Type conversion for numeric fields
+    if (update.price !== undefined) {
+      update.price = Number(update.price);
+      if (isNaN(update.price) || update.price < 0) {
+        return res.status(400).json({ error: 'Invalid price value' });
+      }
+    }
+
+    // Convert auction numeric fields if present
+    if (update.auction) {
+      if (update.auction.reservePrice !== undefined) {
+        update.auction.reservePrice = Number(update.auction.reservePrice);
+        if (isNaN(update.auction.reservePrice)) {
+          return res.status(400).json({ error: 'Invalid reservePrice value' });
+        }
+      }
+      if (update.auction.buyNowPrice !== undefined) {
+        update.auction.buyNowPrice = Number(update.auction.buyNowPrice);
+        if (isNaN(update.auction.buyNowPrice)) {
+          return res.status(400).json({ error: 'Invalid buyNowPrice value' });
+        }
+      }
+      if (update.auction.minimumBidIncrement !== undefined) {
+        update.auction.minimumBidIncrement = Number(update.auction.minimumBidIncrement);
+        if (isNaN(update.auction.minimumBidIncrement)) {
+          return res.status(400).json({ error: 'Invalid minimumBidIncrement value' });
+        }
+      }
+      if (update.auction.currentBid !== undefined) {
+        update.auction.currentBid = Number(update.auction.currentBid);
+      }
+      if (update.auction.winningBid !== undefined) {
+        update.auction.winningBid = Number(update.auction.winningBid);
+      }
+    }
+
+    // Convert shipping numeric fields if present
+    if (update.shippingInfo) {
+      if (update.shippingInfo.weight !== undefined) {
+        update.shippingInfo.weight = Number(update.shippingInfo.weight);
+        if (isNaN(update.shippingInfo.weight)) {
+          return res.status(400).json({ error: 'Invalid weight value' });
+        }
+      }
+      if (update.shippingInfo.freeShippingThreshold !== undefined) {
+        update.shippingInfo.freeShippingThreshold = Number(update.shippingInfo.freeShippingThreshold);
+      }
+      if (update.shippingInfo.dimensions) {
+        if (update.shippingInfo.dimensions.height !== undefined) {
+          update.shippingInfo.dimensions.height = Number(update.shippingInfo.dimensions.height);
+        }
+        if (update.shippingInfo.dimensions.width !== undefined) {
+          update.shippingInfo.dimensions.width = Number(update.shippingInfo.dimensions.width);
+        }
+        if (update.shippingInfo.dimensions.depth !== undefined) {
+          update.shippingInfo.dimensions.depth = Number(update.shippingInfo.dimensions.depth);
+        }
+      }
+    }
+
+    // Convert specifications numeric fields if present
+    if (update.specifications) {
+      if (update.specifications.weight !== undefined) {
+        update.specifications.weight = Number(update.specifications.weight);
+      }
+      if (update.specifications.dimensions) {
+        if (update.specifications.dimensions.height !== undefined) {
+          update.specifications.dimensions.height = Number(update.specifications.dimensions.height);
+        }
+        if (update.specifications.dimensions.width !== undefined) {
+          update.specifications.dimensions.width = Number(update.specifications.dimensions.width);
+        }
+        if (update.specifications.dimensions.depth !== undefined) {
+          update.specifications.dimensions.depth = Number(update.specifications.dimensions.depth);
+        }
+      }
+    }
+
+    console.log('Sanitized Update Object:', JSON.stringify(update, null, 2));
+
+    // Use findByIdAndUpdate with runValidators
+    const updatedCollectible = await Collectible.findByIdAndUpdate(
+      collectible._id,
+      update,
+      { 
+        new: true, 
+        runValidators: true,
+        context: 'query' // Needed for validation to work properly with findByIdAndUpdate
+      }
+    );
+
+    if (!updatedCollectible) {
+      return res.status(404).json({ error: 'Collectible not found after update' });
+    }
+
+    console.log('=== UPDATE SUCCESSFUL ===');
 
     res.status(200).json({
       message: 'Collectible updated successfully',
       data: updatedCollectible
     });
   } catch (error) {
-    console.error('Error updating collectible:', error);
-    res.status(400).json({ error: error.message });
+    console.error('=== UPDATE ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      console.error('Validation errors:', error.errors);
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: Object.keys(error.errors).map(key => ({
+          field: key,
+          message: error.errors[key].message,
+          value: error.errors[key].value
+        }))
+      });
+    }
+    
+    // Handle Mongoose cast errors (e.g., invalid ObjectId)
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        error: 'Invalid data format',
+        field: error.path,
+        message: error.message
+      });
+    }
+    
+    // Generic server error
+    res.status(500).json({ 
+      error: error.message || 'Internal server error',
+      type: error.name,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
@@ -413,12 +593,16 @@ export const deleteCollectible = async (req, res) => {
       return res.status(404).json({ error: 'Collectible not found' });
     }
 
-    // Check ownership
-    if (collectible.owner && collectible.owner.toString() !== userId.toString() && req.user?.role !== 'admin') {
-      return res.status(403).json({
-        error: 'Access denied',
-        message: 'You do not have permission to delete this listing'
-      });
+    // Check ownership - need to find collector by userId
+    if (collectible.owner && req.user?.role !== 'admin') {
+      const collector = await Collector.findOne({ userId });
+      
+      if (!collector || collector._id.toString() !== collectible.owner.toString()) {
+        return res.status(403).json({
+          error: 'Access denied',
+          message: 'You do not have permission to delete this listing'
+        });
+      }
     }
 
     // Prevent deletion of active auctions with bids
@@ -533,7 +717,7 @@ export const getCollectorListings = async (req, res) => {
       return res.status(404).json({ error: 'Collector not found' });
     }
 
-    // Build query
+    // Build query - owner should be the collector ID
     const query = { owner: collector._id };
     if (status) query.status = status;
     if (saleType) query.saleType = saleType;

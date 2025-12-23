@@ -142,9 +142,80 @@ export const getCollectibleById = async (id) => {
  * @param {String} id - Collectible ID
  * @param {Object} updateData - Updated data
  * @returns {Promise<Object>} Updated collectible
+ * 
+ * Example valid payload:
+ * {
+ *   title: "Updated Title",
+ *   description: "Updated description",
+ *   price: 1500,
+ *   category: "Pottery",
+ *   image: "https://...",
+ *   saleType: "direct"
+ * }
+ * 
+ * For auction items:
+ * {
+ *   title: "Auction Item",
+ *   price: 1000,
+ *   saleType: "auction",
+ *   auction: {
+ *     startTime: "2025-12-20T10:00:00.000Z",
+ *     endTime: "2025-12-27T10:00:00.000Z",
+ *     reservePrice: 1500,
+ *     buyNowPrice: 3000
+ *   }
+ * }
  */
 export const updateCollectible = async (id, updateData) => {
-  const response = await api.put(`/collectibles/${id}`, updateData);
+  // Sanitize payload before sending
+  const sanitizedData = { ...updateData };
+  
+  // Convert numeric fields from strings to numbers
+  if (sanitizedData.price !== undefined && sanitizedData.price !== '') {
+    sanitizedData.price = Number(sanitizedData.price);
+  }
+  
+  // Handle auction fields
+  if (sanitizedData.auction) {
+    // Convert auction numeric fields
+    if (sanitizedData.auction.reservePrice !== undefined && sanitizedData.auction.reservePrice !== '') {
+      sanitizedData.auction.reservePrice = Number(sanitizedData.auction.reservePrice);
+    }
+    if (sanitizedData.auction.buyNowPrice !== undefined && sanitizedData.auction.buyNowPrice !== '') {
+      sanitizedData.auction.buyNowPrice = Number(sanitizedData.auction.buyNowPrice);
+    }
+    if (sanitizedData.auction.minimumBidIncrement !== undefined && sanitizedData.auction.minimumBidIncrement !== '') {
+      sanitizedData.auction.minimumBidIncrement = Number(sanitizedData.auction.minimumBidIncrement);
+    }
+  }
+  
+  // Remove auction field for direct sales
+  if (sanitizedData.saleType === 'direct') {
+    delete sanitizedData.auction;
+  }
+  
+  // Handle shipping info numeric fields
+  if (sanitizedData.shippingInfo) {
+    if (sanitizedData.shippingInfo.weight !== undefined && sanitizedData.shippingInfo.weight !== '') {
+      sanitizedData.shippingInfo.weight = Number(sanitizedData.shippingInfo.weight);
+    }
+    if (sanitizedData.shippingInfo.dimensions) {
+      if (sanitizedData.shippingInfo.dimensions.height !== undefined && sanitizedData.shippingInfo.dimensions.height !== '') {
+        sanitizedData.shippingInfo.dimensions.height = Number(sanitizedData.shippingInfo.dimensions.height);
+      }
+      if (sanitizedData.shippingInfo.dimensions.width !== undefined && sanitizedData.shippingInfo.dimensions.width !== '') {
+        sanitizedData.shippingInfo.dimensions.width = Number(sanitizedData.shippingInfo.dimensions.width);
+      }
+      if (sanitizedData.shippingInfo.dimensions.depth !== undefined && sanitizedData.shippingInfo.dimensions.depth !== '') {
+        sanitizedData.shippingInfo.dimensions.depth = Number(sanitizedData.shippingInfo.dimensions.depth);
+      }
+    }
+  }
+  
+  console.log('API: updateCollectible payload:', JSON.stringify(sanitizedData, null, 2));
+  
+  const response = await api.put(`/collectibles/${id}`, sanitizedData);
+  console.log('API: updateCollectible response:', response.data);
   return response.data;
 };
 
@@ -251,6 +322,17 @@ export const cancelAuction = async (id) => {
   return response.data;
 };
 
+/**
+ * Relist an ended/unsold auction
+ * @param {String} id - Auction ID
+ * @param {Object} relistData - { startTime, endTime, startingBid?, reservePrice?, minimumBidIncrement? }
+ * @returns {Promise<Object>} Relist result
+ */
+export const relistAuction = async (id, relistData) => {
+  const response = await api.post(`/auction/${id}/relist`, relistData);
+  return response.data;
+};
+
 // ============================================================================
 // COLLECTOR API
 // ============================================================================
@@ -352,6 +434,60 @@ export const getOrderById = async (orderId) => {
  */
 export const updateOrderShippingAddress = async (orderId, shippingAddress) => {
   const response = await api.patch(`/orders/${orderId}/shipping-address`, { shippingAddress });
+  return response.data;
+};
+
+// ============================================================================
+// ADDRESS APIs
+// ============================================================================
+
+/**
+ * Get all saved addresses
+ * @returns {Promise<Object>} List of saved addresses
+ */
+export const getSavedAddresses = async () => {
+  const response = await api.get('/addresses');
+  return response.data;
+};
+
+/**
+ * Add a new address
+ * @param {Object} addressData - Address data
+ * @returns {Promise<Object>} Created address
+ */
+export const addAddress = async (addressData) => {
+  const response = await api.post('/addresses', addressData);
+  return response.data;
+};
+
+/**
+ * Update an existing address
+ * @param {String} addressId - Address ID
+ * @param {Object} addressData - Updated address data
+ * @returns {Promise<Object>} Updated address
+ */
+export const updateAddress = async (addressId, addressData) => {
+  const response = await api.put(`/addresses/${addressId}`, addressData);
+  return response.data;
+};
+
+/**
+ * Delete an address
+ * @param {String} addressId - Address ID
+ * @returns {Promise<Object>} Deletion result
+ */
+export const deleteAddress = async (addressId) => {
+  const response = await api.delete(`/addresses/${addressId}`);
+  return response.data;
+};
+
+/**
+ * Set an address as default
+ * @param {String} addressId - Address ID
+ * @returns {Promise<Object>} Update result
+ */
+export const setDefaultAddress = async (addressId) => {
+  const response = await api.patch(`/addresses/${addressId}/default`);
   return response.data;
 };
 

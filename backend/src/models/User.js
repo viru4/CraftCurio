@@ -13,7 +13,18 @@ const userSchema = new mongoose.Schema({
     state: { type: String },
     zipCode: { type: String },
     country: { type: String }
-  }
+  },
+  // Saved shipping addresses for orders
+  savedAddresses: [{
+    fullName: { type: String, required: true },
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    zipCode: { type: String, required: true },
+    country: { type: String, required: true },
+    isDefault: { type: Boolean, default: false },
+    addedAt: { type: Date, default: Date.now }
+  }]
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

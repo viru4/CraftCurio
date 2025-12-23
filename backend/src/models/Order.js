@@ -12,12 +12,12 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const addressSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  address: { type: String, required: true },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
-  zipCode: { type: String, required: true },
-  country: { type: String, required: true }
+  fullName: { type: String, required: false },
+  address: { type: String, required: false },
+  city: { type: String, required: false },
+  state: { type: String, required: false },
+  zipCode: { type: String, required: false },
+  country: { type: String, required: false }
 });
 
 const orderSchema = new mongoose.Schema({

@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useCollectorContext } from '../../../contexts/CollectorContext';
 import { useCollectorListings } from '../../../hooks/useCollectibles';
-import { getUserOrders, getNotifications } from '../../../utils/api';
+import { getUserOrders, getNotifications, relistAuction } from '../../../utils/api';
 import { formatDate } from '../../../lib/date';
 import AuctionCard from './AuctionCard';
 import OrderDetailsModal from './OrderDetailsModal';
 import NotificationPanel from './NotificationPanel';
+import RelistAuctionModal from './RelistAuctionModal';
 
 /**
  * AuctionManagement - Comprehensive auction management for collectors
@@ -27,6 +28,7 @@ const AuctionManagement = ({ onBack }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [allAuctions, setAllAuctions] = useState([]); // Store all auctions for stats
+  const [relistingAuction, setRelistingAuction] = useState(null); // Auction being relisted
   
   // Loading states
   const [ordersLoading, setOrdersLoading] = useState(false);
@@ -92,6 +94,19 @@ const AuctionManagement = ({ onBack }) => {
       setNotificationsError(error.response?.data?.message || 'Failed to fetch notifications');
     } finally {
       setNotificationsLoading(false);
+    }
+  };
+
+  // Handle relist auction
+  const handleRelistAuction = async (auctionId, relistData) => {
+    try {
+      await relistAuction(auctionId, relistData);
+      setRelistingAuction(null);
+      refetchAuctions(); // Refresh the list
+      alert('Auction relisted successfully!');
+    } catch (error) {
+      console.error('Error relisting auction:', error);
+      throw error; // Let modal handle the error
     }
   };
 
@@ -292,6 +307,7 @@ const AuctionManagement = ({ onBack }) => {
                 key={auction._id}
                 auction={auction}
                 onView={() => navigate(`/auctions/${auction._id}`)}
+                onRelist={(auction) => setRelistingAuction(auction)}
               />
             ))}
           </div>
@@ -410,6 +426,15 @@ const AuctionManagement = ({ onBack }) => {
           error={notificationsError}
           onClose={() => setShowNotifications(false)}
           onRefresh={fetchNotifications}
+        />
+      )}
+
+      {/* Relist Auction Modal */}
+      {relistingAuction && (
+        <RelistAuctionModal
+          auction={relistingAuction}
+          onClose={() => setRelistingAuction(null)}
+          onRelist={handleRelistAuction}
         />
       )}
     </div>

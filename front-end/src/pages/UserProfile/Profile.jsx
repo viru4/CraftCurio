@@ -5,12 +5,12 @@ import {
   ProfileSidebar,
   ProfileHeader,
   PersonalInfoForm,
-  AddressForm,
   SecuritySettings,
   AccountSettings,
   PaymentBilling,
   UserMessages
 } from './components';
+import SavedAddresses from '../../components/SavedAddresses';
 
 // Helper to refresh auth context
 const refreshAuthContext = async () => {
@@ -337,17 +337,21 @@ const Profile = () => {
                   onSubmit={handleProfileSubmit}
                   saving={saving}
                 />
-                <AddressForm
-                  profileData={profileData}
-                  onChange={handleProfileChange}
-                  onSubmit={handleProfileSubmit}
-                  saving={saving}
-                />
               </>
             )}
 
             {activeTab === 'account' && (
               <AccountSettings />
+            )}
+
+            {activeTab === 'addresses' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Saved Addresses</h2>
+                <SavedAddresses 
+                  showAddForm={true}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                />
+              </div>
             )}
 
             {activeTab === 'security' && (

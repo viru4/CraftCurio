@@ -16,6 +16,7 @@ const ProfileSidebar = ({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOp
   const menuItems = [
     { id: 'profile', label: 'Profile', icon: 'person' },
     { id: 'account', label: 'Account', icon: 'manage_accounts' },
+    { id: 'addresses', label: 'Saved Addresses', icon: 'location_on' },
     { id: 'security', label: 'Security', icon: 'lock' },
     { id: 'payment', label: 'Payment & Billing', icon: 'credit_card' },
     { id: 'messages', label: 'Messages', icon: 'chat' }

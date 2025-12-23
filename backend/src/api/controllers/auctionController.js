@@ -484,11 +484,94 @@ export const manuallyFinalizeAuction = async (req, res) => {
   }
 };
 
+/**
+ * Relist an ended/unsold auction
+ * POST /api/auction/:id/relist
+ * @route POST /api/auction/:id/relist
+ * @access Private - Owner only
+ */
+export const relistAuction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { startTime, endTime, startingBid, reservePrice, minimumBidIncrement } = req.body;
+
+    // Find the collectible
+    const collectible = await Collectible.findById(id);
+    if (!collectible) {
+      return res.status(404).json({ error: 'Collectible not found' });
+    }
+
+    // Check if user owns this collectible
+    // Owner should be the Collector ID
+    const userCollector = await Collector.findOne({ userId: req.user._id });
+    if (!userCollector) {
+      return res.status(403).json({ error: 'Collector profile not found' });
+    }
+
+    if (!collectible.owner || collectible.owner.toString() !== userCollector._id.toString()) {
+      return res.status(403).json({ 
+        error: 'Only the owner can relist this auction'
+      });
+    }
+
+    // Check if auction can be relisted (must be ended and not sold)
+    if (collectible.auction.auctionStatus !== 'ended') {
+      return res.status(400).json({ 
+        error: 'Only ended auctions can be relisted. Current status: ' + collectible.auction.auctionStatus 
+      });
+    }
+
+    // Validate dates
+    const now = new Date();
+    const newStartTime = new Date(startTime);
+    const newEndTime = new Date(endTime);
+
+    if (newStartTime < now) {
+      return res.status(400).json({ error: 'Start time must be in the future' });
+    }
+
+    if (newEndTime <= newStartTime) {
+      return res.status(400).json({ error: 'End time must be after start time' });
+    }
+
+    // Reset auction data
+    collectible.auction.startTime = newStartTime;
+    collectible.auction.endTime = newEndTime;
+    collectible.auction.startingBid = startingBid || collectible.auction.startingBid;
+    collectible.auction.currentBid = startingBid || collectible.auction.startingBid;
+    collectible.auction.reservePrice = reservePrice !== undefined ? reservePrice : collectible.auction.reservePrice;
+    collectible.auction.minimumBidIncrement = minimumBidIncrement || collectible.auction.minimumBidIncrement;
+    
+    // Clear previous auction data
+    collectible.auction.bidHistory = [];
+    collectible.auction.winner = null;
+    collectible.auction.winningBid = null;
+    collectible.auction.totalBids = 0;
+    collectible.auction.uniqueBidders = 0;
+    
+    // Update status
+    collectible.auction.auctionStatus = newStartTime <= now ? 'live' : 'scheduled';
+    collectible.status = 'available';
+    collectible.orderId = null;
+
+    await collectible.save();
+
+    res.status(200).json({
+      message: 'Auction relisted successfully',
+      data: collectible
+    });
+  } catch (error) {
+    console.error('Error relisting auction:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   placeBid,
   buyNow,
   getLiveAuctions,
   getAuctionDetails,
   cancelAuction,
-  manuallyFinalizeAuction
+  manuallyFinalizeAuction,
+  relistAuction
 };

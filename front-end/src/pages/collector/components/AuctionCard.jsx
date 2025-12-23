@@ -5,7 +5,7 @@ import { formatDateTime } from '../../../lib/date';
 /**
  * AuctionCard - Display auction with status and actions
  */
-const AuctionCard = ({ auction, onView }) => {
+const AuctionCard = ({ auction, onView, onRelist }) => {
   const isAuction = auction.saleType === 'auction';
   const auctionStatus = auction.auction?.auctionStatus || 'scheduled';
   const currentBid = auction.auction?.currentBid || auction.price;
@@ -150,10 +150,12 @@ const AuctionCard = ({ auction, onView }) => {
 
           {auctionStatus === 'ended' && !auction.auction?.winner && (
             <button
-              onClick={() => {
-                if (confirm('Would you like to relist this auction?')) {
-                  // TODO: Implement relist functionality
-                  alert('Relist functionality coming soon!');
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onRelist) {
+                  onRelist(auction);
+                } else {
+                  alert('Relist functionality is not available');
                 }
               }}
               className="px-4 py-2 border border-orange-600 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium text-sm"
@@ -178,7 +180,8 @@ const AuctionCard = ({ auction, onView }) => {
 
 AuctionCard.propTypes = {
   auction: PropTypes.object.isRequired,
-  onView: PropTypes.func.isRequired
+  onView: PropTypes.func.isRequired,
+  onRelist: PropTypes.func
 };
 
 export default AuctionCard;

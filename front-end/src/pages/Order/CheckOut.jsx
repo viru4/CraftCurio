@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRazorpay } from '@/hooks/useRazorpay';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import SavedAddresses from '@/components/SavedAddresses';
 import { Lock, ArrowRight, CreditCard } from 'lucide-react';
 
 const CheckOut = () => {
@@ -292,6 +293,25 @@ const CheckOut = () => {
                     <h2 className="text-[#1b130d] text-2xl sm:text-[32px] font-bold leading-tight px-4 text-left pb-3 pt-6">
                       Shipping Address
                     </h2>
+                    
+                    {/* Saved Addresses */}
+                    <SavedAddresses 
+                      onSelectAddress={(address) => {
+                        setShippingInfo({
+                          fullName: address.fullName || '',
+                          address: address.address || '',
+                          city: address.city || '',
+                          state: address.state || '',
+                          zipCode: address.zipCode || '',
+                          country: address.country || ''
+                        });
+                      }}
+                      className="px-4 mb-6"
+                    />
+                    
+                    <h3 className="text-[#1b130d] text-xl font-semibold px-4 pb-3">
+                      Or Enter New Address
+                    </h3>
                     
                     <form onSubmit={handleContinueToPayment} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 p-4">
                     {/* Full Name */}

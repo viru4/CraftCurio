@@ -139,7 +139,14 @@ const collectibleSchema = new mongoose.Schema({
 
 // Virtual property to check if auction is active
 collectibleSchema.virtual('isAuctionActive').get(function() {
+  // Guard against missing auction object or wrong sale type
   if (this.saleType !== 'auction' || !this.auction) return false;
+  
+  // Additional safety checks for auction properties
+  if (!this.auction.startTime || !this.auction.endTime || !this.auction.auctionStatus) {
+    return false;
+  }
+  
   const now = new Date();
   return this.auction.auctionStatus === 'live' && 
          this.auction.startTime <= now && 
@@ -148,7 +155,15 @@ collectibleSchema.virtual('isAuctionActive').get(function() {
 
 // Virtual property to get time remaining in auction
 collectibleSchema.virtual('timeRemaining').get(function() {
-  if (this.saleType !== 'auction' || !this.auction || !this.isAuctionActive) return 0;
+  // Guard against missing auction object
+  if (this.saleType !== 'auction' || !this.auction) return 0;
+  
+  // Check if auction is active
+  if (!this.isAuctionActive) return 0;
+  
+  // Safety check for endTime
+  if (!this.auction.endTime) return 0;
+  
   return Math.max(0, this.auction.endTime - new Date());
 });
 

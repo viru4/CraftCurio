@@ -8,6 +8,19 @@ import ImageUpload from '../common/ImageUpload';
  * Includes image preview, validation, and dynamic auction fields
  */
 
+// Categories list - defined outside component to prevent re-renders
+const CATEGORIES = [
+  'Pottery',
+  'Textiles',
+  'Jewelry',
+  'Woodwork',
+  'Metalwork',
+  'Glass',
+  'Painting',
+  'Sculpture',
+  'Other',
+];
+
 const ListForm = ({
   initialData = null,
   onSubmit,
@@ -34,30 +47,28 @@ const ListForm = ({
 
   const [errors, setErrors] = useState({});
   const [uploadError, setUploadError] = useState(null);
-
-  // Categories list
-  const categories = [
-    'Pottery',
-    'Textiles',
-    'Jewelry',
-    'Woodwork',
-    'Metalwork',
-    'Glass',
-    'Painting',
-    'Sculpture',
-    'Other',
-  ];
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryValue, setCustomCategoryValue] = useState('');
 
   // Load initial data for edit mode
   useEffect(() => {
     if (initialData) {
       const isAuction = initialData.saleType === 'auction';
+      
+      // Check if category is custom (not in predefined list)
+      const categoryValue = initialData.category || '';
+      const isCustom = categoryValue && !CATEGORIES.includes(categoryValue);
+      
+      if (isCustom) {
+        setIsCustomCategory(true);
+        setCustomCategoryValue(categoryValue);
+      }
 
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
         price: isAuction ? '' : initialData.price?.toString() || '',
-        category: initialData.category || '',
+        category: categoryValue,
         image: initialData.image || '',
         saleType: initialData.saleType || 'direct',
         // Auction fields
@@ -334,19 +345,56 @@ const ListForm = ({
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
             Category <span className="text-red-500">*</span>
           </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.category ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
-              }`}
-          >
-            <option value="">Select a category</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          {!isCustomCategory ? (
+            <div className="flex gap-2">
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={(e) => {
+                  if (e.target.value === 'custom') {
+                    setIsCustomCategory(true);
+                    setFormData(prev => ({ ...prev, category: '' }));
+                  } else {
+                    handleChange(e);
+                  }
+                }}
+                className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.category ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                  }`}
+              >
+                <option value="">Select a category</option>
+                {CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+                <option value="custom">+ Add Custom Category</option>
+              </select>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customCategoryValue}
+                onChange={(e) => {
+                  setCustomCategoryValue(e.target.value);
+                  setFormData(prev => ({ ...prev, category: e.target.value }));
+                }}
+                placeholder="Enter custom category"
+                className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.category ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-orange-500'
+                  }`}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCustomCategory(false);
+                  setCustomCategoryValue('');
+                  setFormData(prev => ({ ...prev, category: '' }));
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
           {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
         </div>
 
