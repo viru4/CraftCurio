@@ -1,5 +1,6 @@
 import Order from '../../models/Order.js';
 import ArtisanProduct from '../../models/ArtisanProduct.js';
+import Collectible from '../../models/Collectible.js';
 import Artisan from '../../models/Artisan.js';
 
 // Create new order
@@ -26,6 +27,46 @@ export const createOrder = async (req, res) => {
       }
     }
 
+    // Validate stock availability for artisan products and direct-sale collectibles
+    for (const item of items) {
+      if (item.productType === 'artisan-product') {
+        const product = await ArtisanProduct.findOne({ id: item.productId });
+        
+        if (!product) {
+          return res.status(404).json({ 
+            success: false,
+            message: `Product ${item.productId} not found` 
+          });
+        }
+
+        if (product.stockQuantity < item.quantity) {
+          return res.status(400).json({ 
+            success: false,
+            message: `Insufficient stock for ${product.title}. Available: ${product.stockQuantity}, Requested: ${item.quantity}` 
+          });
+        }
+      } else if (item.productType === 'collectible') {
+        const collectible = await Collectible.findOne({ id: item.productId });
+        
+        if (!collectible) {
+          return res.status(404).json({ 
+            success: false,
+            message: `Collectible ${item.productId} not found` 
+          });
+        }
+
+        // Only validate stock for direct-sale collectibles (not auctions)
+        if (collectible.saleType === 'direct') {
+          if (collectible.stockQuantity < item.quantity) {
+            return res.status(400).json({ 
+              success: false,
+              message: `Insufficient stock for ${collectible.title}. Available: ${collectible.stockQuantity}, Requested: ${item.quantity}` 
+            });
+          }
+        }
+      }
+    }
+
     // Create order
     const order = new Order({
       user: req.user._id,
@@ -41,6 +82,25 @@ export const createOrder = async (req, res) => {
     });
 
     await order.save();
+
+    // Decrement stock for artisan products and direct-sale collectibles
+    for (const item of items) {
+      if (item.productType === 'artisan-product') {
+        await ArtisanProduct.findOneAndUpdate(
+          { id: item.productId },
+          { $inc: { stockQuantity: -item.quantity } }
+        );
+      } else if (item.productType === 'collectible') {
+        // Only decrement stock for direct-sale collectibles
+        const collectible = await Collectible.findOne({ id: item.productId });
+        if (collectible && collectible.saleType === 'direct') {
+          await Collectible.findOneAndUpdate(
+            { id: item.productId },
+            { $inc: { stockQuantity: -item.quantity } }
+          );
+        }
+      }
+    }
 
     // Populate user details
     await order.populate('user', 'name email');

@@ -414,6 +414,7 @@ export const updateCollectible = async (req, res) => {
       'promotionEndDate',
       'shippingInfo',
       'availability',
+      'stockQuantity',
       'authenticityCertificateUrl',
       'status',
       'tags'
@@ -510,6 +511,14 @@ export const updateCollectible = async (req, res) => {
         if (update.specifications.dimensions.depth !== undefined) {
           update.specifications.dimensions.depth = Number(update.specifications.dimensions.depth);
         }
+      }
+    }
+
+    // Convert stockQuantity if present (for direct-sale collectibles)
+    if (update.stockQuantity !== undefined) {
+      update.stockQuantity = Number(update.stockQuantity);
+      if (isNaN(update.stockQuantity) || update.stockQuantity < 0) {
+        return res.status(400).json({ error: 'Invalid stockQuantity value. Must be a non-negative number.' });
       }
     }
 

@@ -34,6 +34,7 @@ const artisanProductSchema = new mongoose.Schema({
   },
   authenticityCertificateUrl: { type: String },            // URL to authenticity certificate
   availability: { type: Boolean, default: true },          // If product is in stock
+  stockQuantity: { type: Number, default: 0, min: 0 },    // Available stock units
   shippingInfo: {
     weight: { type: Number },                             // Product weight in grams or unit
     dimensions: {                                         // Physical dimensions

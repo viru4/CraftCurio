@@ -37,6 +37,16 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     }
   };
 
+  const getStockStatus = () => {
+    const stock = product.stockQuantity || 0;
+    if (stock === 0) {
+      return { text: 'Out of Stock', color: 'bg-red-100 text-red-800' };
+    }
+    return { text: 'In Stock', color: 'bg-green-100 text-green-800' };
+  };
+
+  const stockStatus = getStockStatus();
+
   return (
     <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow">
       {/* Product Image */}
@@ -56,9 +66,12 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
         )}
         
         {/* Status Badge */}
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 flex gap-2">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(product.status)}`}>
             {product.status || 'Active'}
+          </span>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${stockStatus.color}`}>
+            {stockStatus.text}
           </span>
         </div>
 
@@ -124,8 +137,8 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
             <p className="text-2xl font-bold text-[#ec6d13]">
               {formatCurrency(product.price)}
             </p>
-            <p className="text-xs text-stone-500">
-              Stock: {product.stock || 0} units
+            <p className={`text-xs font-medium ${product.stockQuantity === 0 ? 'text-red-600' : 'text-stone-500'}`}>
+              Stock: {product.stockQuantity || 0} units
             </p>
           </div>
           <button

@@ -29,6 +29,7 @@ const AddProduct = () => {
     category: '',
     price: '',
     currency: 'INR',
+    stockQuantity: '',
     craftMethod: '',
     provenance: '',
     craftingStory: '',
@@ -83,6 +84,7 @@ const AddProduct = () => {
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
+    if (!formData.stockQuantity || formData.stockQuantity < 0) newErrors.stockQuantity = 'Stock quantity must be 0 or greater';
 
     if (productImages.length === 0) newErrors.images = 'At least one product image is required';
 
@@ -164,6 +166,7 @@ const AddProduct = () => {
         images: productImages, // Use uploaded images
         price: parseFloat(formData.price),
         currency: formData.currency,
+        stockQuantity: parseInt(formData.stockQuantity) || 0,
         artisanInfo: {
           id: user._id,
           name: user.name,
@@ -411,6 +414,24 @@ const AddProduct = () => {
                       />
                     </div>
                     {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+                  </div>
+
+                  {/* Stock Quantity */}
+                  <div>
+                    <label className="block text-stone-800 text-sm font-medium mb-2">
+                      Stock Quantity *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={formData.stockQuantity}
+                      onChange={(e) => handleInputChange('stockQuantity', e.target.value)}
+                      className={`w-full px-4 py-3 border ${errors.stockQuantity ? 'border-red-500' : 'border-stone-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white`}
+                      placeholder="Enter available units"
+                    />
+                    {errors.stockQuantity && <p className="text-red-500 text-sm mt-1">{errors.stockQuantity}</p>}
+                    <p className="text-stone-500 text-xs mt-1">Number of units available in stock</p>
                   </div>
 
                   {/* Availability */}

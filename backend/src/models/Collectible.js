@@ -127,6 +127,7 @@ const collectibleSchema = new mongoose.Schema({
   }],
 
   availability: { type: Boolean, default: true },
+  stockQuantity: { type: Number, default: 0, min: 0 },    // Available stock units for direct sale items
   authenticityCertificateUrl: { type: String },
   status: { 
     type: String, 
