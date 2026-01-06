@@ -85,7 +85,7 @@ const Profile = () => {
       newParams.set('tab', activeTab);
       navigate(`/profile?${newParams.toString()}`, { replace: true });
     }
-  }, [activeTab, navigate]);
+  }, [activeTab, navigate, location.search]);
 
   useEffect(() => {
     if (!authLoading && !user) {
