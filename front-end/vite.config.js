@@ -61,14 +61,7 @@ export default defineConfig(({ mode }) => {
       // Increase chunk size warning limit
       chunkSizeWarningLimit: 1000,
       // Optimize build output
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: mode === 'production', // Remove console.log in production only
-          drop_debugger: true,
-          pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
-        }
-      },
+      minify: 'esbuild',
       // Enable CSS code splitting
       cssCodeSplit: true,
       // Sourcemaps for production debugging (can be disabled for smaller builds)
