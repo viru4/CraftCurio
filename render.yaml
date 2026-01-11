@@ -37,13 +37,21 @@ services:
     healthCheckPath: /api/health
 
   # Frontend Static Site
-  - type: web
+  - type: static
     name: craftcurio-frontend
-    env: static
     region: oregon
     plan: free
     buildCommand: cd front-end && npm install && npm run build
-    startCommand: npx serve -s front-end/dist -l 10000
+    staticPublishPath: ./front-end/dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    routes:
+      - type: rewrite
+        source: /**
+        destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
         value: https://craftcurio.onrender.com
