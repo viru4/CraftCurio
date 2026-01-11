@@ -32,6 +32,7 @@ const sanitizeUser = (userDoc) => {
  */
 export const sendOTPForSignIn = async (req, res) => {
   try {
+    console.log('🔔 sendOTPForSignIn called with email:', req.body.email);
     const { email } = req.body;
 
     if (!email) {
@@ -160,6 +161,7 @@ export const verifyOTPForSignIn = async (req, res) => {
  */
 export const sendOTPForSignUp = async (req, res) => {
   try {
+    console.log('🔔 sendOTPForSignUp called with email:', req.body.email);
     const { email, fullName, password, role } = req.body;
 
     if (!email || !fullName || !password) {
