@@ -43,11 +43,7 @@ services:
     region: oregon
     plan: free
     buildCommand: cd front-end && npm install && npm run build
-    staticPublishPath: ./front-end/dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    startCommand: npx serve -s front-end/dist -l 10000
     envVars:
       - key: VITE_API_BASE_URL
         value: https://craftcurio.onrender.com
