@@ -98,7 +98,128 @@ The architecture of CraftCurio is built on the **MERN stack**, chosen for its un
 5.  **Media Storage:** **Cloudinary 1.41** is used for cloud-based image management, ensuring that high-resolution artisan photos are optimized and served quickly via CDN.
 6.  **Payment Gateway:** **Razorpay 2.9.6** [10] is integrated for secure payment processing, supporting multiple payment methods including UPI, credit/debit cards, net banking, and digital wallets. This addresses the Indian market's diverse payment preferences.
 
-### B. Data Flow Architecture
+### B. System Architecture Overview
+
+CraftCurio employs a hybrid architecture combining **Client-Server**, **Layered**, and **Event-Driven** patterns. The following diagram illustrates the comprehensive system architecture:
+
+```mermaid
+graph TB
+    subgraph Client["CLIENT TIER (Presentation Layer)"]
+        Browser[React 19 Application]
+        
+        subgraph ClientComponents["Frontend Components"]
+            UI[UI Components<br/>Tailwind CSS + Radix UI]
+            State[State Management<br/>Context API]
+            Routing[React Router<br/>Navigation]
+        end
+        
+        Browser --> UI
+        Browser --> State
+        Browser --> Routing
+    end
+
+    subgraph Server["SERVER TIER (Application Layer)"]
+        direction TB
+        
+        subgraph Communication["Communication Layer"]
+            HTTP[HTTP/REST API<br/>Express 5.1]
+            WS[WebSocket Server<br/>Socket.io 4.8]
+        end
+        
+        subgraph Presentation["Presentation Layer"]
+            Routes[API Routes<br/>Endpoints]
+            SocketHandlers[Socket Event Handlers<br/>Real-time Events]
+        end
+        
+        subgraph Business["Business Logic Layer"]
+            Controllers[Controllers<br/>Request Processing]
+            Services[Services<br/>Business Rules]
+            SocketLogic[Auction/Chat Logic<br/>Event Broadcasting]
+        end
+        
+        subgraph CrossCutting["Cross-Cutting Concerns"]
+            Auth[Authentication<br/>JWT Middleware]
+            ErrorHandler[Error Handling<br/>Async Wrapper]
+            Validation[Input Validation]
+        end
+        
+        HTTP --> Routes
+        WS --> SocketHandlers
+        Routes --> Auth
+        Routes --> Controllers
+        SocketHandlers --> Auth
+        SocketHandlers --> SocketLogic
+        Controllers --> Services
+        SocketLogic --> Services
+        Auth -.-> ErrorHandler
+        Controllers -.-> ErrorHandler
+    end
+
+    subgraph Data["DATA TIER (Persistence Layer)"]
+        direction TB
+        
+        subgraph DataAccess["Data Access Layer"]
+            Models[Mongoose Models<br/>Schema Definitions]
+            DAL[Database Abstraction<br/>Query Logic]
+        end
+        
+        subgraph Storage["Storage Systems"]
+            MongoDB[(MongoDB 8.18<br/>Document Store)]
+            Cloudinary[Cloudinary<br/>Media Storage]
+            Cache[In-Memory Cache<br/>Session Data]
+        end
+        
+        Models --> DAL
+        DAL --> MongoDB
+        DAL --> Cache
+    end
+
+    subgraph External["EXTERNAL SERVICES"]
+        Razorpay[Razorpay Gateway<br/>Payment Processing]
+        CDN[Cloudinary CDN<br/>Image Delivery]
+    end
+
+    %% Client-Server Communication
+    Browser ==>|HTTP REST<br/>CRUD Operations| HTTP
+    Browser ==>|WebSocket<br/>Real-time Events| WS
+    Browser -.->|Fetch Media| CDN
+
+    %% Business to Data
+    Services --> Models
+    SocketLogic --> Models
+
+    %% External Integrations
+    Services --> Razorpay
+    Services --> Cloudinary
+    Cloudinary --> CDN
+
+    %% Event-Driven Flow
+    WS -.->|Broadcast Events| Browser
+    SocketLogic -.->|Push Updates| WS
+
+    classDef clientStyle fill:#e1f5ff,stroke:#0288d1,stroke-width:2px
+    classDef serverStyle fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef dataStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef externalStyle fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    
+    class Client,Browser,ClientComponents clientStyle
+    class Server,Communication,Presentation,Business,CrossCutting serverStyle
+    class Data,DataAccess,Storage dataStyle
+    class External,Razorpay,CDN externalStyle
+```
+
+**Architectural Patterns Explained:**
+
+1. **Client-Server Pattern**: Clear separation between the React client (presentation tier) and Node.js/Express server (application tier), communicating via HTTP REST and WebSocket protocols.
+
+2. **Layered Architecture**: The server tier follows a strict 3-layer pattern:
+   - **Presentation Layer**: Routes and Socket Handlers receive requests
+   - **Business Logic Layer**: Controllers and Services process business rules
+   - **Data Access Layer**: Models and DAL abstract database operations
+
+3. **Event-Driven Architecture**: Socket.io enables asynchronous, event-based communication for real-time features (bidding, chat), where events flow bidirectionally between client and server without blocking operations.
+
+### C. Data Flow Architecture
 
 The following diagram illustrates how data moves through the system, particularly highlighting the dual communication channels: standard HTTP REST API requests for CRUD operations and WebSocket connections for real-time events.
 
@@ -130,7 +251,7 @@ graph TD
     Browser -- Fetch Image --> Cloudinary
 ```
 
-### C. Sequence Diagram: Real-Time Bidding Flow
+### D. Sequence Diagram: Real-Time Bidding Flow
 
 To further illustrate the real-time capabilities, the following sequence diagram details the flow of a "Place Bid" event. This highlights the interaction between the Client, REST API, Database, and Socket Server.
 
@@ -157,7 +278,7 @@ sequenceDiagram
     end
 ```
 
-### D. Database Design Decisions
+### E. Database Design Decisions
 A critical part of our architecture is the database schema. We chose **MongoDB** for its schema flexibility, which is essential when dealing with diverse product types.
 
 1.  **Schema Inheritance vs. Composition:** We used a composition pattern for Users. Instead of a single monolithic User schema, we have a base User schema extended by specific profile schemas (ArtisanProfile, CollectorProfile) linked via ObjectId. This keeps the auth logic clean while allowing rich, role-specific data.
