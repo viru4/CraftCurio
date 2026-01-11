@@ -49,5 +49,5 @@ services:
         source: /*
         destination: /index.html
     envVars:
-      - key: VITE_API_URL
-        value: https://craftcurio-backend.onrender.com
+      - key: VITE_API_BASE_URL
+        value: https://craftcurio.onrender.com
