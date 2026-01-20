@@ -23,20 +23,27 @@ backend/
 │   │   └── Collector.js          ✅ Added listing tracking
 │   ├── api/
 │   │   ├── controllers/
-│   │   │   ├── collectibleController.js  ✅ NEW: Enhanced CRUD
-│   │   │   └── auctionController.js      ✅ NEW: Auction logic
+│   │   │   ├── collectibleController.js  ✅ Enhanced CRUD
+│   │   │   ├── auctionController.js      ✅ Auction logic
+│   │   │   ├── chatbotController.js      ✅ AI chatbot
+│   │   │   └── contentGenerationController.js ✅ AI content
 │   │   └── routes/
 │   │       ├── collectibles.js   ✅ Enhanced routes
-│   │       └── auction.js        ✅ NEW: Auction endpoints
+│   │       ├── auction.js        ✅ Auction endpoints
+│   │       ├── chatbot.js        ✅ AI chat endpoints
+│   │       └── contentGeneration.js ✅ AI content endpoints
 │   ├── services/
-│   │   └── auctionService.js     ✅ NEW: Business logic
+│   │   ├── auctionService.js     ✅ Business logic
+│   │   ├── huggingfaceService.js ✅ AI integration
+│   │   ├── contentGenerationService.js ✅ AI content
+│   │   └── chatbotService.js     ✅ AI chatbot
 │   ├── middleware/
-│   │   └── validation.js         ✅ NEW: Zod validation
+│   │   └── validation.js         ✅ Zod validation
 │   ├── sockets/
-│   │   └── auctionSocket.js      ✅ NEW: Real-time handler
-│   └── app.js                    ✅ Added auction routes
+│   │   └── auctionSocket.js      ✅ Real-time handler
+│   └── app.js                    ✅ Routes + trust proxy
 ├── server.js                     ✅ Socket.io integration
-└── package.json                  ✅ Added socket.io
+└── package.json                  ✅ Added socket.io + AI packages
 ```
 
 ---
@@ -67,6 +74,20 @@ Auth: Not required
 ```bash
 POST /api/auction/:id/buy-now
 Body: { buyerId, buyerName, buyerEmail }
+Auth: Required
+```
+
+### AI Chatbot
+```bash
+POST /api/chatbot/chat
+Body: { message, conversationHistory }
+Auth: Optional
+```
+
+### Generate Content
+```bash
+POST /api/content/generate-description
+Body: { name, category, materials, images }
 Auth: Required
 ```
 
@@ -137,6 +158,29 @@ Auth: Required
 ---
 
 ## 🛠️ Common Tasks
+
+### Environment Variables Required
+```env
+# Database
+MONGODB_URI=mongodb://...
+
+# Authentication
+JWT_SECRET=your-secret-key
+
+# Payment Gateway
+RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=...
+
+# AI Services
+HUGGINGFACE_API_KEY=hf_...
+
+# Email Service
+EMAIL_USER=...
+EMAIL_PASS=...
+
+# Deployment (Render)
+NODE_ENV=production
+```
 
 ### Start Server
 ```bash
@@ -252,8 +296,10 @@ useEffect(() => {
 - [x] Routes configured
 - [x] Middleware added
 - [x] Server integrated
-- [x] Documentation written
-
+- [x] Documentation written- [x] AI services integrated (Hugging Face)
+- [x] Trust proxy configured (Render deployment)
+- [x] Content generation implemented
+- [x] Chatbot implemented
 ### Testing
 - [ ] Create auction listing
 - [ ] Place bids

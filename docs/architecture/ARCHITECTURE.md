@@ -98,6 +98,27 @@
 │  │  │  │ • finalize       │  │ • sendEmail (fallback)       │   │ │  │
 │  │  │  │   Auction        │  │                              │   │ │  │
 │  │  │  │ • checkExpired   │  │                              │   │ │  │
+│  │  │  └──────────────────┘  └──────────────────────────────┘   │ │  │
+│  │  │                                                             │ │  │
+│  │  │  ┌──────────────────┐  ┌──────────────────────────────┐   │ │  │
+│  │  │  │ huggingfaceService│ │ contentGenerationService     │   │ │  │
+│  │  │  │                  │  │                              │   │ │  │
+│  │  │  │ • generateText   │  │ • generateProductDescription │   │ │  │
+│  │  │  │ • analyzeImage   │  │ • generateTitles             │   │ │  │
+│  │  │  │ • chatCompletion │  │ • generateKeywords           │   │ │  │
+│  │  │  │                  │  │ • enhanceDescription         │   │ │  │
+│  │  │  │ (Llama-3.2-3B)   │  │ • generateSocialPost         │   │ │  │
+│  │  │  │ (BLIP-2 Vision)  │  │ • generateBatch              │   │ │  │
+│  │  │  └──────────────────┘  └──────────────────────────────┘   │ │  │
+│  │  │                                                             │ │  │
+│  │  │  ┌────────────────────────────────────────────────────┐   │ │  │
+│  │  │  │           chatbotService                           │   │ │  │
+│  │  │  │                                                     │   │ │  │
+│  │  │  │ • processUserMessage                               │   │ │  │
+│  │  │  │ • detectIntent (search, auction, order, etc.)      │   │ │  │
+│  │  │  │ • generateResponse (context-aware)                 │   │ │  │
+│  │  │  │ • suggestQuickReplies (6 dynamic options)          │   │ │  │
+│  │  │  └────────────────────────────────────────────────────┘   │ │  │
 │  │  │  │   Auctions       │  │                              │   │ │  │
 │  │  │  │ • update         │  │                              │   │ │  │
 │  │  │  │   AuctionStatus  │  │                              │   │ │  │
@@ -655,11 +676,29 @@ Node.js v18+
       │         ├── Event emitters
       │         └── Background tasks
       │
-      └── Email
-           └── Nodemailer v6.10.1
-                ├── SMTP configuration
-                ├── HTML templates
-                └── Fallback logging
+      ├── Email
+      │    └── Nodemailer v6.10.1
+      │         ├── SMTP configuration
+      │         ├── HTML templates
+      │         └── Fallback logging
+      │
+      ├── AI Integration
+      │    └── Hugging Face Inference API v4.13.9
+      │         ├── Text Generation (Llama-3.2-3B-Instruct)
+      │         │    ├── Chatbot responses
+      │         │    ├── Product descriptions
+      │         │    └── Content enhancement
+      │         │
+      │         └── Vision Analysis (BLIP-2)
+      │              ├── Image captioning
+      │              ├── Visual feature extraction
+      │              └── Vision-language pipeline
+      │
+      └── Security & Configuration
+           ├── Helmet v7.2.0 (Security headers)
+           ├── express-rate-limit v7.5.0 (Rate limiting)
+           ├── bcryptjs v2.4.3 (Password hashing)
+           └── app.set('trust proxy', 1) (Render deployment)
 ```
 
 ### Frontend Stack

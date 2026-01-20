@@ -34,6 +34,8 @@ This document explains the purpose of each folder and key file in the backend of
   - Event management
   - Notification management
   - Auction management and bidding
+  - AI chatbot conversation handling
+  - AI content generation (descriptions, titles, keywords, social posts)
 
 ### `services/`
 
@@ -44,6 +46,9 @@ This document explains the purpose of each folder and key file in the backend of
   - `paymentService.js` — Razorpay payment processing, order creation, verification
   - `notificationService.js` — In-app notification creation and management
   - `emailService.js` — Email notification sending
+  - `huggingfaceService.js` — AI text generation and image analysis
+  - `contentGenerationService.js` — AI-powered product descriptions and content
+  - `chatbotService.js` — Intelligent chatbot with intent detection and context-aware responses
 
 ### `routes/`
 
@@ -55,9 +60,11 @@ This document explains the purpose of each folder and key file in the backend of
   - `products.js` — Artisan product-related routes
   - `collectibles.js` — Collectible-specific endpoints
   - `orders.js` — Customer orders and tracking routes
-  - `payments.js` — Payment processing endpoints (NEW)
-  - `notifications.js` — Notification management routes (NEW)
+  - `payments.js` — Payment processing endpoints
+  - `notifications.js` — Notification management routes
   - `auction.js` — Auction bidding and management routes
+  - `chatbot.js` — AI chatbot conversation endpoints
+  - `contentGeneration.js` — AI content generation endpoints
   - Others as needed (messages, events)
 
 ### `middleware/`
@@ -101,6 +108,8 @@ This document explains the purpose of each folder and key file in the backend of
   - JWT secret keys
   - Razorpay API keys (Key ID, Key Secret, Webhook Secret)
   - Email service credentials
+  - Hugging Face API key (AI services)
+  - Cloudinary credentials (image storage)
 
 ### `package.json`
 

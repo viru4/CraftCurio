@@ -904,6 +904,412 @@ Webhook endpoint for Razorpay events (public endpoint, verified by signature).
 
 ---
 
+## AI & Intelligence API
+
+### Chatbot API
+
+#### Send Chat Message
+**POST** `/chatbot/chat`
+
+Send a message to the AI chatbot and receive a contextual response.
+
+**Authentication:** Optional (enhanced context if authenticated)
+
+**Request Body:**
+```json
+{
+  "message": "How do I track my order?",
+  "conversationHistory": [
+    {
+      "role": "user",
+      "content": "Previous message"
+    },
+    {
+      "role": "assistant",
+      "content": "Previous response"
+    }
+  ]
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "response": "You can track your order by visiting the Orders section in your dashboard...",
+    "quickReplies": [
+      "📦 Browse Categories",
+      "🔍 Track Order",
+      "🏛️ Auction Help",
+      "💳 Payment Info",
+      "❓ How to Bid",
+      "👤 Account Help"
+    ],
+    "intent": ["order"],
+    "conversationId": "conv_abc123"
+  }
+}
+```
+
+**Supported Intents:**
+- `search` - Product discovery and browsing
+- `auction` - Auction bidding and rules
+- `order` - Order tracking and status
+- `payment` - Payment methods and issues
+- `account` - Account management
+- `help` - General platform assistance
+
+---
+
+#### Get Chat History
+**GET** `/chatbot/history/:userId`
+
+Retrieve conversation history for a specific user.
+
+**Authentication:** Required (user can only access own history)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "conversations": [
+      {
+        "role": "user",
+        "content": "How do I place a bid?",
+        "timestamp": "2026-01-20T10:30:00.000Z"
+      },
+      {
+        "role": "assistant",
+        "content": "To place a bid, navigate to the auction...",
+        "timestamp": "2026-01-20T10:30:02.000Z"
+      }
+    ],
+    "totalMessages": 24
+  }
+}
+```
+
+---
+
+#### Clear Chat History
+**DELETE** `/chatbot/history/:userId`
+
+Delete all chat history for a user.
+
+**Authentication:** Required
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Chat history cleared successfully"
+}
+```
+
+---
+
+#### Chatbot Health Check
+**GET** `/chatbot/health`
+
+Check if the AI service is available.
+
+**Authentication:** Not required
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "status": "operational",
+  "model": "meta-llama/Llama-3.2-3B-Instruct",
+  "apiAvailable": true
+}
+```
+
+---
+
+### Content Generation API
+
+#### Generate Product Description
+**POST** `/content/generate-description`
+
+Generate AI-powered product description from text and images.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "name": "Handcrafted Ceramic Vase",
+  "category": "Pottery",
+  "materials": "Ceramic, Hand-glazed",
+  "isAuction": false,
+  "images": [
+    "https://cloudinary.com/image1.jpg",
+    "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
+  ]
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "description": "This exquisite handcrafted ceramic vase showcases traditional pottery techniques with a modern aesthetic. Each piece is meticulously hand-glazed, creating unique color variations and textures. The smooth ceramic finish and elegant form make it a stunning decorative accent for any space.",
+    "wordCount": 45
+  }
+}
+```
+
+**Features:**
+- Analyzes product images using BLIP-2 vision model
+- Generates 50-100 word descriptions
+- SEO-optimized with natural keywords
+- Professional tone with sensory language
+- Incorporates visual details from image analysis
+
+---
+
+#### Generate Product Titles
+**POST** `/content/generate-titles`
+
+Generate 5 SEO-optimized product title variations.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "category": "Jewelry",
+  "materials": "Silver, Turquoise",
+  "style": "Southwestern",
+  "keywords": "handmade, artisan"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "titles": [
+      "Handcrafted Southwestern Silver Turquoise Jewelry",
+      "Artisan Silver & Turquoise Statement Piece",
+      "Traditional Southwestern Turquoise Silver Jewelry",
+      "Hand-Forged Silver Jewelry with Turquoise Accents",
+      "Authentic Southwestern Artisan Turquoise Necklace"
+    ]
+  }
+}
+```
+
+---
+
+#### Generate Keywords & Tags
+**POST** `/content/generate-keywords`
+
+Generate relevant SEO keywords and product tags.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "name": "Vintage Leather Journal",
+  "category": "Stationery",
+  "description": "Hand-bound journal with vintage leather cover...",
+  "materials": "Leather, Handmade Paper"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "keywords": [
+      "vintage leather journal",
+      "handbound notebook",
+      "artisan stationery",
+      "leather diary",
+      "handmade paper",
+      "vintage gifts",
+      "bookbinding",
+      "leather crafts",
+      "journaling",
+      "artisan notebook"
+    ]
+  }
+}
+```
+
+---
+
+#### Generate Social Media Post
+**POST** `/content/generate-social-post`
+
+Create engaging social media content for product promotion.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "name": "Handwoven Wool Blanket",
+  "category": "Textiles",
+  "platform": "instagram"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "text": "Wrap yourself in tradition with our handwoven wool blanket! Each thread tells a story of craftsmanship passed down through generations. Perfect for cozy evenings and adding warmth to your home decor. ✨",
+    "hashtags": "#HandwovenBlanket #ArtisanCrafts #WoolBlanket #HandmadeTextiles #TraditionalCrafts #CozyHome #SustainableLiving #CraftCurio"
+  }
+}
+```
+
+---
+
+#### Enhance Description
+**POST** `/content/enhance-description`
+
+Improve an existing product description with AI refinement.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "description": "This is a nice vase made of ceramic.",
+  "improvementType": "general"
+}
+```
+
+**Improvement Types:**
+- `general` - Overall improvement
+- `seo` - Add SEO keywords
+- `emotional` - Add emotional appeal
+- `concise` - Make more concise
+- `detailed` - Add more details
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "enhanced": "This elegant ceramic vase combines timeless design with superior craftsmanship. Its smooth finish and graceful form make it a versatile decorative piece that enhances any interior space."
+  }
+}
+```
+
+---
+
+#### Generate Auction Announcement
+**POST** `/content/generate-auction-announcement`
+
+Create compelling auction promotional content.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "title": "Rare Vintage Watch",
+  "description": "1950s Swiss chronograph in mint condition",
+  "startingBid": 500,
+  "endTime": "2026-01-25T20:00:00Z"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "announcement": "🔥 AUCTION ALERT 🔥 Don't miss this rare opportunity to own a stunning 1950s Swiss chronograph in pristine condition! Bidding starts at just $500. This vintage masterpiece combines classic elegance with historical significance. Auction closes Jan 25 at 8:00 PM. Bid now to make this timeless treasure yours!"
+  }
+}
+```
+
+---
+
+#### Generate Category Description
+**POST** `/content/generate-category-description`
+
+Create SEO-optimized category page descriptions.
+
+**Authentication:** Required (Admin only)
+
+**Request Body:**
+```json
+{
+  "name": "Woodwork",
+  "itemCount": 127,
+  "topArtisans": "Master craftsmen specializing in traditional and modern woodworking"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "description": "Discover exceptional woodwork from master craftsmen who blend traditional techniques with contemporary design. Our curated collection of 127 handcrafted wooden pieces showcases the finest artisan woodworking, from furniture to decorative art. Each item reflects years of expertise and dedication to the craft, ensuring superior quality and timeless appeal."
+  }
+}
+```
+
+---
+
+#### Batch Content Generation
+**POST** `/content/generate-batch`
+
+Generate multiple content types for a product in one request.
+
+**Authentication:** Required
+
+**Request Body:**
+```json
+{
+  "product": {
+    "name": "Ceramic Bowl",
+    "category": "Pottery",
+    "materials": "Stoneware",
+    "images": ["https://example.com/bowl.jpg"]
+  },
+  "contentTypes": ["description", "titles", "keywords"]
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "description": "This artisan stoneware bowl combines functionality...",
+    "titles": ["Handcrafted Stoneware Pottery Bowl", ...],
+    "keywords": ["ceramic bowl", "pottery", "stoneware", ...]
+  }
+}
+```
+
+---
+
+**AI Features:**
+- **Vision Model:** Salesforce BLIP-2 for image analysis
+- **Language Model:** Meta Llama-3.2-3B-Instruct for text generation
+- **Response Time:** 2-5 seconds average
+- **Rate Limit:** Included in general API rate limits
+- **Free Tier:** 1,000 requests/day (Hugging Face)
+
+---
+
 ## Error Responses
 
 All error responses follow this format:

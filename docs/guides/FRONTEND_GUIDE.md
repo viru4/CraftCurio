@@ -11,6 +11,8 @@ This is a modern, responsive React frontend for the CraftCurio collector dashboa
 - ✅ **Real-Time Auctions**: Live bid updates, countdown timers, and status changes via Socket.io
 - ✅ **Payment Gateway**: Razorpay integration for secure payments (Card/UPI/Wallet)
 - ✅ **Auction Management**: Post-auction dashboard for tracking orders and payments
+- ✅ **AI Content Generation**: Automated product descriptions, titles, and keywords using Llama-3.2 and BLIP-2
+- ✅ **AI Chatbot**: Intelligent customer support with intent detection and context-aware responses
 - ✅ **CRUD Operations**: Complete create, read, update, delete functionality for collectibles
 - ✅ **Advanced Filtering**: Search, status filtering, and sorting (by date, price, views, title)
 - ✅ **Responsive Design**: Mobile-first design with Tailwind CSS
@@ -40,29 +42,33 @@ This is a modern, responsive React frontend for the CraftCurio collector dashboa
 ```
 front-end/src/
 ├── components/
-│   └── CollectorDashboard/
-│       ├── CollectibleCard.jsx      # Card component for displaying items
-│       ├── ListForm.jsx             # Form for creating/editing listings
-│       ├── Dashboard.jsx            # Main dashboard with tabs
-│       ├── AuctionPage.jsx          # Live auction viewing/bidding
-│       └── index.js                 # Component exports
+│   ├── CollectorDashboard/
+│   │   ├── CollectibleCard.jsx      # Card component for displaying items
+│   │   ├── ListForm.jsx             # Form for creating/editing listings
+│   │   ├── Dashboard.jsx            # Main dashboard with tabs
+│   │   ├── AuctionPage.jsx          # Live auction viewing/bidding
+│   │   └── index.js                 # Component exports
+│   └── common/
+│       ├── ContentGenerator.jsx     # AI content generation (NEW)
+│       └── Chatbot.jsx              # AI chatbot assistant (NEW)
 ├── pages/
 │   ├── CollectorDashboardPage.jsx   # Main page integration
 │   ├── collector/
 │   │   └── components/
-│   │       ├── AuctionManagement.jsx    # Post-auction management (NEW)
-│   │       ├── AuctionCard.jsx          # Auction status display (NEW)
-│   │       ├── OrderDetailsModal.jsx    # Order details & payment (NEW)
-│   │       └── NotificationPanel.jsx    # Notifications panel (NEW)
+│   │       ├── AuctionManagement.jsx    # Post-auction management
+│   │       ├── AuctionCard.jsx          # Auction status display
+│   │       ├── OrderDetailsModal.jsx    # Order details & payment
+│   │       └── NotificationPanel.jsx    # Notifications panel
 │   └── Order/
 │       ├── CheckOut.jsx             # Checkout with Razorpay
 │       └── OrderConfirmation.jsx    # Order success page
 ├── contexts/
-│   └── CollectorContext.jsx         # Global state management
+│   ├── CollectorContext.jsx         # Global state management
+│   └── ChatbotContext.jsx           # Chatbot state (NEW)
 ├── hooks/
 │   ├── useCollectibles.js           # Hooks for collectibles CRUD
 │   ├── useAuction.js                # Hooks for auction operations
-│   └── useRazorpay.js               # Payment processing hook (NEW)
+│   └── useRazorpay.js               # Payment processing hook
 ├── utils/
 │   ├── api.js                       # Axios instance and API functions
 │   └── socket.js                    # Socket.io client wrapper
@@ -228,6 +234,96 @@ Live auction viewing and bidding interface:
   - Countdown updates
   - Auction ending soon alerts
   - Auction ended notifications
+
+### ContentGenerator Component (AI)
+
+AI-powered content generation for product listings:
+
+```jsx
+import { ContentGenerator } from '@/components/common/ContentGenerator';
+
+<ContentGenerator
+  productData={{
+    name: "Handcrafted Vase",
+    category: "Pottery",
+    materials: "Ceramic",
+    images: ["url1", "url2"]
+  }}
+  contentType="description"
+  onContentGenerated={(content) => {
+    console.log('Generated:', content);
+  }}
+/>
+```
+
+**Features:**
+- 7 content generation types: description, titles, keywords, social-post, enhance, auction-announcement, category-description
+- Vision-language analysis for product images
+- Professional text formatting
+- Loading states with generation messages
+- Preview with character/word count
+- "Use This" button to apply generated content
+- Error handling with retry option
+
+**Content Types:**
+- `description` - Product description (50-100 words)
+- `titles` - 5 SEO-optimized title variations
+- `keywords` - 10 relevant search keywords
+- `social-post` - Social media content with hashtags
+- `enhance` - Improve existing description
+- `auction-announcement` - Auction promotional text
+- `category-description` - Category page content
+
+**Usage in Forms:**
+```jsx
+<ContentGenerator
+  productData={formData}
+  contentType="description"
+  onContentGenerated={(generated) => {
+    setFormData(prev => ({ ...prev, description: generated }));
+  }}
+/>
+```
+
+### Chatbot Component (AI)
+
+Intelligent AI chatbot for customer support:
+
+```jsx
+import { Chatbot } from '@/components/common/Chatbot';
+import { ChatbotProvider } from '@/contexts/ChatbotContext';
+
+<ChatbotProvider>
+  <Chatbot />
+</ChatbotProvider>
+```
+
+**Features:**
+- Context-aware responses using Llama-3.2-3B
+- Intent detection (search, auction, order, payment, account, help)
+- Conversation history with localStorage persistence
+- 6 dynamic quick reply buttons
+- Typing indicators
+- Message timestamps
+- Clear history option
+- Expandable/collapsible interface
+- Mobile-responsive design
+
+**Supported Intents:**
+- 🔍 Search - Product discovery
+- 🏛️ Auction - Bidding and auction help
+- 📦 Order - Order tracking and status
+- 💳 Payment - Payment methods and issues
+- 👤 Account - Account management
+- ❓ Help - General platform assistance
+
+**Quick Replies:**
+- 📦 Browse Categories
+- 🔍 Track Order
+- 🏛️ Auction Help
+- 💳 Payment Info
+- ❓ How to Bid
+- 👤 Account Help
 
 ## Hooks Documentation
 

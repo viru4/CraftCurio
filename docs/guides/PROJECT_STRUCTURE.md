@@ -27,6 +27,9 @@ The backend handles server-side logic, API endpoints, database interactions, and
   - `emailService.js`: Handling transactional emails.
   - `paymentService.js`: Payment processing logic.
   - `uploadService.js`: Cloud storage interactions.
+  - `huggingfaceService.js`: AI text generation and image analysis.
+  - `contentGenerationService.js`: AI-powered content creation.
+  - `chatbotService.js`: Intelligent chatbot with intent detection.
 
 - **`sockets/`**: Real-time communication logic (Socket.io).
   - Handles live chat, notifications, and auction updates.
@@ -52,11 +55,13 @@ The frontend is the React application that users interact with.
 - **`components/`**: Reusable UI elements.
   - **`ui/`**: Atomic components (Buttons, Inputs, Cards), often generic or from a library.
   - **`layout/`**: Structural components (Header, Footer, Sidebar).
+  - **`common/`**: Shared components (ContentGenerator, Chatbot).
   - **`[feature]/`**: Feature-specific components (e.g., `auth/`, `product/`).
 
 - **`contexts/`**: React Context providers for global state management.
   - `AuthContext`: User authentication state.
   - `CartContext`: Shopping cart management.
+  - `ChatbotContext`: AI chatbot conversation state.
 
 - **`data/`**: Static constants, mock data, and navigation configurations.
 
