@@ -17,7 +17,12 @@ const ChatbotProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [quickReplies, setQuickReplies] = useState([]);
+  const [quickReplies, setQuickReplies] = useState([
+    '🔍 Search Products',
+    '🏷️ Browse Auctions',
+    '📦 Track My Order',
+    '💳 Payment Help'
+  ]);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 

@@ -167,14 +167,15 @@ const Chatbot = () => {
           </div>
 
           {/* Quick Replies */}
-          {quickReplies && quickReplies.length > 0 && !isLoading && (
+          {quickReplies && quickReplies.length > 0 && (
             <div className="px-3 sm:px-4 py-2 bg-white border-t border-gray-200 shrink-0">
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {quickReplies.slice(0, 4).map((reply, idx) => (
+                {quickReplies.map((reply, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleQuickReply(reply)}
-                    className="text-xs bg-blue-50 text-blue-700 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-blue-100 transition-colors border border-blue-200 whitespace-nowrap"
+                    disabled={isLoading}
+                    className="text-xs bg-blue-50 text-blue-700 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-blue-100 transition-colors border border-blue-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {reply}
                   </button>
