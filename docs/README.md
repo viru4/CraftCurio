@@ -33,6 +33,8 @@ Located in [`guides/`](guides/)
 - **[Backend Structure](guides/BACKEND_STRUCTURE.md)** - Backend folder structure and organization
 - **[Quick Reference](guides/QUICK_REFERENCE.md)** - Common tasks and quick commands
 - **[Project Structure](guides/PROJECT_STRUCTURE.md)** - Complete codebase structure
+- **[Content Generation Guide](guides/CONTENT_GENERATION_GUIDE.md)** - AI content generation feature guide
+- **[AI Chatbot Quick Reference](guides/AI_CHATBOT_QUICK_REFERENCE.md)** - Quick reference for chatbot
 
 ### 🔌 API Documentation
 Located in [`api/`](api/)
@@ -57,6 +59,8 @@ Located in [`deployment/`](deployment/)
 - **[Render Deployment](deployment/RENDER_DEPLOYMENT_QUICKSTART.md)** - Quick deployment to Render
 - **[Razorpay Setup](deployment/RAZORPAY_SETUP.md)** - Payment gateway configuration
 - **[Payment Quickstart](deployment/PAYMENT_QUICKSTART.txt)** - Quick payment integration guide
+- **[Hugging Face Chatbot Setup](deployment/HUGGINGFACE_CHATBOT_SETUP.md)** - AI chatbot setup with Hugging Face
+- **[AI Chatbot Setup (Legacy)](deployment/AI_CHATBOT_SETUP.md)** - Original Gemini chatbot setup (archived)
 
 ### 🔐 Security
 Located in [`security/`](security/)
