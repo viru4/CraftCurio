@@ -34,6 +34,10 @@ import contentGenerationRoutes from './api/routes/contentGeneration.js';
 
 const app = express();
 
+// Trust proxy - Required for Render, Heroku, and other reverse proxies
+// This allows express-rate-limit to correctly identify users by IP
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet());
 

@@ -56,7 +56,12 @@ export const getArtisanProducts = async (req, res) => {
         }
       }
 
-      filter['artisanInfo.id'] = artisanIdentifier;
+      // Check both artisanInfo.id (custom string) AND userId (MongoDB ObjectId)
+      // This handles products created with either format
+      filter.$or = [
+        { 'artisanInfo.id': artisanIdentifier },
+        { 'artisanInfo.id': artisan } // Also check original ObjectId
+      ];
     }
 
     if (category) {
