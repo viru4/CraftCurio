@@ -29,6 +29,7 @@ import uploadRoutes from './api/routes/upload.routes.js';
 import notificationRoutes from './api/routes/notifications.js';
 import paymentRoutes from './api/routes/payments.js';
 import addressRoutes from './api/routes/addresses.js';
+import chatbotRoutes from './api/routes/chatbot.js';
 
 const app = express();
 
@@ -140,6 +141,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Handle 404 for undefined routes
 app.use((req, res) => {

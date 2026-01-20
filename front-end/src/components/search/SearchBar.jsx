@@ -90,6 +90,7 @@ const SearchBar = ({
   };
 
   const currentSize = sizeClasses[size] || sizeClasses.medium;
+
   const handleInputChange = (e) => {
     if (onSearchChange) {
       onSearchChange(e.target.value);
