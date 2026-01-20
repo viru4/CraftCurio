@@ -5,6 +5,7 @@ import ArtisanSidebar from '../components/ArtisanSidebar';
 import { Menu, Upload, X, Plus, ArrowLeft, Save } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/api';
 import ImageUpload from '@/components/common/ImageUpload';
+import ContentGenerator from '@/components/common/ContentGenerator';
 
 const AddProduct = () => {
   const { user, isArtisan, loading: authLoading } = useAuth();
@@ -310,6 +311,28 @@ const AddProduct = () => {
                     <label className="block text-stone-800 text-sm font-medium mb-2">
                       Product Description *
                     </label>
+                    
+                    {/* AI Content Generator */}
+                    <div className="mb-4">
+                      <ContentGenerator
+                        contentType="description"
+                        productData={{
+                          name: formData.title,
+                          category: formData.category,
+                          materials: formData.craftMethod,
+                          isAuction: false,
+                          images: productImages
+                        }}
+                        onContentGenerated={(content) => {
+                          if (typeof content === 'string') {
+                            handleInputChange('description', content);
+                          } else if (content.description) {
+                            handleInputChange('description', content.description);
+                          }
+                        }}
+                      />
+                    </div>
+                    
                     <textarea
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}

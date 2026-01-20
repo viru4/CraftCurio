@@ -21,7 +21,9 @@ const ChatbotProvider = ({ children }) => {
     '🔍 Search Products',
     '🏷️ Browse Auctions',
     '📦 Track My Order',
-    '💳 Payment Help'
+    '💳 Payment Help',
+    '❓ How to Bid',
+    '👤 Account Help'
   ]);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';

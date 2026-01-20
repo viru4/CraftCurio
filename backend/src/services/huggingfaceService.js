@@ -172,6 +172,49 @@ class HuggingFaceService {
   }
 
   /**
+   * Analyze image and generate description
+   * @param {string} imageUrl - URL or base64 of the image
+   * @returns {Promise<string>} Image analysis description
+   */
+  async analyzeImage(imageUrl) {
+    try {
+      if (!this.client) {
+        throw new Error('Hugging Face API not initialized.');
+      }
+
+      // Use BLIP-2 for image captioning (vision model)
+      const visionModel = 'Salesforce/blip-image-captioning-large';
+
+      // Convert base64 to blob if needed
+      let imageBlob;
+      if (imageUrl.startsWith('data:image')) {
+        // Base64 image
+        const base64Data = imageUrl.split(',')[1];
+        const binaryData = Buffer.from(base64Data, 'base64');
+        imageBlob = new Blob([binaryData]);
+      } else if (imageUrl.startsWith('http')) {
+        // Fetch image from URL
+        const response = await fetch(imageUrl);
+        imageBlob = await response.blob();
+      } else {
+        throw new Error('Invalid image format. Provide URL or base64.');
+      }
+
+      // Call image-to-text API
+      const result = await this.client.imageToText({
+        model: visionModel,
+        data: imageBlob
+      });
+
+      return result.generated_text || 'Unable to analyze image';
+
+    } catch (error) {
+      console.error('Image analysis error:', error);
+      throw new Error('Failed to analyze image: ' + error.message);
+    }
+  }
+
+  /**
    * Check if the service is available
    * @returns {boolean} True if API key is configured
    */
