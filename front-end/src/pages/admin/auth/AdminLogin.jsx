@@ -2,69 +2,104 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { otpSignInSchema, otpSignInDefaultValues } from '@/forms/SignInSchema'
+import { otpSignInSchema, otpSignInDefaultValues, signInSchema, signInDefaultValues } from '@/forms/SignInSchema'
 import { useAuth } from '@/contexts/AuthContext'
 import OTPInput from '@/components/auth/OTPInput'
-import { Shield, ArrowLeft, Lock, Mail, AlertCircle } from 'lucide-react'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+import api from '@/utils/api'
+import { Shield, ArrowLeft, Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  
+  // Auth method state: 'password' or 'otp'
+  const [authMethod, setAuthMethod] = useState('password')
+  
+  // OTP flow state
   const [step, setStep] = useState('email') // 'email' or 'otp'
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [otpError, setOtpError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSendingOTP, setIsSendingOTP] = useState(false)
-  const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  
+  // Password visibility
+  const [showPassword, setShowPassword] = useState(false)
+  
+  // General state
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
-  const form = useForm({
+  // Form for Password Sign In
+  const passwordForm = useForm({
+    resolver: zodResolver(signInSchema),
+    defaultValues: signInDefaultValues,
+    mode: 'onSubmit',
+  })
+
+  // Form for OTP Sign In
+  const otpForm = useForm({
     resolver: zodResolver(otpSignInSchema),
     defaultValues: otpSignInDefaultValues,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
   })
-  const { register, handleSubmit, formState, getValues } = form
-  const { errors, isSubmitting: formIsSubmitting } = formState
+
+  // Handle Password Sign In (Admin)
+  const onPasswordSignIn = async (data) => {
+    if (isSubmitting) return
+    setError('')
+    setIsSubmitting(true)
+
+    try {
+      const response = await api.post('/auth/sign-in', data)
+
+      if (response.data && response.data.user) {
+        // Check if user is admin
+        if (response.data.user.role !== 'admin') {
+          setError('Access denied. Admin credentials required.')
+          setIsSubmitting(false)
+          return
+        }
+
+        // Login successful - Admin verified
+        login(response.data.user, response.data.token)
+        navigate('/admin')
+      }
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || 'Invalid email or password'
+      setError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // Step 1: Send OTP (Admin Only)
-  async function onSendOTP() {
-    const { email: formEmail } = getValues()
+  async function onSendOTP(data) {
+    const formEmail = data.email
     if (isSendingOTP) return
     setError('')
     setSuccessMessage('')
     setIsSendingOTP(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/send-otp-signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formEmail }),
-        credentials: 'include',
-      })
+      const response = await api.post('/auth/send-otp-signin', { email: formEmail })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP')
-      }
-
-      setEmail(formEmail)
-      setStep('otp')
-      
-      if (data.otp) {
-        setSuccessMessage(`Development Mode - OTP: ${data.otp}`)
-        console.log('🔐 Admin OTP:', data.otp)
-      } else {
-        setSuccessMessage('OTP sent to your email. Please check your inbox.')
+      if (response.data) {
+        setEmail(formEmail)
+        setStep('otp')
+        
+        if (response.data.otp) {
+          setSuccessMessage(`Development Mode - OTP: ${response.data.otp}`)
+          if (import.meta.env.DEV) {
+            console.log('🔐 Admin OTP:', response.data.otp)
+          }
+        } else {
+          setSuccessMessage(response.data.message || 'OTP sent to your email. Please check your inbox.')
+        }
       }
     } catch (err) {
-      const message = err?.message || 'Failed to send OTP. Please try again.'
+      const message = err.response?.data?.message || err.message || 'Failed to send OTP. Please try again.'
       setError(message)
     } finally {
       setIsSendingOTP(false)
@@ -79,34 +114,23 @@ export default function AdminLogin() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp-signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp: otpValue }),
-        credentials: 'include',
-      })
+      const response = await api.post('/auth/verify-otp-signin', { email, otp: otpValue })
 
-      const data = await response.json()
+      if (response.data && response.data.user) {
+        // Check if user is admin
+        if (response.data.user.role !== 'admin') {
+          setOtpError('Access denied. Admin credentials required.')
+          setOtp('')
+          setIsSubmitting(false)
+          return
+        }
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Invalid OTP')
+        // Login successful - Admin verified
+        login(response.data.user, response.data.token)
+        navigate('/admin')
       }
-
-      // Check if user is admin
-      if (data.user.role !== 'admin') {
-        setOtpError('Access denied. Admin credentials required.')
-        setOtp('')
-        setIsSubmitting(false)
-        return
-      }
-
-      // Login successful - Admin verified
-      login(data.user, data.token)
-      navigate('/admin')
     } catch (err) {
-      const message = err?.message || 'Invalid OTP. Please try again.'
+      const message = err.response?.data?.message || err.message || 'Invalid OTP. Please try again.'
       setOtpError(message)
       setOtp('')
     } finally {
@@ -119,7 +143,18 @@ export default function AdminLogin() {
     setOtpError('')
     setError('')
     setSuccessMessage('')
-    onSendOTP()
+    onSendOTP({ email })
+  }
+
+  const toggleAuthMethod = () => {
+    setAuthMethod(prev => prev === 'password' ? 'otp' : 'password')
+    setError('')
+    setSuccessMessage('')
+    setStep('email')
+    setOtp('')
+    setOtpError('')
+    passwordForm.reset()
+    otpForm.reset()
   }
 
   return (
@@ -156,17 +191,21 @@ export default function AdminLogin() {
               </div>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900">
-              {step === 'email' ? 'Admin Login' : 'Verify Your Identity'}
+              {authMethod === 'password'
+                ? 'Admin Login'
+                : (step === 'email' ? 'Admin Login' : 'Verify Your Identity')}
             </h1>
             <p className="text-sm sm:text-base text-slate-600">
-              {step === 'email' 
-                ? 'Secure authentication with OTP verification' 
-                : `Enter the code sent to ${email}`}
+              {authMethod === 'password'
+                ? 'Sign in with your admin credentials'
+                : (step === 'email' 
+                  ? 'Secure authentication with OTP verification' 
+                  : `Enter the code sent to ${email}`)}
             </p>
           </div>
 
           {/* Alert for admin access */}
-          {step === 'email' && (
+          {(authMethod === 'password' || step === 'email') && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-3 sm:p-4 rounded-r-lg flex items-start gap-2 sm:gap-3">
               <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm text-orange-800">
@@ -177,8 +216,9 @@ export default function AdminLogin() {
           )}
 
           {/* Form Steps */}
-          {step === 'email' ? (
-            <form onSubmit={handleSubmit(onSendOTP)} className="space-y-5 sm:space-y-6" noValidate>
+          {authMethod === 'password' ? (
+            // PASSWORD SIGN IN FORM
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSignIn)} className="space-y-5 sm:space-y-6" noValidate>
               {/* Email Input */}
               <div className="space-y-2">
                 <label htmlFor="admin-email" className="block text-sm font-semibold text-slate-700">
@@ -194,13 +234,46 @@ export default function AdminLogin() {
                     autoComplete="email"
                     placeholder="admin@craftcurio.com"
                     className="block w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all placeholder:text-slate-400 bg-white"
-                    {...register('email')}
+                    {...passwordForm.register('email')}
                   />
                 </div>
-                {errors.email && (
+                {passwordForm.formState.errors.email && (
                   <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
                     <AlertCircle className="w-4 h-4" />
-                    {errors.email.message}
+                    {passwordForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label htmlFor="admin-password" className="block text-sm font-semibold text-slate-700">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    id="admin-password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    className="block w-full pl-10 sm:pl-12 pr-12 py-3 sm:py-4 text-sm sm:text-base border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all placeholder:text-slate-400 bg-white"
+                    {...passwordForm.register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+                {passwordForm.formState.errors.password && (
+                  <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {passwordForm.formState.errors.password.message}
                   </p>
                 )}
               </div>
@@ -216,7 +289,73 @@ export default function AdminLogin() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSendingOTP || formIsSubmitting}
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-5 h-5" />
+                    Sign In
+                  </>
+                )}
+              </button>
+
+              {/* Toggle to OTP */}
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={toggleAuthMethod}
+                  className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
+                >
+                  Sign in with OTP instead
+                </button>
+              </div>
+            </form>
+          ) : step === 'email' ? (
+            <form onSubmit={otpForm.handleSubmit(onSendOTP)} className="space-y-5 sm:space-y-6" noValidate>
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label htmlFor="admin-email" className="block text-sm font-semibold text-slate-700">
+                  Admin Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    id="admin-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="admin@craftcurio.com"
+                    className="block w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-sm sm:text-base border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all placeholder:text-slate-400 bg-white"
+                    {...otpForm.register('email')}
+                  />
+                </div>
+                {otpForm.formState.errors.email && (
+                  <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {otpForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSendingOTP}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold py-3 sm:py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 {isSendingOTP ? (
@@ -231,6 +370,17 @@ export default function AdminLogin() {
                   </>
                 )}
               </button>
+
+              {/* Toggle to Password */}
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={toggleAuthMethod}
+                  className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
+                >
+                  Sign in with Password instead
+                </button>
+              </div>
             </form>
           ) : (
             <div className="space-y-5 sm:space-y-6">
