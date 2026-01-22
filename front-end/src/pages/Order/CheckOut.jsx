@@ -135,7 +135,7 @@ const CheckOut = () => {
 
         // If payment method is Razorpay, initiate payment
         if (paymentInfo.paymentMethod === 'razorpay') {
-          await processPayment({
+          const paymentConfig = {
             orderId: createdOrder._id,
             amount: total,
             name: user?.name || shippingInfo.fullName,
@@ -158,33 +158,34 @@ const CheckOut = () => {
                 console.error('Payment failed:', error);
               }
 
-            let userMessage = 'Payment failed. Please try again or use a different payment method.';
-            if (error && error.description) {
-              userMessage = `Payment failed: ${error.description}. Please try again or use a different payment method.`;
-            } else if (error && error.reason) {
-              // Fallback to reason if description is missing
-              userMessage = `Payment failed: ${error.reason}. Please try again or use a different payment method.`;
+              let userMessage = 'Payment failed. Please try again or use a different payment method.';
+              if (error && error.description) {
+                userMessage = `Payment failed: ${error.description}. Please try again or use a different payment method.`;
+              } else if (error && error.reason) {
+                // Fallback to reason if description is missing
+                userMessage = `Payment failed: ${error.reason}. Please try again or use a different payment method.`;
+              }
+
+              // Display user-friendly error message
+              // TODO: Replace alert with a modal or toast notification for better UX
+              alert(userMessage);
+
+              // TODO: Log this error to your backend for monitoring and debugging
+              // Example: sendErrorToBackend('/api/log-payment-failure', error);
+
+              // Navigate to orders page even if payment fails
+              navigate('/profile?section=orders');
             }
-
-            // Display user-friendly error message
-            // TODO: Replace alert with a modal or toast notification for better UX
-            alert(userMessage);
-
-            // TODO: Log this error to your backend for monitoring and debugging
-            // Example: sendErrorToBackend('/api/log-payment-failure', error);
-
-            // Navigate to orders page even if payment fails
-            navigate('/profile?section=orders');
-          }
-        });
-      } else {
-        // For other payment methods (COD, etc.)
-        clearCart();
-        navigate(`/order-confirmation/${data.order._id}`, {
-          state: { order: data.order }
-        });
+          };
+          await processPayment(paymentConfig);
+        } else {
+          // For other payment methods (COD, etc.)
+          clearCart();
+          navigate(`/order-confirmation/${createdOrder._id}`, {
+            state: { order: createdOrder }
+          });
+        }
       }
-
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('Order creation error:', error);
