@@ -56,19 +56,21 @@ const Dashboard = ({
 
   // Debug logging (only in development)
   useEffect(() => {
-    console.log('Dashboard Debug:', {
-      hasCollector: !!collector,
-      collectorId: collector?._id,
-      collectorUserId: collector?.userId,
-      collectiblesCount: collectibles?.length,
-      isLoading,
-      isCollectorLoading: collectorLoading,
-      error,
-      collectorError,
-      pagination,
-      activeTab,
-      filterStatus
-    });
+    if (import.meta.env.DEV) {
+      console.log('Dashboard Debug:', {
+        hasCollector: !!collector,
+        collectorId: collector?._id,
+        collectorUserId: collector?.userId,
+        collectiblesCount: collectibles?.length,
+        isLoading,
+        isCollectorLoading: collectorLoading,
+        error,
+        collectorError,
+        pagination,
+        activeTab,
+        filterStatus
+      });
+    }
   }, [collector, collectibles, isLoading, error, pagination, activeTab, filterStatus, collectorLoading, collectorError]);
 
   // Listen to refreshTrigger from context
@@ -95,7 +97,9 @@ const Dashboard = ({
       await onDelete(id);
       await refetch();
     } catch (error) {
-      console.error('Error after delete:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error after delete:', error);
+      }
     }
   };
 

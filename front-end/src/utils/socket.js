@@ -337,13 +337,13 @@ export const initializeChatSocket = (token) => {
   });
 
   chatSocket.on('connect', () => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('✅ Chat Socket connected');
     }
   });
 
   chatSocket.on('connect_error', (err) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.error('🔴 Chat Socket connection error:', err.message);
     }
   });

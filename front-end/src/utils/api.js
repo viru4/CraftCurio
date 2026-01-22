@@ -212,10 +212,14 @@ export const updateCollectible = async (id, updateData) => {
     }
   }
   
-  console.log('API: updateCollectible payload:', JSON.stringify(sanitizedData, null, 2));
+  if (import.meta.env.DEV) {
+    console.log('API: updateCollectible payload:', JSON.stringify(sanitizedData, null, 2));
+  }
   
   const response = await api.put(`/collectibles/${id}`, sanitizedData);
-  console.log('API: updateCollectible response:', response.data);
+  if (import.meta.env.DEV) {
+    console.log('API: updateCollectible response:', response.data);
+  }
   return response.data;
 };
 
@@ -344,9 +348,13 @@ export const relistAuction = async (id, relistData) => {
  * @returns {Promise<Object>} Collector's listings
  */
 export const getCollectorListings = async (collectorId, params = {}) => {
-  console.log('API: getCollectorListings called with:', { collectorId, params });
+  if (import.meta.env.DEV) {
+    console.log('API: getCollectorListings called with:', { collectorId, params });
+  }
   const response = await api.get(`/collectibles/collector/${collectorId}/listings`, { params });
-  console.log('API: getCollectorListings response:', response.data);
+  if (import.meta.env.DEV) {
+    console.log('API: getCollectorListings response:', response.data);
+  }
   return response.data;
 };
 

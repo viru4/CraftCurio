@@ -35,6 +35,7 @@ const Profile = lazy(() => import('@/pages/UserProfile/Profile'))
 const Admin = lazy(() => import('@/pages/admin/Admin'))
 const Products = lazy(() => import('@/pages/admin/Products'))
 const EditProduct = lazy(() => import('@/pages/admin/EditProduct'))
+const Categories = lazy(() => import('@/pages/admin/Categories/Categories'))
 const Users = lazy(() => import('@/pages/admin/Users/Users'))
 const AdminContent = lazy(() => import('@/pages/admin/content&stories/AdminContent'))
 const VerificationManagement = lazy(() => import('@/pages/admin/Users/components/VerificationManagement'))
@@ -87,6 +88,7 @@ export default function AppRoutes() {
       <Route path="/admin" element={<ProtectedAdminRoute><Admin /></ProtectedAdminRoute>} />
       <Route path="/admin/products" element={<ProtectedAdminRoute><Products /></ProtectedAdminRoute>} />
       <Route path="/admin/products/edit/:id" element={<ProtectedAdminRoute><EditProduct /></ProtectedAdminRoute>} />
+      <Route path="/admin/categories" element={<ProtectedAdminRoute><Categories /></ProtectedAdminRoute>} />
       <Route path="/admin/users" element={<ProtectedAdminRoute><Users /></ProtectedAdminRoute>} />
       <Route path="/admin/orders" element={<ProtectedAdminRoute><AdminOrders /></ProtectedAdminRoute>} />
       <Route path="/admin/verifications" element={<ProtectedAdminRoute><VerificationManagement /></ProtectedAdminRoute>} />

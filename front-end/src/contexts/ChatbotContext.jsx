@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import axios from 'axios';
+import api from '@/utils/api';
 
 const ChatbotContext = createContext(null);
 
@@ -26,16 +26,14 @@ const ChatbotProvider = ({ children }) => {
     '👤 Account Help'
   ]);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
   // Initialize chat with greeting
   const initializeChat = useCallback(async () => {
     if (messages.length > 0) return; // Already initialized
 
     try {
-      const response = await axios.get(`${API_URL}/api/chatbot/greeting`);
+      const response = await api.get('/chatbot/greeting');
       
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         setSessionId(response.data.data.sessionId);
         setMessages([{
           role: 'assistant',
@@ -45,14 +43,17 @@ const ChatbotProvider = ({ children }) => {
         setQuickReplies(response.data.data.quickReplies || []);
       }
     } catch (error) {
-      console.error('Failed to initialize chat:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to initialize chat:', error);
+      }
+      // Fallback greeting if API fails
       setMessages([{
         role: 'assistant',
         message: "Hi! 👋 I'm your CraftCurio assistant. How can I help you today?",
         timestamp: new Date().toISOString()
       }]);
     }
-  }, [messages.length, API_URL]);
+  }, [messages.length]);
 
   // Send message to chatbot
   const sendMessage = useCallback(async (messageText) => {
@@ -69,23 +70,16 @@ const ChatbotProvider = ({ children }) => {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await api.post('/chatbot/message', {
+        message: messageText,
+        sessionId: sessionId
+      });
 
-      const response = await axios.post(
-        `${API_URL}/api/chatbot/message`,
-        {
-          message: messageText,
-          sessionId: sessionId
-        },
-        { headers }
-      );
-
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         const assistantMessage = {
           role: 'assistant',
           message: response.data.data.message,
-          timestamp: response.data.data.timestamp,
+          timestamp: response.data.data.timestamp || new Date().toISOString(),
           suggestedActions: response.data.data.suggestedActions,
           products: response.data.data.products
         };
@@ -98,7 +92,14 @@ const ChatbotProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to send message:', error);
+        console.error('Error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+      }
       
       let errorMessage = "I'm having trouble connecting. Please try again.";
       
@@ -106,6 +107,10 @@ const ChatbotProvider = ({ children }) => {
         errorMessage = "You're sending messages too quickly. Please wait a moment.";
       } else if (error.response?.status === 503) {
         errorMessage = "The chatbot service is currently unavailable. Please try again later.";
+      } else if (error.response?.status === 401) {
+        errorMessage = "Please refresh the page and try again.";
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
       }
 
       setMessages(prev => [...prev, {
@@ -116,7 +121,7 @@ const ChatbotProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, API_URL]);
+  }, [sessionId]);
 
   // Send quick reply
   const sendQuickReply = useCallback((reply) => {
@@ -147,17 +152,29 @@ const ChatbotProvider = ({ children }) => {
 
   // Clear chat history
   const clearHistory = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      // If no session, just clear local messages
+      setMessages([]);
+      setSessionId(null);
+      initializeChat();
+      return;
+    }
 
     try {
-      await axios.delete(`${API_URL}/api/chatbot/history/${sessionId}`);
+      await api.delete(`/chatbot/history/${sessionId}`);
       setMessages([]);
       setSessionId(null);
       initializeChat();
     } catch (error) {
-      console.error('Failed to clear history:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to clear history:', error);
+      }
+      // Clear locally even if API call fails
+      setMessages([]);
+      setSessionId(null);
+      initializeChat();
     }
-  }, [sessionId, API_URL, initializeChat]);
+  }, [sessionId, initializeChat]);
 
   const value = {
     isOpen,

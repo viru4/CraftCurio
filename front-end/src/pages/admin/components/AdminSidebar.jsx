@@ -10,7 +10,8 @@ import {
   Headset, 
   Settings, 
   LogOut,
-  Info
+  Info,
+  Grid3x3
 } from 'lucide-react';
 
 const AdminSidebar = () => {
@@ -20,6 +21,7 @@ const AdminSidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', exact: true },
     { icon: Users, label: 'Users', path: '/admin/users' },
     { icon: Package, label: 'Products', path: '/admin/products' },
+    { icon: Grid3x3, label: 'Categories', path: '/admin/categories' },
     { icon: Receipt, label: 'Orders', path: '/admin/orders' },
     { icon: FileText, label: 'Content', path: '/admin/content' },
     { icon: Info, label: 'About Us', path: '/admin/about-us' },

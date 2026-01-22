@@ -323,6 +323,37 @@ export const createArtisanProduct = async (req, res) => {
       ? String(artisanProductData.id).trim()
       : `art-${randomUUID()}`;
 
+    // Check if category exists in approved categories
+    // If not, create it as pending for admin approval
+    try {
+      const ArtisanProductCategory = (await import('../../models/ArtisanProductCategory.js')).default;
+      const categoryExists = await ArtisanProductCategory.findOne({ 
+        name: new RegExp(`^${artisanProductData.category}$`, 'i'),
+        status: 'approved' 
+      });
+      
+      if (!categoryExists) {
+        // Check if it already exists as pending
+        const pendingCategory = await ArtisanProductCategory.findOne({ 
+          name: new RegExp(`^${artisanProductData.category}$`, 'i') 
+        });
+        
+        if (!pendingCategory) {
+          // Create new pending category
+          await ArtisanProductCategory.create({
+            name: artisanProductData.category,
+            description: `Custom category submitted by seller`,
+            status: 'pending',
+            submittedBy: req.user?._id || null
+          });
+          console.log(`Created pending category: ${artisanProductData.category}`);
+        }
+      }
+    } catch (categoryError) {
+      console.error('Error handling category:', categoryError);
+      // Continue even if category creation fails
+    }
+
     const artisanProduct = new ArtisanProduct(artisanProductData);
     const savedArtisanProduct = await artisanProduct.save();
 

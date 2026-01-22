@@ -12,7 +12,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  Grid3x3
 } from 'lucide-react';
 
 const MobileSidebar = () => {
@@ -23,6 +24,7 @@ const MobileSidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', exact: true },
     { icon: Users, label: 'Users', path: '/admin/users' },
     { icon: Package, label: 'Products', path: '/admin/products' },
+    { icon: Grid3x3, label: 'Categories', path: '/admin/categories' },
     { icon: Receipt, label: 'Orders', path: '/admin/orders' },
     { icon: FileText, label: 'Content', path: '/admin/content' },
     { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },

@@ -105,6 +105,39 @@ export const createCollectible = async (req, res) => {
       }
     }
 
+    // Check if category exists in approved categories
+    // If not, create it as pending for admin approval
+    if (collectibleData.category) {
+      try {
+        const CollectibleCategory = (await import('../../models/collectiblecategory.js')).default;
+        const categoryExists = await CollectibleCategory.findOne({ 
+          name: new RegExp(`^${collectibleData.category}$`, 'i'),
+          status: 'approved' 
+        });
+        
+        if (!categoryExists) {
+          // Check if it already exists as pending
+          const pendingCategory = await CollectibleCategory.findOne({ 
+            name: new RegExp(`^${collectibleData.category}$`, 'i') 
+          });
+          
+          if (!pendingCategory) {
+            // Create new pending category
+            await CollectibleCategory.create({
+              name: collectibleData.category,
+              description: `Custom category submitted by collector`,
+              status: 'pending',
+              submittedBy: userId || null
+            });
+            console.log(`Created pending collectible category: ${collectibleData.category}`);
+          }
+        }
+      } catch (categoryError) {
+        console.error('Error handling collectible category:', categoryError);
+        // Continue even if category creation fails
+      }
+    }
+
     const collectible = new Collectible(collectibleData);
     await collectible.save();
 
