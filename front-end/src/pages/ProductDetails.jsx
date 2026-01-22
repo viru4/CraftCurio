@@ -52,27 +52,28 @@ const ProductDetails = () => {
         if (response.data) {
           const data = response.data;
 
-        // Normalize data structure for collectibles
-        let normalizedProduct = data.data;
-        if (isCollectible) {
-          normalizedProduct = {
-            ...data.data,
-            // Ensure images array exists
-            images: data.data.images?.length > 0 ? data.data.images : [data.data.image],
-            // Convert price string to number if needed
-            price: typeof data.data.price === 'string' ? parseFloat(data.data.price.replace(/[^0-9.-]+/g, '')) : data.data.price,
-            // Add empty structures for optional fields
-            rating: data.data.rating || { average: 0, count: 0 },
-            reviews: data.data.reviews || [],
-            artisanInfo: data.data.owner || null, // Pass owner as artisanInfo for collectibles
-            craftMethod: data.data.craftMethod || null,
-            provenance: data.data.provenance || null,
-            history: data.data.history || null,
-            productStory: data.data.productStory || null
-          };
-        }
+          // Normalize data structure for collectibles
+          let normalizedProduct = data.data;
+          if (isCollectible) {
+            normalizedProduct = {
+              ...data.data,
+              // Ensure images array exists
+              images: data.data.images?.length > 0 ? data.data.images : [data.data.image],
+              // Convert price string to number if needed
+              price: typeof data.data.price === 'string' ? parseFloat(data.data.price.replace(/[^0-9.-]+/g, '')) : data.data.price,
+              // Add empty structures for optional fields
+              rating: data.data.rating || { average: 0, count: 0 },
+              reviews: data.data.reviews || [],
+              artisanInfo: data.data.owner || null, // Pass owner as artisanInfo for collectibles
+              craftMethod: data.data.craftMethod || null,
+              provenance: data.data.provenance || null,
+              history: data.data.history || null,
+              productStory: data.data.productStory || null
+            };
+          }
 
-        setProduct(normalizedProduct);
+          setProduct(normalizedProduct);
+        }
       } catch (err) {
         if (import.meta.env.DEV) {
           console.error('Error fetching product:', err);
