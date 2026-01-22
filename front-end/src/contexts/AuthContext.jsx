@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import api from '@/utils/api';
 
 const AuthContext = createContext(null);
 
@@ -19,18 +18,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const currentToken = localStorage.getItem('token');
-      if (currentToken) {
-        await fetch(`${API_BASE_URL}/api/auth/logout`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${currentToken}`
-          }
-        });
-      }
+      await api.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Logout error:', error);
+      }
     } finally {
       setUser(null);
       setToken(null);
@@ -53,29 +45,23 @@ export const AuthProvider = ({ children }) => {
           setUser(parsedUser);
           
           // Verify token is still valid in the background
-          const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${storedToken}`
-            },
-            credentials: 'include'
-          });
+          const response = await api.get('/auth/me');
 
-          if (!response.ok) {
-            // Only logout if we get an explicit auth error (401/403)
-            if (response.status === 401 || response.status === 403) {
-              setUser(null);
-              setToken(null);
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-            }
-          } else {
+          if (response.data && response.data.user) {
             // Update with fresh user data from server
-            const data = await response.json();
-            setUser(data.user);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            setUser(response.data.user);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
           }
         } catch (error) {
-          console.error('Auth initialization error:', error);
+          // Only logout if we get an explicit auth error (401/403)
+          if (error.response?.status === 401 || error.response?.status === 403) {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          } else if (import.meta.env.DEV) {
+            console.error('Auth initialization error:', error);
+          }
           // Don't logout on network errors - keep the user logged in
           // Only clear auth on explicit authentication failures
         }

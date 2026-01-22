@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, Footer } from '../components/layout';
-import { API_BASE_URL } from '../utils/api';
+import api from '../utils/api';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -44,17 +44,13 @@ const ProductDetails = () => {
         setLoading(true);
         // Determine API endpoint based on type
         const endpoint = isCollectible
-          ? `${API_BASE_URL}/api/collectibles/${id}`
-          : `${API_BASE_URL}/api/artisan-products/${id}`;
+          ? `/collectibles/${id}`
+          : `/artisan-products/${id}`;
 
-        const response = await fetch(endpoint);
+        const response = await api.get(endpoint);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Product not found (${response.status}): ${errorText}`);
-        }
-
-        const data = await response.json();
+        if (response.data) {
+          const data = response.data;
 
         // Normalize data structure for collectibles
         let normalizedProduct = data.data;
@@ -78,8 +74,11 @@ const ProductDetails = () => {
 
         setProduct(normalizedProduct);
       } catch (err) {
-        console.error('Error fetching product:', err);
-        setError(err.message);
+        if (import.meta.env.DEV) {
+          console.error('Error fetching product:', err);
+        }
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to load product';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

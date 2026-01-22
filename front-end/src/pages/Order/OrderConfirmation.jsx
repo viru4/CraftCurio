@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import api from '@/utils/api';
 import { CheckCircle, Package, Truck, MapPin, Calendar, CreditCard } from 'lucide-react';
 
 const OrderConfirmation = () => {
@@ -21,22 +22,17 @@ const OrderConfirmation = () => {
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders/${orderId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const response = await api.get(`/orders/${orderId}`);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch order');
+        if (response.data) {
+          setOrder(response.data.order || response.data.data);
         }
-
-        setOrder(data.order);
       } catch (err) {
-        console.error('Fetch order error:', err);
-        setError(err.message);
+        if (import.meta.env.DEV) {
+          console.error('Fetch order error:', err);
+        }
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch order';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

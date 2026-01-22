@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import api from '@/utils/api';
 import {
   ProfileSidebar,
   ProfileHeader,
@@ -99,19 +100,15 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/auth/profile');
 
-      if (response.ok) {
-        const data = await response.json();
-        setProfileData(data.user);
+      if (response.data && response.data.user) {
+        setProfileData(response.data.user);
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching profile:', error);
+      }
     } finally {
       setLoading(false);
     }

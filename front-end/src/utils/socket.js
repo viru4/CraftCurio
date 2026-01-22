@@ -5,8 +5,18 @@ import { io } from 'socket.io-client';
  * Handles connection, events, and auction room management
  */
 
-// Socket.io server URL
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000';
+// Socket.io server URL - use API base URL if socket URL not specified
+// If both are empty, use relative path (works with same origin)
+const getSocketUrl = () => {
+  const socketUrl = import.meta.env.VITE_SOCKET_URL;
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
+  
+  if (socketUrl) return socketUrl;
+  if (apiUrl) return apiUrl;
+  return ''; // Relative path - same origin
+};
+
+const SOCKET_URL = getSocketUrl();
 
 // Socket instance (singleton)
 let socket = null;

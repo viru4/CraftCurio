@@ -5,7 +5,7 @@ import MobileSidebar from './components/MobileSidebar';
 import AdminHeader from './components/AdminHeader';
 import ProductsTable from './components/ProductsTable';
 import { Search, RefreshCw, Plus, ChevronDown } from 'lucide-react';
-import { API_ENDPOINTS } from '../../utils/api';
+import api from '@/utils/api';
 
 const Products = () => {
   const navigate = useNavigate();
@@ -59,42 +59,43 @@ const Products = () => {
     
     try {
       const endpoint = activeTab === 'artisan' 
-        ? API_ENDPOINTS.artisanProducts
-        : API_ENDPOINTS.collectibles;
+        ? '/artisan-products'
+        : '/collectibles';
       
-      const params = new URLSearchParams({
+      const params = {
         page: currentPage,
         limit: itemsPerPage,
         ...(searchQuery && { search: searchQuery }),
         ...(selectedCategory !== 'all' && { category: selectedCategory }),
         ...(selectedStatus !== 'all' && { status: selectedStatus })
-      });
+      };
 
-      const response = await fetch(`${endpoint}?${params}`);
+      const response = await api.get(endpoint, { params });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
-
-      const data = await response.json();
-      
-      // Handle different response structures
-      if (Array.isArray(data)) {
-        setProducts(data);
-        setTotalItems(data.length);
-        setTotalPages(Math.ceil(data.length / itemsPerPage));
-      } else if (data.data) {
-        setProducts(data.data);
-        setTotalItems(data.total || data.data.length);
-        setTotalPages(Math.ceil((data.total || data.data.length) / itemsPerPage));
-      } else {
-        setProducts([]);
-        setTotalItems(0);
-        setTotalPages(1);
+      if (response.data) {
+        const data = response.data;
+        
+        // Handle different response structures
+        if (Array.isArray(data)) {
+          setProducts(data);
+          setTotalItems(data.length);
+          setTotalPages(Math.ceil(data.length / itemsPerPage));
+        } else if (data.data) {
+          setProducts(data.data);
+          setTotalItems(data.total || data.data.length);
+          setTotalPages(Math.ceil((data.total || data.data.length) / itemsPerPage));
+        } else {
+          setProducts([]);
+          setTotalItems(0);
+          setTotalPages(1);
+        }
       }
     } catch (err) {
-      console.error('Error fetching products:', err);
-      setError(err.message);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching products:', err);
+      }
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch products';
+      setError(errorMessage);
       setProducts([]);
     } finally {
       setLoading(false);

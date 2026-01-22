@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../lib/date';
+import api from '@/utils/api';
 
 const MyOrders = () => {
   const { user, loading: authLoading } = useAuth();
@@ -23,23 +24,17 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders/my-orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/orders/my-orders');
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setOrders(data.orders);
-      } else {
-        setError(data.message || 'Failed to fetch orders');
+      if (response.data) {
+        setOrders(response.data.orders || response.data.data?.orders || []);
       }
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      setError('Failed to load orders');
+      if (import.meta.env.DEV) {
+        console.error('Error fetching orders:', error);
+      }
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to load orders';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

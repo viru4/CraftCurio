@@ -6,8 +6,7 @@ import { otpSignInSchema, otpSignInDefaultValues, signInSchema, signInDefaultVal
 import { useAuth } from '@/contexts/AuthContext'
 import Navbar from '@/components/layout/Navbar'
 import OTPInput from '@/components/auth/OTPInput'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+import api from '@/utils/api'
 
 export default function SignInPage() {
   const navigate = useNavigate()
@@ -49,26 +48,16 @@ export default function SignInPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/sign-in`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      })
+      const response = await api.post('/auth/sign-in', data)
 
-      const responseData = await response.json()
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to sign in')
+      if (response.data && response.data.user) {
+        // Login successful
+        login(response.data.user, response.data.token)
+        navigate('/')
       }
-
-      // Login successful
-      login(responseData.user, responseData.token)
-      navigate('/')
     } catch (err) {
-      setError(err.message || 'Invalid email or password')
+      const message = err.response?.data?.message || err.message || 'Invalid email or password'
+      setError(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -83,33 +72,24 @@ export default function SignInPage() {
     setIsSendingOTP(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/send-otp-signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: formEmail }),
-        credentials: 'include',
-      })
+      const response = await api.post('/auth/send-otp-signin', { email: formEmail })
 
-      const data = await response.json()
+      if (response.data) {
+        setEmail(formEmail)
+        setStep('otp')
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send OTP')
-      }
-
-      setEmail(formEmail)
-      setStep('otp')
-
-      // In development, if OTP is included in response, show it
-      if (data.otp) {
-        setSuccessMessage(`OTP: ${data.otp} (Development mode - check backend console for email OTP)`)
-        console.log('📧 OTP for testing:', data.otp)
-      } else {
-        setSuccessMessage(data.message || 'OTP sent to your email. Please check your inbox.')
+        // In development, if OTP is included in response, show it
+        if (response.data.otp) {
+          setSuccessMessage(`OTP: ${response.data.otp} (Development mode - check backend console for email OTP)`)
+          if (import.meta.env.DEV) {
+            console.log('📧 OTP for testing:', response.data.otp)
+          }
+        } else {
+          setSuccessMessage(response.data.message || 'OTP sent to your email. Please check your inbox.')
+        }
       }
     } catch (err) {
-      const message = err?.message || 'Failed to send OTP. Please try again.'
+      const message = err.response?.data?.message || err.message || 'Failed to send OTP. Please try again.'
       setError(message)
     } finally {
       setIsSendingOTP(false)
@@ -124,26 +104,15 @@ export default function SignInPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp-signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp: otpValue }),
-        credentials: 'include',
-      })
+      const response = await api.post('/auth/verify-otp-signin', { email, otp: otpValue })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Invalid OTP')
+      if (response.data && response.data.user) {
+        // Login successful
+        login(response.data.user, response.data.token)
+        navigate('/')
       }
-
-      // Login successful
-      login(data.user, data.token)
-      navigate('/')
     } catch (err) {
-      const message = err?.message || 'Invalid OTP. Please try again.'
+      const message = err.response?.data?.message || err.message || 'Invalid OTP. Please try again.'
       setOtpError(message)
       setOtp('') // Clear OTP on error
     } finally {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRazorpay } from '@/hooks/useRazorpay';
+import api from '@/utils/api';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SavedAddresses from '@/components/SavedAddresses';
@@ -125,44 +126,37 @@ const CheckOut = () => {
       }
 
       // Send order to backend
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(orderData)
-      });
+      const response = await api.post('/orders', orderData);
 
-      const data = await response.json();
+      if (response.data && response.data.order) {
+        // Store created order
+        const createdOrder = response.data.order;
+        setCreatedOrder(createdOrder);
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to create order');
-      }
-
-      // Store created order
-      setCreatedOrder(data.order);
-
-      // If payment method is Razorpay, initiate payment
-      if (paymentInfo.paymentMethod === 'razorpay') {
-        await processPayment({
-          orderId: data.order._id,
-          amount: total,
-          name: user?.name || shippingInfo.fullName,
-          email: user?.email || '',
-          phone: user?.phone || '',
-          description: `Order #${data.order.orderNumber}`,
-          onSuccess: (updatedOrder) => {
-            console.log('Payment successful:', updatedOrder);
-            // Clear cart after successful payment
-            clearCart();
-            // Navigate to order confirmation page
-            navigate(`/order-confirmation/${data.order._id}`, {
-              state: { order: updatedOrder }
-            });
-          },
-          onFailure: (error) => {
-            console.error('Payment failed:', error);
+        // If payment method is Razorpay, initiate payment
+        if (paymentInfo.paymentMethod === 'razorpay') {
+          await processPayment({
+            orderId: createdOrder._id,
+            amount: total,
+            name: user?.name || shippingInfo.fullName,
+            email: user?.email || '',
+            phone: user?.phone || '',
+            description: `Order #${createdOrder.orderNumber}`,
+            onSuccess: (updatedOrder) => {
+              if (import.meta.env.DEV) {
+                console.log('Payment successful:', updatedOrder);
+              }
+              // Clear cart after successful payment
+              clearCart();
+              // Navigate to order confirmation page
+              navigate(`/order-confirmation/${createdOrder._id}`, {
+                state: { order: updatedOrder }
+              });
+            },
+            onFailure: (error) => {
+              if (import.meta.env.DEV) {
+                console.error('Payment failed:', error);
+              }
 
             let userMessage = 'Payment failed. Please try again or use a different payment method.';
             if (error && error.description) {
@@ -192,8 +186,11 @@ const CheckOut = () => {
       }
 
     } catch (error) {
-      console.error('Order creation error:', error);
-      alert(error.message || 'Failed to create order. Please try again.');
+      if (import.meta.env.DEV) {
+        console.error('Order creation error:', error);
+      }
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create order. Please try again.';
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

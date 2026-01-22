@@ -4,10 +4,14 @@
  */
 
 const getApiBaseUrl = () => {
-    const raw = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    const raw = import.meta.env.VITE_API_BASE_URL || '';
     const normalized = raw.replace(/\/+$/, '');
     if (normalized.endsWith('/api')) {
         return normalized;
+    }
+    // If empty, use relative path (works with Vite proxy in dev, or same origin in prod)
+    if (!normalized) {
+        return '/api';
     }
     return `${normalized}/api`;
 };
@@ -68,7 +72,9 @@ export const uploadSingleImage = async (file, folder = 'craftcurio', onProgress 
             xhr.send(formData);
         });
     } catch (error) {
-        console.error('Upload error:', error);
+        if (import.meta.env.DEV) {
+            console.error('Upload error:', error);
+        }
         throw error;
     }
 };
@@ -133,7 +139,9 @@ export const uploadMultipleImages = async (files, folder = 'craftcurio', onProgr
             xhr.send(formData);
         });
     } catch (error) {
-        console.error('Upload error:', error);
+        if (import.meta.env.DEV) {
+            console.error('Upload error:', error);
+        }
         throw error;
     }
 };

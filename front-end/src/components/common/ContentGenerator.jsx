@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Wand2, Loader2, Copy, Check, RefreshCw, Sparkles } from 'lucide-react';
-import axios from 'axios';
+import api from '@/utils/api';
 
 /**
  * ContentGenerator - AI-powered content generation component
@@ -22,37 +22,35 @@ const ContentGenerator = ({
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
   const contentTypeConfig = {
     description: {
       title: 'Generate Product Description',
       icon: <Sparkles className="w-5 h-5" />,
-      endpoint: '/api/content/generate-description',
+      endpoint: '/content/generate-description',
       buttonText: 'Generate Description'
     },
     titles: {
       title: 'Generate Title Ideas',
       icon: <Wand2 className="w-5 h-5" />,
-      endpoint: '/api/content/generate-titles',
+      endpoint: '/content/generate-titles',
       buttonText: 'Generate Titles'
     },
     keywords: {
       title: 'Generate Keywords & Tags',
       icon: <Sparkles className="w-5 h-5" />,
-      endpoint: '/api/content/generate-keywords',
+      endpoint: '/content/generate-keywords',
       buttonText: 'Generate Keywords'
     },
     social: {
       title: 'Generate Social Media Post',
       icon: <Sparkles className="w-5 h-5" />,
-      endpoint: '/api/content/generate-social-post',
+      endpoint: '/content/generate-social-post',
       buttonText: 'Generate Post'
     },
     enhance: {
       title: 'Enhance Description',
       icon: <Wand2 className="w-5 h-5" />,
-      endpoint: '/api/content/enhance-description',
+      endpoint: '/content/enhance-description',
       buttonText: 'Enhance'
     }
   };
@@ -65,9 +63,6 @@ const ContentGenerator = ({
     setGeneratedContent('');
 
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       let payload = {};
       
       if (contentType === 'enhance' && existingContent) {
@@ -76,13 +71,9 @@ const ContentGenerator = ({
         payload = productData;
       }
 
-      const response = await axios.post(
-        `${API_URL}${config.endpoint}`,
-        payload,
-        { headers }
-      );
+      const response = await api.post(config.endpoint, payload);
 
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         const content = response.data.data;
         
         let formattedContent = '';
@@ -118,8 +109,10 @@ const ContentGenerator = ({
         // DO NOT call onContentGenerated here - only call when "Use This" is clicked
       }
     } catch (err) {
-      console.error('Content generation error:', err);
-      setError(err.response?.data?.error || 'Failed to generate content. Please try again.');
+      if (import.meta.env.DEV) {
+        console.error('Content generation error:', err);
+      }
+      setError(err.response?.data?.error || err.message || 'Failed to generate content. Please try again.');
     } finally {
       setIsGenerating(false);
     }

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Package, Download, HelpCircle, Truck } from 'lucide-react';
 import { formatPrice } from '@/lib/currency';
 import { formatDate } from '@/lib/date';
+import api from '@/utils/api';
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -23,21 +24,16 @@ const OrderDetails = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/orders/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch order details');
-      }
-
-      const data = await response.json();
+      const response = await api.get(`/orders/${orderId}`);
+      
       // Handle both response formats: { data: order } or { order: order }
-      setOrder(data.data || data.order);
+      if (response.data) {
+        setOrder(response.data.data || response.data.order);
+      }
     } catch (error) {
-      console.error('Error fetching order details:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching order details:', error);
+      }
     } finally {
       setLoading(false);
     }
