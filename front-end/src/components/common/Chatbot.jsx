@@ -118,7 +118,7 @@ const Chatbot = () => {
                 🤖
               </div>
               <div className="min-w-0">
-                <h3 className="font-semibold text-base sm:text-lg truncate">CraftCurio Assistant</h3>
+                <h3 className="font-semibold text-base sm:text-lg truncate">Crafty</h3>
                 <p className="text-xs text-blue-100 hidden sm:block">Always here to help</p>
               </div>
             </div>
