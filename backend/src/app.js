@@ -41,28 +41,7 @@ app.set('trust proxy', 1);
 // Security Middleware
 app.use(helmet());
 
-// Rate Limiting - Stricter for auth endpoints
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
-// General API rate limiter (more lenient)
-const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200, // Limit each IP to 200 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
-app.use('/api/auth/', authLimiter);
-app.use('/api/', apiLimiter);
-
-// CORS Configuration - Must be before other middleware
+// CORS Configuration - MUST be before rate limiting to handle OPTIONS preflight requests
 const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps, Postman, or same-origin)
@@ -92,6 +71,32 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Rate Limiting - Stricter for auth endpoints
+// Increased limits for development to handle React StrictMode double renders
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: isDevelopment ? 500 : 100, // Higher limit in development
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS', // Skip rate limiting for OPTIONS requests
+});
+
+// General API rate limiter (more lenient)
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: isDevelopment ? 1000 : 200, // Higher limit in development
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS', // Skip rate limiting for OPTIONS requests
+});
+
+app.use('/api/auth/', authLimiter);
+app.use('/api/', apiLimiter);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

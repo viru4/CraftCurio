@@ -281,6 +281,8 @@ const ListForm = ({
 
     try {
       await onSubmit(submitData);
+      // Close the form after successful submission
+      onCancel();
     } catch (error) {
       console.error('Form submission error:', error);
       setErrors({ submit: error.message || 'Failed to submit form' });

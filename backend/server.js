@@ -16,9 +16,19 @@ const port = process.env.PORT || 8000;
 const httpServer = createServer(app);
 
 // Initialize Socket.io with CORS
+// Support both development and production origins
+const allowedSocketOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  process.env.FRONTEND_URL,
+  'https://craftcurio-frontend.onrender.com'
+].filter(Boolean); // Remove undefined values
+
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: allowedSocketOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   },

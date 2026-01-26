@@ -5,7 +5,7 @@ import MobileSidebar from './components/MobileSidebar';
 import AdminHeader from './components/AdminHeader';
 import ProductsTable from './components/ProductsTable';
 import { Search, RefreshCw, Plus, ChevronDown } from 'lucide-react';
-import api from '@/utils/api';
+import api, { API_ENDPOINTS } from '@/utils/api';
 
 const Products = () => {
   const navigate = useNavigate();
