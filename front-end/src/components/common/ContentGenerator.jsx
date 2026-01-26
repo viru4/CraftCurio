@@ -73,20 +73,21 @@ const ContentGenerator = ({
 
       const response = await api.post(config.endpoint, payload);
 
-      if (response.data && response.data.success) {
-        const content = response.data.data;
+      if (response.data) {
+        // Handle different response structures
+        const content = response.data.data || response.data.content || response.data;
         
         let formattedContent = '';
         
         if (contentType === 'titles' && content.titles) {
-          formattedContent = content.titles.join('\n');
+          formattedContent = Array.isArray(content.titles) ? content.titles.join('\n') : content.titles;
         } else if (contentType === 'keywords' && content.keywords) {
-          formattedContent = content.keywords.join(', ');
+          formattedContent = Array.isArray(content.keywords) ? content.keywords.join(', ') : content.keywords;
         } else if (contentType === 'social' && content.text) {
-          formattedContent = `${content.text}\n\n${content.hashtags}`;
+          formattedContent = `${content.text}\n\n${content.hashtags || ''}`;
         } else if (content.description) {
           // Clean and format the description professionally
-          formattedContent = content.description
+          formattedContent = (typeof content.description === 'string' ? content.description : '')
             .replace(/\*\*/g, '') // Remove markdown bold
             .replace(/\*/g, '') // Remove markdown italic
             .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with max 2
@@ -95,7 +96,7 @@ const ContentGenerator = ({
             .replace(/\s{2,}/g, ' ') // Replace multiple spaces with single space
             .trim();
         } else if (content.enhanced) {
-          formattedContent = content.enhanced
+          formattedContent = (typeof content.enhanced === 'string' ? content.enhanced : '')
             .replace(/\*\*/g, '')
             .replace(/\*/g, '')
             .replace(/\n{3,}/g, '\n\n')
@@ -103,10 +104,23 @@ const ContentGenerator = ({
             .replace(/[\s\n]+$/, '')
             .replace(/\s{2,}/g, ' ')
             .trim();
+        } else if (typeof content === 'string') {
+          // If the response is directly a string
+          formattedContent = content
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
         }
         
-        setGeneratedContent(formattedContent);
-        // DO NOT call onContentGenerated here - only call when "Use This" is clicked
+        if (formattedContent) {
+          setGeneratedContent(formattedContent);
+          // DO NOT call onContentGenerated here - only call when "Use This" is clicked
+        } else {
+          setError('No content generated. Please try again.');
+        }
+      } else {
+        setError('Invalid response from server. Please try again.');
       }
     } catch (err) {
       if (import.meta.env.DEV) {
@@ -147,6 +161,7 @@ const ContentGenerator = ({
       {/* Generate Button */}
       {!generatedContent && (
         <button
+          type="button"
           onClick={handleGenerate}
           disabled={isGenerating}
           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
@@ -184,6 +199,7 @@ const ContentGenerator = ({
           {/* Action Buttons */}
           <div className="flex gap-2 flex-wrap">
             <button
+              type="button"
               onClick={handleCopy}
               className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
@@ -201,6 +217,7 @@ const ContentGenerator = ({
             </button>
 
             <button
+              type="button"
               onClick={handleUse}
               className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
@@ -209,6 +226,7 @@ const ContentGenerator = ({
             </button>
 
             <button
+              type="button"
               onClick={handleGenerate}
               disabled={isGenerating}
               className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"

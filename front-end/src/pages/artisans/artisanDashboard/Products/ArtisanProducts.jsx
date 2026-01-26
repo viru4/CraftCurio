@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ArtisanSidebar from '../components/ArtisanSidebar';
-import { Menu, Plus, Search, Filter } from 'lucide-react';
+import { Menu, Plus, Search, Filter, X } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/api';
 import ProductsHeader from './components/ProductsHeader';
 import ProductsFilters from './components/ProductsFilters';
@@ -17,6 +17,7 @@ const ArtisanProducts = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState(''); // Local state for input field
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -104,6 +105,22 @@ const ArtisanProducts = () => {
     setFilteredProducts(filtered);
   };
 
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchInput);
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearchSubmit();
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchQuery('');
+  };
+
   const handleEditProduct = (product) => {
     setSelectedProduct(product);
     setShowModal(true);
@@ -138,7 +155,21 @@ const ArtisanProducts = () => {
         ? `${API_ENDPOINTS.artisanProducts}/${selectedProduct._id}`
         : API_ENDPOINTS.artisanProducts;
       
-      const method = selectedProduct ? 'PUT' : 'POST';
+      const method = selectedProduct ? 'PATCH' : 'POST';
+
+      // Prepare data with artisan info for new products
+      const submitData = selectedProduct 
+        ? productData // For updates, use data as-is
+        : {
+            ...productData,
+            artisanInfo: {
+              id: user._id,
+              name: user.name,
+              profilePhotoUrl: user.avatar || '',
+              briefBio: user.bio || '',
+              verified: true
+            }
+          };
 
       const response = await fetch(url, {
         method,
@@ -146,27 +177,29 @@ const ArtisanProducts = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...productData,
-          artisan: user._id
-        })
+        body: JSON.stringify(submitData)
       });
 
-      if (!response.ok) throw new Error('Failed to save product');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to save product');
+      }
 
       const data = await response.json();
+      const updatedProduct = data.product || data.data || data;
       
       if (selectedProduct) {
-        setProducts(products.map(p => p._id === selectedProduct._id ? data.product : p));
+        setProducts(products.map(p => p._id === selectedProduct._id ? updatedProduct : p));
       } else {
-        setProducts([data.product, ...products]);
+        setProducts([updatedProduct, ...products]);
       }
 
       setShowModal(false);
+      setSelectedProduct(null);
       alert(`Product ${selectedProduct ? 'updated' : 'created'} successfully!`);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product. Please try again.');
+      alert(`Failed to save product: ${error.message || 'Please try again.'}`);
     }
   };
 
@@ -220,15 +253,36 @@ const ArtisanProducts = () => {
             {/* Search and Filters */}
             <div className="mb-6 space-y-4">
               {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products by name or description..."
-                  className="w-full pl-10 pr-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-stone-400 z-10" />
+                  <input
+                    type="text"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyPress={handleSearchKeyPress}
+                    placeholder="Search products by name or description..."
+                    className={`w-full pl-10 ${searchInput ? 'pr-10' : 'pr-4'} py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white`}
+                  />
+                  {searchInput && (
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 transition-colors z-10"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSearchSubmit}
+                  className="px-4 sm:px-6 py-3 bg-[#ec6d13] text-white rounded-xl font-semibold hover:bg-[#ec6d13]/90 transition-colors flex items-center gap-2 flex-shrink-0"
+                >
+                  <Search className="h-5 w-5" />
+                  <span className="hidden sm:inline">Search</span>
+                </button>
               </div>
 
               {/* Filters */}

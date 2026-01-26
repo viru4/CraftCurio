@@ -18,8 +18,6 @@ const AddProduct = () => {
   const [productImages, setProductImages] = useState([]); // Changed from imageUrls
   const [storyMediaUrls, setStoryMediaUrls] = useState([]);
   const [certificateUrl, setCertificateUrl] = useState(''); // Changed
-  const [tags, setTags] = useState([]);
-  const [newTag, setNewTag] = useState('');
   const [errors, setErrors] = useState({});
   const [uploadError, setUploadError] = useState(null);
 
@@ -41,10 +39,7 @@ const AddProduct = () => {
     height: '',
     width: '',
     depth: '',
-    estimatedDeliveryDays: '',
-    featured: false,
-    popular: false,
-    recent: true
+    estimatedDeliveryDays: ''
   });
 
   useEffect(() => {
@@ -136,16 +131,6 @@ const AddProduct = () => {
     setUploadError(error.message || 'Upload failed');
   };
 
-  const handleAddTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -193,10 +178,6 @@ const AddProduct = () => {
           },
           estimatedDeliveryDays: formData.estimatedDeliveryDays ? parseInt(formData.estimatedDeliveryDays) : undefined
         },
-        tags: tags,
-        featured: formData.featured,
-        popular: formData.popular,
-        recent: formData.recent,
         status: 'pending'
       };
 
@@ -655,95 +636,6 @@ const AddProduct = () => {
                         className="px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
                         placeholder="Depth"
                       />
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Tags & Features */}
-              <section>
-                <h2 className="text-xl font-bold text-stone-900 mb-4 pb-2 border-b border-stone-200">
-                  Tags & Features
-                </h2>
-                <div className="space-y-6">
-                  {/* Tags */}
-                  <div>
-                    <label className="block text-stone-800 text-sm font-medium mb-2">
-                      Search Tags
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#ec6d13]/10 text-[#ec6d13] rounded-lg text-sm font-medium"
-                        >
-                          {tag}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTag(tag)}
-                            className="hover:text-[#ec6d13]/70"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newTag}
-                        onChange={(e) => setNewTag(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                        className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ec6d13]/50 bg-white"
-                        placeholder="Enter a tag and press Enter"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleAddTag}
-                        className="px-6 py-3 bg-stone-100 text-stone-800 rounded-xl font-semibold hover:bg-stone-200 transition-colors"
-                      >
-                        Add Tag
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Feature Flags */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="featured"
-                        checked={formData.featured}
-                        onChange={(e) => handleInputChange('featured', e.target.checked)}
-                        className="w-5 h-5 text-[#ec6d13] border-stone-300 rounded focus:ring-[#ec6d13]/50"
-                      />
-                      <label htmlFor="featured" className="text-stone-800 text-sm font-medium">
-                        Mark as Featured Product
-                      </label>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="popular"
-                        checked={formData.popular}
-                        onChange={(e) => handleInputChange('popular', e.target.checked)}
-                        className="w-5 h-5 text-[#ec6d13] border-stone-300 rounded focus:ring-[#ec6d13]/50"
-                      />
-                      <label htmlFor="popular" className="text-stone-800 text-sm font-medium">
-                        Mark as Popular Product
-                      </label>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="recent"
-                        checked={formData.recent}
-                        onChange={(e) => handleInputChange('recent', e.target.checked)}
-                        className="w-5 h-5 text-[#ec6d13] border-stone-300 rounded focus:ring-[#ec6d13]/50"
-                      />
-                      <label htmlFor="recent" className="text-stone-800 text-sm font-medium">
-                        Mark as Recent Product
-                      </label>
                     </div>
                   </div>
                 </div>

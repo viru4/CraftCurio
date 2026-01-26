@@ -63,6 +63,13 @@ const SearchBar = ({
   size = 'medium',
   rounded = true
 }) => {
+  // Local state for input field to prevent auto-scrolling on every keystroke
+  const [inputValue, setInputValue] = React.useState(searchQuery);
+
+  // Sync local state when searchQuery prop changes (e.g., from URL or external updates)
+  React.useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
   
   // Size variants
   const sizeClasses = {
@@ -92,26 +99,42 @@ const SearchBar = ({
   const currentSize = sizeClasses[size] || sizeClasses.medium;
 
   const handleInputChange = (e) => {
-    if (onSearchChange) {
-      onSearchChange(e.target.value);
-    }
+    // Only update local state, don't trigger search or scroll
+    setInputValue(e.target.value);
   };
 
   const handleSearchClick = () => {
+    const trimmedValue = inputValue.trim();
+    // Update parent search query only when search is submitted
+    if (onSearchChange) {
+      onSearchChange(trimmedValue);
+    }
     if (onSearch) {
-      onSearch(searchQuery);
+      onSearch(trimmedValue);
     }
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSearchClick();
     }
   };
 
   const handlePopularTagClick = (tag) => {
+    setInputValue(tag);
     if (onPopularTagClick) {
       onPopularTagClick(tag);
+    }
+  };
+
+  const handleClear = () => {
+    setInputValue('');
+    if (onSearchChange) {
+      onSearchChange('');
+    }
+    if (onSearch) {
+      onSearch('');
     }
   };
 
@@ -134,23 +157,39 @@ const SearchBar = ({
 
       {/* Search Input */}
       <div className={`relative ${currentSize.container} mx-auto`}>
-        <div className={`flex items-center bg-white border-2 border-stone-300 ${rounded ? 'rounded-full' : 'rounded-lg'} shadow-lg hover:shadow-xl transition-shadow duration-300 focus-within:border-amber-500 focus-within:shadow-xl`}>
+        <div className={`relative flex items-center bg-white border-2 border-stone-300 ${rounded ? 'rounded-full' : 'rounded-lg'} shadow-lg hover:shadow-xl transition-shadow duration-300 focus-within:border-amber-500 focus-within:shadow-xl`}>
           <div className={`flex items-center justify-center ${currentSize.padding}`}>
             <svg className={`${currentSize.icon} text-stone-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            placeholder={placeholder}
-            className={`flex-1 ${currentSize.input} text-stone-800 placeholder-stone-500 bg-transparent outline-none min-w-0`}
-          />
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              placeholder={placeholder}
+              className={`w-full ${currentSize.input} text-stone-800 placeholder-stone-500 bg-transparent outline-none min-w-0 ${inputValue ? 'pr-8 sm:pr-10' : ''}`}
+            />
+            {/* Clear Button */}
+            {inputValue && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 transition-colors z-10"
+                aria-label="Clear search"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           <button 
+            type="button"
             onClick={handleSearchClick}
-            className={`bg-amber-500 hover:bg-amber-600 text-white ${currentSize.button} ${rounded ? 'rounded-full' : 'rounded-lg'} m-1 font-semibold transition-colors duration-200 shadow-md hover:shadow-lg whitespace-nowrap`}
+            className={`bg-amber-500 hover:bg-amber-600 text-white ${currentSize.button} ${rounded ? 'rounded-full' : 'rounded-lg'} m-1 font-semibold transition-colors duration-200 shadow-md hover:shadow-lg whitespace-nowrap flex-shrink-0`}
           >
             Search
           </button>
